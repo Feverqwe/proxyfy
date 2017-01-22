@@ -14,9 +14,9 @@
         "16": "img/icon_16.png"
     },
     "options_page": "options.html",
-    "permissions": ["storage", "unlimitedStorage", "proxy", "webRequest", "http://*/*", "https://*/*", "tabs"],
+    "permissions": ["storage", "proxy", "webRequest", "webRequestBlocking", "<all_urls>"],
     "background": {
-        "scripts": ["lib/require.js", "js/bg.js"]
+        "scripts": ["js/bg.js"]
     },
     "name": "Proxyfy",
     "description": "Tiny proxy switcher",
