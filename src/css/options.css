@@ -11,13 +11,14 @@ body {
 .top {
     display: flex;
     align-items: center;
-    height: 32px;
+    height: 34px;
     padding: 4px;
+    box-sizing: border-box;
 }
 
 #jsoneditor {
     width: 100%;
-    height: calc(100% - 32px);
+    height: calc(100% - 34px);
 }
 
 .save {
