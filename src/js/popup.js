@@ -14,40 +14,36 @@ require(['require', 'utils', 'dom'], function (require) {
     var dom = require('dom');
 
     utils.storage.sync.get({
-        proxyList: [],
-        rules: [],
-        invertRules: false
+        proxyList: []
     }).then(function (storage) {
-        (function () {
-            var switcherNode = document.querySelector('.switcher');
+        var switcherNode = document.querySelector('.switcher');
 
-            storage.proxyList.forEach(function (proxyObj, index) {
-                switcherNode.appendChild(dom.el('a', {
-                    href: '#index',
-                    data: {
-                        index: index
-                    },
-                    text: proxyObj.name
-                }));
-            });
+        storage.proxyList.forEach(function (proxyObj, index) {
             switcherNode.appendChild(dom.el('a', {
-                href: '#direct',
+                href: '#index',
                 data: {
-                    index: -1
+                    index: index
                 },
-                text: 'DISABLE'
+                text: proxyObj.name
             }));
-            switcherNode.addEventListener('click', function (e) {
-                e.preventDefault();
-                var node = dom.closestNode(this, e.target);
-                var index = node.dataset.index;
-                localStorage.currentProxy = '';
-                if (index < 0) {
-                    chrome.runtime.sendMessage({action: 'clearProxy'});
-                } else {
-                    chrome.runtime.sendMessage({action: 'setProxy', proxyObj: storage.proxyList[index]});
-                }
-            });
-        })();
+        });
+        switcherNode.appendChild(dom.el('a', {
+            href: '#direct',
+            data: {
+                index: -1
+            },
+            text: 'DISABLE'
+        }));
+        switcherNode.addEventListener('click', function (e) {
+            e.preventDefault();
+            var node = dom.closestNode(this, e.target);
+            var index = node.dataset.index;
+            localStorage.currentProxy = '';
+            if (index < 0) {
+                chrome.runtime.sendMessage({action: 'clearProxy'});
+            } else {
+                chrome.runtime.sendMessage({action: 'setProxy', proxyObj: storage.proxyList[index]});
+            }
+        });
     });
 });
