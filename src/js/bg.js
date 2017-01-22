@@ -175,7 +175,7 @@ var ProxyErrorListener = function () {
         });
     };
 
-    (function () {
+    var getActiveProxyObj = function (callback) {
         chrome.storage.sync.get({
             proxyList: []
         }, function (storage) {
@@ -189,7 +189,8 @@ var ProxyErrorListener = function () {
                         try {
                             var meta = /^\/\/(.+)\n/.exec(config.pacScript.data);
                             proxyName = meta && JSON.parse(meta[1]).proxyfy;
-                        } catch (err) {}
+                        } catch (err) {
+                        }
 
                         proxyName && storage.proxyList.some(function (item) {
                             if (item.name === proxyName) {
@@ -201,20 +202,55 @@ var ProxyErrorListener = function () {
                 }
 
                 if (proxyName && !proxyObj) {
-                    proxyObj = {name: proxyName};
+                    proxyObj = {name: proxyName, lost: true};
                 }
 
-                onProxyChange(proxyObj);
+                callback(proxyObj);
             });
+        });
+    };
 
-            chrome.runtime.onMessage.addListener(function (message) {
-                if (message.action === 'clearProxy') {
-                    clearProxy();
-                } else
-                if (message.action === 'setProxy') {
-                    setProxy(message.proxyObj);
+    (function () {
+        chrome.runtime.onMessage.addListener(function (message, sender, response) {
+            if (message.action === 'clearProxy') {
+                clearProxy();
+            } else
+            if (message.action === 'setProxy') {
+                setProxy(message.proxyObj);
+            } else
+            if (message.action === 'getProxyObj') {
+                getActiveProxyObj(response);
+                return true;
+            }
+        });
+
+        chrome.storage.onChanged.addListener(function (changes) {
+            var rules = changes.rules;
+            rules = rules && rules.newValue;
+            var invertRules = changes.invertRules;
+            invertRules = invertRules && invertRules.newValue;
+            var proxyList = changes.proxyList;
+            proxyList = proxyList && proxyList.newValue;
+
+            getActiveProxyObj(function (proxyObj) {
+                if (proxyObj) {
+                    if (proxyList) {
+                        var exists = proxyList.some(function (_proxyObj) {
+                            return _proxyObj.name === proxyObj.name;
+                        });
+                        if (!exists) {
+                            clearProxy();
+                        } else {
+                            setProxy(proxyObj);
+                        }
+                    } else
+                    if (rules || invertRules) {
+                        setProxy(proxyObj);
+                    }
                 }
             });
         });
+
+        getActiveProxyObj(onProxyChange);
     })();
 })();
