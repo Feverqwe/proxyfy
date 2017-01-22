@@ -4,10 +4,10 @@
 "use strict";
 
 var escapeRegex = function (value) {
-    return value.replace( /[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&" );
+    return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
 };
 
-var urlPatternToStrRe = function(value) {
+var urlPatternToStrRe = function (value) {
     var m = /^(\*|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value);
     if (!m) {
         throw new Error("Invalid url-pattern");
@@ -22,13 +22,13 @@ var urlPatternToStrRe = function(value) {
 
     var ipParts = host.split('.');
     var isIp = ipParts.length === 4 && ipParts.every(function (item) {
-            return /^(2[0-5]{2}|1?[0-9]{1,2}|\*)$/.test(item);
-        });
+        return /^(2[0-5]{2}|1?[0-9]{1,2}|\*)$/.test(item);
+    });
 
     host = escapeRegex(host);
 
     if (isIp) {
-        host = host.replace(/\\\*/, '(?:\d+)');
+        host = host.replace(/\\\*/g, '(?:\d+)');
     } else {
         host = host.replace(/^\\\*\\\./, '(?:[^\/]+\\.)?');
     }
@@ -39,8 +39,7 @@ var urlPatternToStrRe = function(value) {
     if (!path || path === '*') {
         path = '(?:|\/.*)';
         pattern.push(path, '$');
-    } else
-    if (path) {
+    } else if (path) {
         path = '\/' + path;
         path = escapeRegex(path);
         path = path.replace(/\\\*/g, '.*');
@@ -50,16 +49,13 @@ var urlPatternToStrRe = function(value) {
     return pattern.join('');
 };
 
-var setIcon = function (active) {
-    chrome.browserAction.setIcon({
-        path: {
-            19: active ? '/img/icon_19_a.png' : '/img/icon_19.png',
-            38: active ? '/img/icon_38_a.png' : '/img/icon_38.png'
-        }
-    });
-};
-
 var AuthListener = function () {
+    /**
+     * @typedef {Object} proxyObj
+     * @property {string} name
+     * @property {string} host
+     * @property {number} port
+     */
     var proxyObj = null;
     var onAuthRequired = function (details) {
         var result = {};
@@ -103,6 +99,16 @@ var ProxyErrorListener = function () {
     var authListener = new AuthListener();
     var proxyErrorListener = new ProxyErrorListener();
 
+
+    var setIcon = function (active) {
+        chrome.browserAction.setIcon({
+            path: {
+                19: active ? '/img/icon_19_a.png' : '/img/icon_19.png',
+                38: active ? '/img/icon_38_a.png' : '/img/icon_38.png'
+            }
+        });
+    };
+
     var onProxyChange = function (proxyObj) {
         authListener.setProxyObj(proxyObj);
 
@@ -131,37 +137,37 @@ var ProxyErrorListener = function () {
             rules: [],
             invertRules: false
         }, function (storage) {
-            var rulesStrRe = storage.rules.map(function (pattern) {
-                return urlPatternToStrRe(pattern);
-            }).join('|');
+            var config = {
+                mode: 'pac_script',
+                pacScript: {
+                    data: '//' + JSON.stringify({proxyfy: proxyObj.name}) + '\n\n' + 'var FindProxyForURL = (' + function (rulesStrRe, invertRules, proxyUrl) {
+                        var re = rulesStrRe && new RegExp(rulesStrRe);
+                        return function (url) {
+                            var r = true;
+                            if (re) {
+                                r = re.test(url);
+                                if (!invertRules) {
+                                    r = !r;
+                                }
+                            }
+                            if (r) {
+                                return "PROXY " + proxyUrl;
+                            } else {
+                                return "DIRECT";
+                            }
+                        };
+                    }.toString() + ')(' + [
+                        storage.rules.map(function (pattern) {
+                            return urlPatternToStrRe(pattern);
+                        }).join('|'),
+                        storage.invertRules,
+                        [proxyObj.host, proxyObj.port || 80].join(':')
+                    ].map(JSON.stringify).join(',') + ');'
+                }
+            };
 
             chrome.proxy.settings.set({
-                value: {
-                    mode: 'pac_script',
-                    pacScript: {
-                        data: '//' + JSON.stringify({proxyfy: proxyObj.name}) + '\n' + 'var FindProxyForURL;(' + function (rulesStrRe, invertRules, proxy) {
-                            var re = rulesStrRe && new RegExp(rulesStrRe);
-                            FindProxyForURL = function (url) {
-                                var r = true;
-                                if (re) {
-                                    r = re.test(url);
-                                    if (!invertRules) {
-                                        r = !r;
-                                    }
-                                }
-                                if (r) {
-                                    return "PROXY " + proxy;
-                                } else {
-                                    return "DIRECT";
-                                }
-                            };
-                        }.toString() + ')(' + [
-                            rulesStrRe,
-                            storage.invertRules,
-                            [proxyObj.host, proxyObj.port || 80].join(':')
-                        ].map(JSON.stringify).join(',') + ')'
-                    }
-                },
+                value: config,
                 scope: 'regular'
             }, function () {
                 onProxyChange(proxyObj);
@@ -174,35 +180,40 @@ var ProxyErrorListener = function () {
             proxyList: []
         }, function (storage) {
             chrome.proxy.settings.get({'incognito': false}, function (details) {
-                var detailsValue = details.value;
+                var config = details.value;
+                var proxyName = '';
+                var proxyObj = null;
 
-                var ruleName = null;
-                try {
-                    if (detailsValue.mode === 'pac_script') {
-                        var m = /^\/\/(.+)\n/.exec(detailsValue.pacScript.data);
-                        ruleName = m && JSON.parse(m[1]).proxyfy;
+                if (['controlled_by_this_extension'].indexOf(details.levelOfControl) !== -1) {
+                    if (config.mode === 'pac_script') {
+                        try {
+                            var meta = /^\/\/(.+)\n/.exec(config.pacScript.data);
+                            proxyName = meta && JSON.parse(meta[1]).proxyfy;
+                        } catch (err) {}
+
+                        proxyName && storage.proxyList.some(function (item) {
+                            if (item.name === proxyName) {
+                                proxyObj = item;
+                                return true;
+                            }
+                        });
                     }
-                } catch (err) {
                 }
 
-                var rule = null;
+                if (proxyName && !proxyObj) {
+                    proxyObj = {name: proxyName};
+                }
 
-                ruleName && storage.proxyList.some(function (item) {
-                    if (item.name === ruleName) {
-                        rule = item;
-                        return true;
-                    }
-                });
+                onProxyChange(proxyObj);
+            });
 
-                onProxyChange(rule);
-
-                chrome.runtime.onMessage.addListener(function (message) {
-                    if (message.action === 'clearProxy') {
-                        clearProxy();
-                    } else if (message.action === 'setProxy') {
-                        setProxy(message.proxyObj);
-                    }
-                });
+            chrome.runtime.onMessage.addListener(function (message) {
+                if (message.action === 'clearProxy') {
+                    clearProxy();
+                } else
+                if (message.action === 'setProxy') {
+                    setProxy(message.proxyObj);
+                }
             });
         });
     })();
