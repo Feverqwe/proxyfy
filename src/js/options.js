@@ -5,13 +5,15 @@ require.config({
     baseUrl: 'js/',
     paths: {
         utils: './utils',
-        dom: './dom'
+        dom: './dom',
+        jsoneditor: '../lib/jsoneditor.min'
     }
 });
 
-require(['require', 'utils', 'dom'], function (require) {
+require(['require', 'utils', 'dom', 'jsoneditor'], function (require) {
     var utils = require('utils');
     var dom = require('dom');
+    var JSONEditor = require('jsoneditor');
 
     utils.storage.sync.get({
         proxyList: [
@@ -33,13 +35,32 @@ require(['require', 'utils', 'dom'], function (require) {
         ],
         invertRules: false
     }).then(function (storage) {
-        var optionsNode = document.querySelector('.options');
+        var editor = new JSONEditor(document.getElementById("jsoneditor"), {
+            mode: 'code'
+        });
+        editor.set(storage);
+
+        var save = function () {
+            var storage = editor.get();
+            utils.storage.sync.set(storage);
+        };
+
         var saveNode = document.querySelector('.save');
-        optionsNode.value = JSON.stringify(storage, null, 2);
         saveNode.addEventListener('click', function (e) {
             e.preventDefault();
-            var storage = JSON.parse(optionsNode.value);
-            utils.storage.sync.set(storage);
+            save();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey || e.metaKey) {
+                var keyCode = e.keyCode;
+                switch (keyCode) {
+                    case 83:
+                        e.preventDefault();
+                        save();
+                        break;
+                }
+            }
         });
     });
 });
