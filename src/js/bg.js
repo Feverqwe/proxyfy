@@ -113,7 +113,7 @@ var ProxyErrorListener = function () {
             proxyErrorListener.disable();
         } else {
             proxyErrorListener.enable();
-            iconPrefix = 'a_';
+            iconPrefix += 'a_';
         }
 
         chrome.browserAction.setIcon({
