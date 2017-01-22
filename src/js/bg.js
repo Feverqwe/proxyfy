@@ -50,6 +50,7 @@ var urlPatternToStrRe = function (value) {
 };
 
 var AuthListener = function () {
+    var self = this;
     /**
      * @typedef {Object} proxyObj
      * @property {string} name
@@ -78,6 +79,11 @@ var AuthListener = function () {
 
     this.setProxyObj = function (obj) {
         proxyObj = obj;
+        if (proxyObj && proxyObj.auth) {
+            self.enable();
+        } else {
+            self.disable();
+        }
     }
 };
 
@@ -99,30 +105,23 @@ var ProxyErrorListener = function () {
     var authListener = new AuthListener();
     var proxyErrorListener = new ProxyErrorListener();
 
-
-    var setIcon = function (active) {
-        chrome.browserAction.setIcon({
-            path: {
-                19: active ? '/img/icon_19_a.png' : '/img/icon_19.png',
-                38: active ? '/img/icon_38_a.png' : '/img/icon_38.png'
-            }
-        });
-    };
-
     var onProxyChange = function (proxyObj) {
+        var iconPrefix = '/img/icon_';
         authListener.setProxyObj(proxyObj);
 
         if (!proxyObj) {
-            setIcon();
-            authListener.disable();
             proxyErrorListener.disable();
         } else {
-            setIcon(true);
-            if (proxyObj.auth) {
-                authListener.enable();
-            }
             proxyErrorListener.enable();
+            iconPrefix = 'a_';
         }
+
+        chrome.browserAction.setIcon({
+            path: {
+                19: iconPrefix + '19.png',
+                38: iconPrefix + '38.png'
+            }
+        });
     };
 
     var clearProxy = function () {
