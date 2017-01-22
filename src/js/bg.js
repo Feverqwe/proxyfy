@@ -225,9 +225,7 @@ var ProxyErrorListener = function () {
 
         chrome.storage.onChanged.addListener(function (changes) {
             var rules = changes.rules;
-            rules = rules && rules.newValue;
             var invertRules = changes.invertRules;
-            invertRules = invertRules && invertRules.newValue;
             var proxyList = changes.proxyList;
             proxyList = proxyList && proxyList.newValue;
 
