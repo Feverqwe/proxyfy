@@ -9,7 +9,7 @@ body {
     flex-direction: column;
 
     width: 320px;
-    min-height: 164px;
+    min-height: 66px;
     max-height: 480px;
     overflow-y: auto;
 }

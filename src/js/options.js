@@ -40,7 +40,17 @@ require(['require', 'dom', 'jsoneditor'], function (require) {
 
         var save = function () {
             var storage = editor.get();
-            chrome.storage.sync.set(storage);
+            var badRules = [];
+            storage.rules.forEach(function (value) {
+                if (!/^(\*|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value)) {
+                    badRules.push(JSON.stringify(value));
+                }
+            });
+            if (badRules.length) {
+                alert("Invalid rules " + badRules.join(' '));
+            } else {
+                chrome.storage.sync.set(storage);
+            }
         };
 
         var saveNode = document.querySelector('.save');
