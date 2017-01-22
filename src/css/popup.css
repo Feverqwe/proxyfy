@@ -1,3 +1,40 @@
-.switcher a {
-    display: block;
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 14px;
+}
+
+.switcher {
+    display: flex;
+    flex-direction: column;
+
+    width: 320px;
+    min-height: 164px;
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+.switcher .item {
+    display: flex;
+    width: 100%;
+    padding: 8px 0;
+    align-items: center;
+    color: #000;
+    text-decoration: none;
+}
+
+.switcher .item:hover {
+    background-color: #eee;
+}
+
+.switcher .item .status {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin: 0 6px;
+    border-radius: 6px;
+}
+
+.switcher .item.item__selected .status {
+    background-color: #337AF8;
 }

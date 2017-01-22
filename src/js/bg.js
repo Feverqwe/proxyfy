@@ -215,7 +215,7 @@ var ProxyErrorListener = function () {
                 clearProxy();
             } else
             if (message.action === 'setProxy') {
-                setProxy(message.proxyObj);
+                setProxy(message.details);
             } else
             if (message.action === 'getProxyObj') {
                 getActiveProxyObj(response);

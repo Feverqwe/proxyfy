@@ -1,4 +1,6 @@
 html {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
     font-size: 14px;
     height: 100%;
 }

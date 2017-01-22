@@ -4,18 +4,16 @@
 require.config({
     baseUrl: 'js/',
     paths: {
-        utils: './utils',
         dom: './dom',
         jsoneditor: '../lib/jsoneditor.min'
     }
 });
 
-require(['require', 'utils', 'dom', 'jsoneditor'], function (require) {
-    var utils = require('utils');
+require(['require', 'dom', 'jsoneditor'], function (require) {
     var dom = require('dom');
     var JSONEditor = require('jsoneditor');
 
-    utils.storage.sync.get({
+    chrome.storage.sync.get({
         proxyList: [
             {
                 name: 'TEST',
@@ -28,13 +26,13 @@ require(['require', 'utils', 'dom', 'jsoneditor'], function (require) {
             }
         ],
         rules: [
-            '192.168.*.*,',
-            '172.16.*.*',
-            '169.254.*.*',
-            '10.*.*.*'
+            '*://192.168.*.*',
+            '*://172.16.*.*',
+            '*://169.254.*.*',
+            '*://10.*.*.*'
         ],
         invertRules: false
-    }).then(function (storage) {
+    }, function (storage) {
         var editor = new JSONEditor(document.getElementById("jsoneditor"), {
             mode: 'code'
         });
@@ -42,7 +40,7 @@ require(['require', 'utils', 'dom', 'jsoneditor'], function (require) {
 
         var save = function () {
             var storage = editor.get();
-            utils.storage.sync.set(storage);
+            chrome.storage.sync.set(storage);
         };
 
         var saveNode = document.querySelector('.save');
