@@ -30,9 +30,11 @@ require(['require', 'dom', 'jsoneditor'], function (require) {
                     password: 'password'
                 },
                 rules: [
+                    '*://localhost',
                     '*://192.168.*.*',
                     '*://172.16.*.*',
                     '*://169.254.*.*',
+                    '*://127.*.*.*',
                     '*://10.*.*.*'
                 ],
                 invertRules: false
