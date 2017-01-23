@@ -16,9 +16,13 @@ require(['require', 'dom'], function (require) {
     }, function (storage) {
         var switcherNode = document.querySelector('.switcher');
 
-        var proxyList = storage.proxyList.concat([
-            {name: 'DISABLE', type: 'DISABLE'}
-        ]).map(function (proxyObj, index) {
+        var typeItems = {};
+
+        var menuItems = storage.proxyList.concat([
+            {name: 'Disable', type: 'disable'},
+            {name: 'Connections', type: 'connections'},
+            {name: 'Options', type: 'options'}
+        ]).map(function (item, index) {
             var node = dom.el('a', {
                 class: ['item'],
                 href: '#',
@@ -31,53 +35,74 @@ require(['require', 'dom'], function (require) {
                     }),
                     dom.el('div', {
                         class: 'name',
-                        text: proxyObj.name
+                        text: item.name
                     })
                 ]
             });
 
+            var itemObj = {
+                node: node,
+                item: item
+            };
+
+            if (item.type) {
+                typeItems[item.type] = itemObj;
+            }
+
             switcherNode.appendChild(node);
 
-            return {
-                node: node,
-                item: proxyObj
-            }
+            return itemObj;
         });
 
         switcherNode.addEventListener('click', function (e) {
             e.preventDefault();
             var node = dom.closestNode(this, e.target);
             if (node) {
-                var listItem = proxyList[node.dataset.index];
+                var itemObj = menuItems[node.dataset.index];
 
-                var selectedNode = switcherNode.querySelector('.item__selected');
-                selectedNode.classList.remove('item__selected');
-
-                if (listItem.item.type === 'DISABLE') {
-                    chrome.runtime.sendMessage({action: 'clearProxy'});
+                if (itemObj.item.type === 'connections') {
+                    chrome.tabs.query({
+                        active: true,
+                        currentWindow: true
+                    }, function (tabs) {
+                        var tab = tabs[0];
+                        if (tab) {
+                            var width = 720;
+                            var height = 480;
+                            var left = (screen.width/2)-(width/2);
+                            var top = (screen.height/2)-(height/2);
+                            window.open('connections.html#tab=' + tab.id, '', 'left=' + left + ',top=' + top + ',width=' +width+ ',height=' + height + ',resizable=yes,scrollbars=yes');
+                        }
+                    });
+                } else
+                if (itemObj.item.type === 'options') {
+                    chrome.tabs.create({url: 'options.html'});
                 } else {
-                    chrome.runtime.sendMessage({action: 'setProxy', details: listItem.item});
-                }
+                    if (itemObj.item.type === 'disable') {
+                        chrome.runtime.sendMessage({action: 'clearProxy'});
+                    } else {
+                        chrome.runtime.sendMessage({action: 'setProxy', details: itemObj.item});
+                    }
 
-                listItem.node.classList.add('item__selected');
+                    var selectedNode = switcherNode.querySelector('.item__selected');
+                    selectedNode.classList.remove('item__selected');
+                    itemObj.node.classList.add('item__selected');
+                }
             }
         });
 
-        chrome.runtime.sendMessage({action: 'getProxyObj'}, function (_proxyObj) {
-            var listItem = null;
-            proxyList.some(function (_listItem) {
-                if (_proxyObj) {
-                    if (_listItem.item.name === _proxyObj.name) {
-                        listItem = _listItem;
-                        return true;
-                    }
-                } else
-                if (_listItem.item.type === 'DISABLE') {
-                    listItem = _listItem;
+        chrome.runtime.sendMessage({action: 'getProxyObj'}, function (item) {
+            var itemObj = null;
+            menuItems.some(function (_itemObj) {
+                if (item && _itemObj.item.name === item.name) {
+                    itemObj = _itemObj;
                     return true;
                 }
             });
-            listItem.node.classList.add('item__selected');
+            if (!itemObj) {
+                itemObj = typeItems.disable;
+            }
+            itemObj.node.classList.add('item__selected');
         });
     });
 });

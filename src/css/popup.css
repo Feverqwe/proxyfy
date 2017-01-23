@@ -8,7 +8,7 @@ body {
     display: flex;
     flex-direction: column;
 
-    width: 320px;
+    width: 240px;
     min-height: 66px;
     max-height: 480px;
     overflow-y: auto;

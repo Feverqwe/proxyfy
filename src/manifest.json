@@ -14,7 +14,7 @@
         "16": "img/icon_16.png"
     },
     "options_page": "options.html",
-    "permissions": ["storage", "proxy", "webRequest", "webRequestBlocking", "<all_urls>"],
+    "permissions": ["storage", "proxy", "webRequest", "webRequestBlocking", "<all_urls>", "tabs"],
     "background": {
         "scripts": ["js/bg.js"]
     },
