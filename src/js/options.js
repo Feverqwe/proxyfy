@@ -14,37 +14,42 @@ require(['require', 'dom', 'jsoneditor'], function (require) {
     var JSONEditor = require('jsoneditor');
 
     chrome.storage.sync.get({
-        proxyList: [
-            {
+        proxyList: []
+    }, function (storage) {
+        var editor = new JSONEditor(document.getElementById("jsoneditor"), {
+            mode: 'code'
+        });
+
+        if (!storage.proxyList.length) {
+            storage.proxyList.push({
                 name: 'TEST',
                 host: '127.0.0.1',
                 port: 8080,
                 auth: {
                     username: 'username',
                     password: 'password'
-                }
-            }
-        ],
-        rules: [
-            '*://192.168.*.*',
-            '*://172.16.*.*',
-            '*://169.254.*.*',
-            '*://10.*.*.*'
-        ],
-        invertRules: false
-    }, function (storage) {
-        var editor = new JSONEditor(document.getElementById("jsoneditor"), {
-            mode: 'code'
-        });
+                },
+                rules: [
+                    '*://192.168.*.*',
+                    '*://172.16.*.*',
+                    '*://169.254.*.*',
+                    '*://10.*.*.*'
+                ],
+                invertRules: false
+            });
+        }
+
         editor.set(storage);
 
         var save = function () {
             var storage = editor.get();
             var badRules = [];
-            storage.rules.forEach(function (value) {
-                if (!/^(\*|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value)) {
-                    badRules.push(JSON.stringify(value));
-                }
+            storage.proxyList.forEach(function (proxyObj) {
+                proxyObj.forEach(function (value) {
+                    if (!/^(\*|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value)) {
+                        badRules.push(JSON.stringify(value));
+                    }
+                });
             });
             if (badRules.length) {
                 alert("Invalid rules " + badRules.join(' '));

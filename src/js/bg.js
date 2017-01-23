@@ -160,47 +160,41 @@ var ProxyErrorListener = function () {
     };
 
     var setProxySettings = function (proxyObj) {
-        chrome.storage.sync.get({
-            proxyList: [],
-            rules: [],
-            invertRules: false
-        }, function (storage) {
-            var meta = '//' + JSON.stringify({proxyfy: proxyObj.name}) + '\n';
-            var config = {
-                mode: 'pac_script',
-                pacScript: {
-                    data: meta + 'var FindProxyForURL=(' + function (rulesStrRe, invertRules, proxyUrl) {
-                        var re = rulesStrRe && new RegExp(rulesStrRe);
-                        return function (url) {
-                            var r = true;
-                            if (re) {
-                                r = re.test(url);
-                                if (!invertRules) {
-                                    r = !r;
-                                }
+        var meta = '//' + JSON.stringify({proxyfy: proxyObj.name}) + '\n';
+        var config = {
+            mode: 'pac_script',
+            pacScript: {
+                data: meta + 'var FindProxyForURL=(' + function (rulesStrRe, invertRules, proxyUrl) {
+                    var re = rulesStrRe && new RegExp(rulesStrRe);
+                    return function (url) {
+                        var r = true;
+                        if (re) {
+                            r = re.test(url);
+                            if (!invertRules) {
+                                r = !r;
                             }
-                            if (r) {
-                                return "PROXY " + proxyUrl;
-                            } else {
-                                return "DIRECT";
-                            }
-                        };
-                    }.toString() + ')(' + [
-                        storage.rules.map(function (pattern) {
-                            return urlPatternToStrRe(pattern);
-                        }).join('|'),
-                        storage.invertRules,
-                        [proxyObj.host, proxyObj.port || 80].join(':')
-                    ].map(JSON.stringify).join(',') + ');'
-                }
-            };
+                        }
+                        if (r) {
+                            return "PROXY " + proxyUrl;
+                        } else {
+                            return "DIRECT";
+                        }
+                    };
+                }.toString() + ')(' + [
+                    proxyObj.rules.map(function (pattern) {
+                        return urlPatternToStrRe(pattern);
+                    }).join('|'),
+                    proxyObj.invertRules,
+                    [proxyObj.host, proxyObj.port || 80].join(':')
+                ].map(JSON.stringify).join(',') + ');'
+            }
+        };
 
-            chrome.proxy.settings.set({
-                value: config,
-                scope: 'regular'
-            }, function () {
-                onProxyChange(proxyObj);
-            });
+        chrome.proxy.settings.set({
+            value: config,
+            scope: 'regular'
+        }, function () {
+            onProxyChange(proxyObj);
         });
     };
 
