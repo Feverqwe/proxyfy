@@ -20,7 +20,6 @@ require(['require', 'dom'], function (require) {
 
         var menuItems = storage.proxyList.concat([
             {name: 'Disable', type: 'disable'},
-            {name: 'Connections', type: 'connections'},
             {name: 'Options', type: 'options'}
         ]).map(function (item, index) {
             var node = dom.el('a', {
@@ -60,21 +59,6 @@ require(['require', 'dom'], function (require) {
             if (node) {
                 var itemObj = menuItems[node.dataset.index];
 
-                if (itemObj.item.type === 'connections') {
-                    chrome.tabs.query({
-                        active: true,
-                        currentWindow: true
-                    }, function (tabs) {
-                        var tab = tabs[0];
-                        if (tab) {
-                            var width = 720;
-                            var height = 480;
-                            var left = (screen.width/2)-(width/2);
-                            var top = (screen.height/2)-(height/2);
-                            window.open('connections.html#tab=' + tab.id, '', 'left=' + left + ',top=' + top + ',width=' +width+ ',height=' + height + ',resizable=yes,scrollbars=yes');
-                        }
-                    });
-                } else
                 if (itemObj.item.type === 'options') {
                     chrome.tabs.create({url: 'options.html'});
                 } else {
