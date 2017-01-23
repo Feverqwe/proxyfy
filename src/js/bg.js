@@ -124,57 +124,7 @@ var ProxyErrorListener = function () {
         });
     };
 
-    var clearProxy = function () {
-        chrome.proxy.settings.clear({scope: 'regular'}, function () {
-            onProxyChange(null);
-        });
-    };
-
-    var setProxyObj = function (proxyObj) {
-        chrome.storage.sync.get({
-            proxyList: [],
-            rules: [],
-            invertRules: false
-        }, function (storage) {
-            var config = {
-                mode: 'pac_script',
-                pacScript: {
-                    data: '//' + JSON.stringify({proxyfy: proxyObj.name}) + '\n' + 'var FindProxyForURL=(' + function (rulesStrRe, invertRules, proxyUrl) {
-                        var re = rulesStrRe && new RegExp(rulesStrRe);
-                        return function (url) {
-                            var r = true;
-                            if (re) {
-                                r = re.test(url);
-                                if (!invertRules) {
-                                    r = !r;
-                                }
-                            }
-                            if (r) {
-                                return "PROXY " + proxyUrl;
-                            } else {
-                                return "DIRECT";
-                            }
-                        };
-                    }.toString() + ')(' + [
-                        storage.rules.map(function (pattern) {
-                            return urlPatternToStrRe(pattern);
-                        }).join('|'),
-                        storage.invertRules,
-                        [proxyObj.host, proxyObj.port || 80].join(':')
-                    ].map(JSON.stringify).join(',') + ');'
-                }
-            };
-
-            chrome.proxy.settings.set({
-                value: config,
-                scope: 'regular'
-            }, function () {
-                onProxyChange(proxyObj);
-            });
-        });
-    };
-
-    var getActiveProxyObj = function (callback) {
+    var getProxySettings = function (callback) {
         chrome.storage.sync.get({
             proxyList: []
         }, function (storage) {
@@ -209,16 +159,67 @@ var ProxyErrorListener = function () {
         });
     };
 
+    var setProxySettings = function (proxyObj) {
+        chrome.storage.sync.get({
+            proxyList: [],
+            rules: [],
+            invertRules: false
+        }, function (storage) {
+            var meta = '//' + JSON.stringify({proxyfy: proxyObj.name}) + '\n';
+            var config = {
+                mode: 'pac_script',
+                pacScript: {
+                    data: meta + 'var FindProxyForURL=(' + function (rulesStrRe, invertRules, proxyUrl) {
+                        var re = rulesStrRe && new RegExp(rulesStrRe);
+                        return function (url) {
+                            var r = true;
+                            if (re) {
+                                r = re.test(url);
+                                if (!invertRules) {
+                                    r = !r;
+                                }
+                            }
+                            if (r) {
+                                return "PROXY " + proxyUrl;
+                            } else {
+                                return "DIRECT";
+                            }
+                        };
+                    }.toString() + ')(' + [
+                        storage.rules.map(function (pattern) {
+                            return urlPatternToStrRe(pattern);
+                        }).join('|'),
+                        storage.invertRules,
+                        [proxyObj.host, proxyObj.port || 80].join(':')
+                    ].map(JSON.stringify).join(',') + ');'
+                }
+            };
+
+            chrome.proxy.settings.set({
+                value: config,
+                scope: 'regular'
+            }, function () {
+                onProxyChange(proxyObj);
+            });
+        });
+    };
+
+    var clearProxySettings = function () {
+        chrome.proxy.settings.clear({scope: 'regular'}, function () {
+            onProxyChange(null);
+        });
+    };
+
     (function () {
         chrome.runtime.onMessage.addListener(function (message, sender, response) {
-            if (message.action === 'clearProxy') {
-                clearProxy();
+            if (message.action === 'clearProxySettings') {
+                clearProxySettings();
             } else
-            if (message.action === 'setProxyObj') {
-                setProxyObj(message.proxyObj);
+            if (message.action === 'setProxySettings') {
+                setProxySettings(message.proxyObj);
             } else
-            if (message.action === 'getProxyObj') {
-                getActiveProxyObj(function (proxyObj) {
+            if (message.action === 'getProxySettings') {
+                getProxySettings(function (proxyObj) {
                     response({proxyObj: proxyObj});
                 });
                 return true;
@@ -231,25 +232,25 @@ var ProxyErrorListener = function () {
             var proxyList = changes.proxyList;
             proxyList = proxyList && proxyList.newValue;
 
-            getActiveProxyObj(function (proxyObj) {
+            getProxySettings(function (proxyObj) {
                 if (proxyObj) {
                     if (proxyList) {
                         var exists = proxyList.some(function (_proxyObj) {
                             return _proxyObj.name === proxyObj.name;
                         });
                         if (!exists) {
-                            clearProxy();
+                            clearProxySettings();
                         } else {
-                            setProxyObj(proxyObj);
+                            setProxySettings(proxyObj);
                         }
                     } else
                     if (rules || invertRules) {
-                        setProxyObj(proxyObj);
+                        setProxySettings(proxyObj);
                     }
                 }
             });
         });
 
-        getActiveProxyObj(onProxyChange);
+        getProxySettings(onProxyChange);
     })();
 })();
