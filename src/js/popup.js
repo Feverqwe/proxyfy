@@ -78,14 +78,15 @@ require(['require', 'dom'], function (require) {
                     if (menuItem.proxyObj.type === 'disable') {
                         chrome.runtime.sendMessage({action: 'clearProxy'});
                     } else {
-                        chrome.runtime.sendMessage({action: 'setProxy', details: menuItem.proxyObj});
+                        chrome.runtime.sendMessage({action: 'setProxyObj', proxyObj: menuItem.proxyObj});
                     }
                     menuItem.select();
                 }
             }
         });
 
-        chrome.runtime.sendMessage({action: 'getProxyObj'}, function (proxyObj) {
+        chrome.runtime.sendMessage({action: 'getProxyObj'}, function (response) {
+            var proxyObj = response.proxyObj;
             var menuItem = null;
             proxyObj && menuItems.some(function (item) {
                 if (item.proxyObj.name === proxyObj.name) {

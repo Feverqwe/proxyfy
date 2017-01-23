@@ -130,7 +130,7 @@ var ProxyErrorListener = function () {
         });
     };
 
-    var setProxy = function (proxyObj) {
+    var setProxyObj = function (proxyObj) {
         chrome.storage.sync.get({
             proxyList: [],
             rules: [],
@@ -214,11 +214,13 @@ var ProxyErrorListener = function () {
             if (message.action === 'clearProxy') {
                 clearProxy();
             } else
-            if (message.action === 'setProxy') {
-                setProxy(message.details);
+            if (message.action === 'setProxyObj') {
+                setProxyObj(message.proxyObj);
             } else
             if (message.action === 'getProxyObj') {
-                getActiveProxyObj(response);
+                getActiveProxyObj(function (proxyObj) {
+                    response({proxyObj: proxyObj});
+                });
                 return true;
             }
         });
@@ -238,11 +240,11 @@ var ProxyErrorListener = function () {
                         if (!exists) {
                             clearProxy();
                         } else {
-                            setProxy(proxyObj);
+                            setProxyObj(proxyObj);
                         }
                     } else
                     if (rules || invertRules) {
-                        setProxy(proxyObj);
+                        setProxyObj(proxyObj);
                     }
                 }
             });
