@@ -1,6 +1,7 @@
 /**
  * Created by Anton on 22.01.2017.
  */
+"use strict";
 require.config({
     baseUrl: 'js/',
     paths: {
@@ -16,12 +17,23 @@ require(['require', 'dom'], function (require) {
     }, function (storage) {
         var switcherNode = document.querySelector('.switcher');
 
-        var typeItems = {};
+        var typeMenuItems = {};
+
+        var onSelect = (function () {
+            var lastSelectedItem = null;
+            return function () {
+                if (lastSelectedItem) {
+                    lastSelectedItem.node.classList.remove('item__selected');
+                }
+                this.node.classList.add('item__selected');
+                lastSelectedItem = this;
+            };
+        })();
 
         var menuItems = storage.proxyList.concat([
             {name: 'Disable', type: 'disable'},
             {name: 'Options', type: 'options'}
-        ]).map(function (item, index) {
+        ]).map(function (proxyObj, index) {
             var node = dom.el('a', {
                 class: ['item'],
                 href: '#',
@@ -34,18 +46,19 @@ require(['require', 'dom'], function (require) {
                     }),
                     dom.el('div', {
                         class: 'name',
-                        text: item.name
+                        text: proxyObj.name
                     })
                 ]
             });
 
             var itemObj = {
                 node: node,
-                item: item
+                proxyObj: proxyObj,
+                select: onSelect
             };
 
-            if (item.type) {
-                typeItems[item.type] = itemObj;
+            if (proxyObj.type) {
+                typeMenuItems[proxyObj.type] = itemObj;
             }
 
             switcherNode.appendChild(node);
@@ -57,36 +70,33 @@ require(['require', 'dom'], function (require) {
             e.preventDefault();
             var node = dom.closestNode(this, e.target);
             if (node) {
-                var itemObj = menuItems[node.dataset.index];
+                var menuItem = menuItems[node.dataset.index];
 
-                if (itemObj.item.type === 'options') {
+                if (menuItem.proxyObj.type === 'options') {
                     chrome.tabs.create({url: 'options.html'});
                 } else {
-                    if (itemObj.item.type === 'disable') {
+                    if (menuItem.proxyObj.type === 'disable') {
                         chrome.runtime.sendMessage({action: 'clearProxy'});
                     } else {
-                        chrome.runtime.sendMessage({action: 'setProxy', details: itemObj.item});
+                        chrome.runtime.sendMessage({action: 'setProxy', details: menuItem.proxyObj});
                     }
-
-                    var selectedNode = switcherNode.querySelector('.item__selected');
-                    selectedNode.classList.remove('item__selected');
-                    itemObj.node.classList.add('item__selected');
+                    menuItem.select();
                 }
             }
         });
 
-        chrome.runtime.sendMessage({action: 'getProxyObj'}, function (item) {
-            var itemObj = null;
-            menuItems.some(function (_itemObj) {
-                if (item && _itemObj.item.name === item.name) {
-                    itemObj = _itemObj;
+        chrome.runtime.sendMessage({action: 'getProxyObj'}, function (proxyObj) {
+            var menuItem = null;
+            proxyObj && menuItems.some(function (item) {
+                if (item.proxyObj.name === proxyObj.name) {
+                    menuItem = item;
                     return true;
                 }
             });
-            if (!itemObj) {
-                itemObj = typeItems.disable;
+            if (!menuItem) {
+                menuItem = typeMenuItems.disable;
             }
-            itemObj.node.classList.add('item__selected');
+            menuItem.select();
         });
     });
 });
