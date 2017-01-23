@@ -139,7 +139,7 @@ var ProxyErrorListener = function () {
             var config = {
                 mode: 'pac_script',
                 pacScript: {
-                    data: '//' + JSON.stringify({proxyfy: proxyObj.name}) + '\n\n' + 'var FindProxyForURL = (' + function (rulesStrRe, invertRules, proxyUrl) {
+                    data: '//' + JSON.stringify({proxyfy: proxyObj.name}) + '\n' + 'var FindProxyForURL=(' + function (rulesStrRe, invertRules, proxyUrl) {
                         var re = rulesStrRe && new RegExp(rulesStrRe);
                         return function (url) {
                             var r = true;
