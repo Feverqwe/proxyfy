@@ -45,7 +45,7 @@ require(['require', 'dom', 'jsoneditor'], function (require) {
             var storage = editor.get();
             var badRules = [];
             storage.proxyList.forEach(function (proxyObj) {
-                proxyObj.forEach(function (value) {
+                proxyObj.rules.forEach(function (value) {
                     if (!/^(\*|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value)) {
                         badRules.push(JSON.stringify(value));
                     }
