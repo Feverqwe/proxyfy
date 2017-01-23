@@ -228,10 +228,10 @@ var ProxyErrorListener = function () {
             getProxySettings(function (proxyObj) {
                 if (proxyObj) {
                     if (cProxyList) {
-                        var isRemoved = cProxyList.newValue.some(function (_proxyObj) {
+                        var exists = cProxyList.newValue.some(function (_proxyObj) {
                             return _proxyObj.name === proxyObj.name;
                         });
-                        if (!isRemoved) {
+                        if (!exists) {
                             clearProxySettings();
                         } else {
                             setProxySettings(proxyObj);
