@@ -221,23 +221,16 @@ var ProxyErrorListener = function () {
         });
 
         chrome.storage.onChanged.addListener(function (changes) {
-            var cRules = changes.rules;
-            var cInvertRules = changes.invertRules;
             var cProxyList = changes.proxyList;
 
-            getProxySettings(function (proxyObj) {
+            cProxyList && getProxySettings(function (proxyObj) {
                 if (proxyObj) {
-                    if (cProxyList) {
-                        var exists = cProxyList.newValue.some(function (_proxyObj) {
-                            return _proxyObj.name === proxyObj.name;
-                        });
-                        if (!exists) {
-                            clearProxySettings();
-                        } else {
-                            setProxySettings(proxyObj);
-                        }
-                    } else
-                    if (cRules || cInvertRules) {
+                    var exists = cProxyList.newValue.some(function (_proxyObj) {
+                        return _proxyObj.name === proxyObj.name;
+                    });
+                    if (!exists) {
+                        clearProxySettings();
+                    } else {
                         setProxySettings(proxyObj);
                     }
                 }
