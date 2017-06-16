@@ -22,7 +22,7 @@ var urlPatternToStrRe = function (value) {
 
     var ipParts = host.split('.');
     var isIp = ipParts.length === 4 && ipParts.every(function (item) {
-        return /^(2[0-5]{2}|1?[0-9]{1,2}|\*)$/.test(item);
+        return item === '*' || /^[0-9]+$/.test(item) && item < 255;
     });
 
     host = escapeRegex(host);
