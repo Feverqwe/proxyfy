@@ -8,7 +8,7 @@ var escapeRegex = function (value) {
 };
 
 var urlPatternToStrRe = function (value) {
-    var m = /^(\*|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value);
+    var m = /^(\*|ws|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value);
     if (!m) {
         throw new Error("Invalid url-pattern");
     }
