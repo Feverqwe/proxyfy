@@ -15,7 +15,7 @@ var urlPatternToStrRe = function (value) {
 
     var scheme = m[1];
     if (scheme === '*') {
-        scheme = 'https?';
+        scheme = '(?:ws|https?)';
     }
 
     var host = m[2];
