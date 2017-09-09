@@ -102,15 +102,23 @@ const ProxyErrorListener = function () {
             }
         });
 
+        let badgeText = '';
+        let badgeColor = '';
         const badge = proxyObj && proxyObj.badge;
         if (badge) {
-            badge.text && chrome.browserAction.setBadgeText({
-                text: badge.text
-            });
-            badge.color && chrome.browserAction.setBadgeBackgroundColor({
-                color: badge.color
-            });
+            if (typeof badge.text === 'string') {
+                badgeText = badge.text;
+            }
+            if (typeof badge.color === 'string' || Array.isArray(badge.color)) {
+                badgeColor = badge.color;
+            }
         }
+        badgeColor && chrome.browserAction.setBadgeBackgroundColor({
+            color: badgeColor
+        });
+        chrome.browserAction.setBadgeText({
+            text: badgeText
+        });
     };
 
     const getProxyList = function () {
