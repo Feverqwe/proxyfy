@@ -8,14 +8,14 @@ var escapeRegex = function (value) {
 };
 
 var urlPatternToStrRe = function (value) {
-    var m = /^(\*|ws|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value);
+    var m = /^([^:]+):\/\/([^:\/]+)(?::(\d+))?(?:\/(.*))?$/.exec(value);
     if (!m) {
         throw new Error("Invalid url-pattern");
     }
 
     var scheme = m[1];
     if (scheme === '*') {
-        scheme = '(?:ws|https?)';
+        scheme = '(?:https?)';
     }
 
     var host = m[2];
@@ -35,7 +35,12 @@ var urlPatternToStrRe = function (value) {
 
     var pattern = ['^', scheme, ':\\/\\/', host];
 
-    var path = m[3];
+    var port = m[3];
+    if (port) {
+        pattern.push(':' + port);
+    }
+
+    var path = m[4];
     if (!path || path === '*') {
         path = '(?:|\/.*)';
         pattern.push(path, '$');
