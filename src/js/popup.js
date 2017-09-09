@@ -9,7 +9,7 @@ utils.chromeStorageSyncGet({
 }).then(function (storage) {
     const proxyList = storage.proxyList;
     const switcherNode = document.querySelector('.switcher');
-    const typeMenuItems = {};
+    const typeMenuItemMap = {};
 
     const onSelect = (function () {
         let lastSelectedItem = null;
@@ -49,7 +49,7 @@ utils.chromeStorageSyncGet({
         };
 
         if (proxyObj.type) {
-            typeMenuItems[proxyObj.type] = itemObj;
+            typeMenuItemMap[proxyObj.type] = itemObj;
         }
 
         switcherNode.appendChild(node);
@@ -61,7 +61,8 @@ utils.chromeStorageSyncGet({
         e.preventDefault();
         const node = utils.closestNode(this, e.target);
         if (node) {
-            const menuItem = menuItems[node.dataset.index];
+            const index = parseInt(node.dataset.index);
+            const menuItem = menuItems[index];
 
             if (menuItem.proxyObj.type === 'options') {
                 chrome.tabs.create({url: 'options.html'});
@@ -86,7 +87,7 @@ utils.chromeStorageSyncGet({
             }
         });
         if (!menuItem) {
-            menuItem = typeMenuItems.disable;
+            menuItem = typeMenuItemMap.disable;
         }
         menuItem.select();
     });
