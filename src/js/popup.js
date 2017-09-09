@@ -9,10 +9,6 @@ utils.getSyncStorage({
 }).then(function (storage) {
     const proxyList = storage.proxyList;
     const switcherNode = document.querySelector('.switcher');
-
-
-    return;
-
     const typeMenuItems = {};
 
     const onSelect = (function () {
