@@ -4,7 +4,7 @@
 const utils = require('./utils');
 const tmpl = require('./tmpl');
 
-utils.getSyncStorage({
+utils.chromeStorageSyncGet({
     proxyList: []
 }).then(function (storage) {
     const proxyList = storage.proxyList;
@@ -76,7 +76,7 @@ utils.getSyncStorage({
         }
     });
 
-    utils.sendMessage({action: 'getProxySettings'}).then(function (response) {
+    utils.chromeRuntimeSendMessage({action: 'getProxySettings'}).then(function (response) {
         const proxyObj = response.proxyObj;
         let menuItem = null;
         proxyObj && menuItems.some(function (item) {

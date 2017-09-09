@@ -1,68 +1,14 @@
 /**
  * Created by Anton on 22.01.2017.
  */
-"use strict";
-
-const escapeRegex = function (value) {
-    return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
-};
-
-const urlPatternToStrRe = function (value) {
-    const m = /^([^:]+):\/\/([^:\/]+)(?::(\d+))?(?:\/(.*))?$/.exec(value);
-    if (!m) {
-        throw new Error("Invalid url-pattern");
-    }
-
-    let scheme = m[1];
-    if (scheme === '*') {
-        scheme = '(?:https?)';
-    }
-
-    let host = m[2];
-    const ipParts = host.split('.');
-    const isIp = ipParts.length === 4 && ipParts.every(function (item) {
-        return item === '*' || /^[0-9]+$/.test(item) && item < 255;
-    });
-
-    host = escapeRegex(host);
-
-    if (isIp) {
-        host = host.replace(/\\\*/g, '(?:\d+)');
-    } else {
-        host = host.replace(/^\\\*\\\./, '(?:[^\/]+\\.)?');
-    }
-
-    const pattern = ['^', scheme, ':\\/\\/', host];
-
-    const port = m[3];
-    if (port) {
-        pattern.push(':' + port);
-    }
-
-    let path = m[4];
-    if (!path || path === '*') {
-        path = '(?:|\/.*)';
-        pattern.push(path, '$');
-    } else if (path) {
-        path = '\/' + path;
-        path = escapeRegex(path);
-        path = path.replace(/\\\*/g, '.*');
-        pattern.push(path, '$');
-    }
-
-    return pattern.join('');
-};
+const utils = require('./utils');
 
 const AuthListener = function () {
     const self = this;
-    /**
-     * @typedef {Object} proxyObj
-     * @property {string} name
-     * @property {string} host
-     * @property {number} port
-     */
+    /**@type {ProxyObj|null}*/
     let proxyObj = null;
-    const onAuthRequired = function (details) {
+
+    const listener = function (details) {
         const result = {};
         if (details.isProxy && proxyObj && proxyObj.auth) {
             result.authCredentials = {
@@ -73,16 +19,20 @@ const AuthListener = function () {
         return result;
     };
 
+
     this.enable = function () {
-        chrome.webRequest.onAuthRequired.addListener(onAuthRequired, {urls: ["<all_urls>"]}, ['blocking']);
+        chrome.webRequest.onAuthRequired.addListener(listener, {urls: ["<all_urls>"]}, ['blocking']);
     };
 
     this.disable = function () {
-        chrome.webRequest.onAuthRequired.removeListener(onAuthRequired, {urls: ["<all_urls>"]}, ['blocking']);
+        chrome.webRequest.onAuthRequired.removeListener(listener, {urls: ["<all_urls>"]}, ['blocking']);
     };
 
-    this.setProxyObj = function (obj) {
-        proxyObj = obj;
+    /**
+     * @param {ProxyObj} _proxyObj
+     */
+    this.setProxyObj = function (_proxyObj) {
+        proxyObj = _proxyObj;
         if (proxyObj && proxyObj.auth) {
             self.enable();
         } else {
@@ -92,16 +42,16 @@ const AuthListener = function () {
 };
 
 const ProxyErrorListener = function () {
-    const onProxyError = function (details) {
+    const listener = function (details) {
         console.error('ProxyError', details);
     };
 
     this.enable = function () {
-        chrome.proxy.onProxyError.addListener(onProxyError);
+        chrome.proxy.onProxyError.addListener(listener);
     };
 
     this.disable = function () {
-        chrome.proxy.onProxyError.removeListener(onProxyError);
+        chrome.proxy.onProxyError.removeListener(listener);
     };
 };
 
@@ -109,6 +59,21 @@ const ProxyErrorListener = function () {
     const authListener = new AuthListener();
     const proxyErrorListener = new ProxyErrorListener();
 
+    /**
+     * @typedef {{}} ProxyObj
+     * @property {string} name
+     * @property {string[]} rules
+     * @property {boolean} invertRules
+     * @property {string} host
+     * @property {string} port
+     * @property {{}} auth
+     * @property {string} auth.username
+     * @property {string} auth.password
+     */
+
+    /**
+     * @param {ProxyObj|null} proxyObj
+     */
     const onProxyChange = function (proxyObj) {
         let iconPrefix = '/img/icon_';
         authListener.setProxyObj(proxyObj);
@@ -128,41 +93,50 @@ const ProxyErrorListener = function () {
         });
     };
 
-    const getProxySettings = function (callback) {
-        chrome.storage.sync.get({
-            proxyList: []
-        }, function (storage) {
-            chrome.proxy.settings.get({'incognito': false}, function (details) {
-                const config = details.value;
-                let proxyName = '';
-                let proxyObj = null;
+    /**
+     * @return {Promise.<ProxyObj|null>}
+     */
+    const getProxySettings = function () {
+        return Promise.all([
+            utils.chromeStorageSyncGet({
+                proxyList: []
+            }),
+            utils.chromeProxySettingsGet({'incognito': false})
+        ]).then(function (results) {
+            const proxyList = results[0];
+            const details = results[1];
+            const config = details.value;
+            let proxyName = '';
+            let proxyObj = null;
 
-                if (['controlled_by_this_extension'].indexOf(details.levelOfControl) !== -1) {
-                    if (config.mode === 'pac_script') {
-                        try {
-                            const meta = /^\/\/(.+)\n/.exec(config.pacScript.data);
-                            proxyName = meta && JSON.parse(meta[1]).proxyfy;
-                        } catch (err) {
+            if (['controlled_by_this_extension'].indexOf(details.levelOfControl) !== -1) {
+                if (config.mode === 'pac_script') {
+                    try {
+                        const meta = /^\/\/(.+)\n/.exec(config.pacScript.data);
+                        proxyName = meta && JSON.parse(meta[1]).proxyfy;
+                    } catch (err) {}
+
+                    proxyName && proxyList.some(function (item) {
+                        if (item.name === proxyName) {
+                            proxyObj = item;
+                            return true;
                         }
-
-                        proxyName && storage.proxyList.some(function (item) {
-                            if (item.name === proxyName) {
-                                proxyObj = item;
-                                return true;
-                            }
-                        });
-                    }
+                    });
                 }
+            }
 
-                if (proxyName && !proxyObj) {
-                    proxyObj = {name: proxyName, lost: true};
-                }
+            if (proxyName && !proxyObj) {
+                proxyObj = {name: proxyName, lost: true};
+            }
 
-                callback(proxyObj);
-            });
+            return proxyObj;
         });
     };
 
+    /**
+     * @param {ProxyObj} proxyObj
+     * @return {Promise}
+     */
     const setProxySettings = function (proxyObj) {
         const meta = '//' + JSON.stringify({proxyfy: proxyObj.name}) + '\n';
         const config = {
@@ -186,7 +160,7 @@ const ProxyErrorListener = function () {
                     };
                 }.toString() + ')(' + [
                     proxyObj.rules.map(function (pattern) {
-                        return urlPatternToStrRe(pattern);
+                        return utils.urlPatternToStrRe(pattern);
                     }).join('|'),
                     proxyObj.invertRules,
                     [proxyObj.host, proxyObj.port || 80].join(':')
@@ -194,53 +168,56 @@ const ProxyErrorListener = function () {
             }
         };
 
-        chrome.proxy.settings.set({
+        return utils.chromeProxySettingsSet({
             value: config,
             scope: 'regular'
-        }, function () {
-            onProxyChange(proxyObj);
+        }).then(function () {
+            return onProxyChange(proxyObj);
         });
     };
 
+    /**
+     * @return {Promise}
+     */
     const clearProxySettings = function () {
-        chrome.proxy.settings.clear({scope: 'regular'}, function () {
-            onProxyChange(null);
+        return utils.chromeProxySettingsClear({scope: 'regular'}).then(function () {
+            return onProxyChange(null);
         });
     };
 
-    (function () {
-        chrome.runtime.onMessage.addListener(function (message, sender, response) {
-            if (message.action === 'clearProxySettings') {
-                clearProxySettings();
-            } else
-            if (message.action === 'setProxySettings') {
-                setProxySettings(message.proxyObj);
-            } else
-            if (message.action === 'getProxySettings') {
-                getProxySettings(function (proxyObj) {
-                    response({proxyObj: proxyObj});
+    chrome.runtime.onMessage.addListener(function (message, sender, response) {
+        if (message.action === 'clearProxySettings') {
+            clearProxySettings();
+        } else
+        if (message.action === 'setProxySettings') {
+            setProxySettings(message.proxyObj);
+        } else
+        if (message.action === 'getProxySettings') {
+            getProxySettings().then(function (proxyObj) {
+                response({proxyObj: proxyObj});
+            });
+            return true;
+        }
+    });
+
+    chrome.storage.onChanged.addListener(function (changes) {
+        const cProxyList = changes.proxyList;
+
+        cProxyList && getProxySettings().then(function (proxyObj) {
+            if (proxyObj) {
+                const exists = cProxyList.newValue.some(function (_proxyObj) {
+                    return _proxyObj.name === proxyObj.name;
                 });
-                return true;
+                if (!exists) {
+                    return clearProxySettings();
+                } else {
+                    return setProxySettings(proxyObj);
+                }
             }
         });
+    });
 
-        chrome.storage.onChanged.addListener(function (changes) {
-            const cProxyList = changes.proxyList;
-
-            cProxyList && getProxySettings(function (proxyObj) {
-                if (proxyObj) {
-                    const exists = cProxyList.newValue.some(function (_proxyObj) {
-                        return _proxyObj.name === proxyObj.name;
-                    });
-                    if (!exists) {
-                        clearProxySettings();
-                    } else {
-                        setProxySettings(proxyObj);
-                    }
-                }
-            });
-        });
-
-        getProxySettings(onProxyChange);
-    })();
+    return getProxySettings().then(function (proxyObj) {
+        return onProxyChange(proxyObj);
+    });
 })();
