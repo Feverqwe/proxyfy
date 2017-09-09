@@ -64,6 +64,7 @@ const ProxyErrorListener = function () {
 (function () {
     const authListener = new AuthListener();
     const proxyErrorListener = new ProxyErrorListener();
+    let defaultBadgeColor = null;
 
     /**
      * @typedef {{}} ProxyObj
@@ -102,22 +103,30 @@ const ProxyErrorListener = function () {
             }
         });
 
-        let badgeText = '';
-        let badgeColor = '';
-        const badge = proxyObj && proxyObj.badge;
-        if (badge) {
-            if (typeof badge.text === 'string') {
-                badgeText = badge.text;
+        Promise.resolve().then(function () {
+            if (!defaultBadgeColor) {
+                return utils.chromeBrowserActionGetBadgeBackgroundColor({}).then(function (color) {
+                    defaultBadgeColor = color;
+                });
             }
-            if (typeof badge.color === 'string' || Array.isArray(badge.color)) {
-                badgeColor = badge.color;
+        }).then(function () {
+            let badgeText = '';
+            let badgeColor = defaultBadgeColor;
+            const badge = proxyObj && proxyObj.badge;
+            if (badge) {
+                if (typeof badge.text === 'string') {
+                    badgeText = badge.text;
+                }
+                if (typeof badge.color === 'string' || Array.isArray(badge.color)) {
+                    badgeColor = badge.color;
+                }
             }
-        }
-        badgeColor && chrome.browserAction.setBadgeBackgroundColor({
-            color: badgeColor
-        });
-        chrome.browserAction.setBadgeText({
-            text: badgeText
+            chrome.browserAction.setBadgeBackgroundColor({
+                color: badgeColor
+            });
+            chrome.browserAction.setBadgeText({
+                text: badgeText
+            });
         });
     };
 

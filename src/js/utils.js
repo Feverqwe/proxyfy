@@ -67,6 +67,14 @@ utils.chromeProxySettingsClear = function () {
     });
 };
 
+utils.chromeBrowserActionGetBadgeBackgroundColor = function () {
+    const args = slice.call(arguments);
+    return new Promise(function (resolve) {
+        args.push(resolve);
+        chrome.browserAction.getBadgeBackgroundColor.apply(chrome.browserAction, args);
+    });
+};
+
 utils.escapeRegex = function (value) {
     return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
 };
