@@ -27,11 +27,19 @@ utils.chromeRuntimeSendMessage = function () {
     });
 };
 
-utils.chromeStorageSyncGet = function (data) {
+utils.chromeStorageSyncGet = function () {
     const args = slice.call(arguments);
     return new Promise(function (resolve) {
         args.push(resolve);
         chrome.storage.sync.get.apply(chrome.storage.sync, args);
+    });
+};
+
+utils.chromeStorageSyncSet = function () {
+    const args = slice.call(arguments);
+    return new Promise(function (resolve) {
+        args.push(resolve);
+        chrome.storage.sync.set.apply(chrome.storage.sync, args);
     });
 };
 

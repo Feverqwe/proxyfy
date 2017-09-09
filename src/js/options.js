@@ -1,11 +1,12 @@
 /**
  * Created by Anton on 22.01.2017.
  */
+const utils = require('./utils');
 const JSONEditor = require('../lib/jsoneditor.min');
 
-chrome.storage.sync.get({
+utils.chromeStorageSyncGet({
     proxyList: []
-}, function (storage) {
+}).then(function (storage) {
     const editor = new JSONEditor(document.getElementById("jsoneditor"), {
         mode: 'code'
     });
@@ -38,27 +39,40 @@ chrome.storage.sync.get({
 
     editor.set(storage);
 
+    /**
+     * @return {Promise}
+     */
     const save = function () {
-        const storage = editor.get();
-        const badRules = [];
-        storage.proxyList.forEach(function (proxyObj) {
-            proxyObj.rules.forEach(function (value) {
-                if (!/^(\*|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value)) {
-                    badRules.push(JSON.stringify(value));
-                }
+        return Promise.resolve().then(function () {
+            const storage = editor.get();
+            const badRules = [];
+            storage.proxyList.forEach(function (/*ProxyObj*/proxyObj) {
+                proxyObj.rules.forEach(function (value) {
+                    try {
+                        utils.urlPatternToStrRe(value);
+                    } catch (err) {
+                        badRules.push(JSON.stringify(value));
+                    }
+                });
             });
+
+            if (badRules.length) {
+                const err = new Error('Invalid rules ' + badRules.join(' '));
+                err.rules = badRules;
+                throw err;
+            }
+
+            return utils.chromeStorageSyncSet(storage);
         });
-        if (badRules.length) {
-            alert("Invalid rules " + badRules.join(' '));
-        } else {
-            chrome.storage.sync.set(storage);
-        }
     };
 
     const saveNode = document.querySelector('.save');
     saveNode.addEventListener('click', function (e) {
         e.preventDefault();
-        save();
+        save().catch(function (err) {
+            console.error('Save error', err);
+            alert('Save error (see more in console): ' + err.message);
+        });
     });
 
     document.addEventListener('keydown', function (e) {
@@ -67,7 +81,7 @@ chrome.storage.sync.get({
             switch (keyCode) {
                 case 83:
                     e.preventDefault();
-                    save();
+                    saveNode.dispatchEvent(new MouseEvent('click'));
                     break;
             }
         }
