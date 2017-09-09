@@ -88,6 +88,8 @@ utils.urlPatternToStrRe = function (value) {
     let scheme = m[1];
     if (scheme === '*') {
         scheme = '(?:https?)';
+    } else {
+        scheme = utils.escapeRegex(scheme);
     }
 
     let host = m[2];
