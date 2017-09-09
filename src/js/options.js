@@ -13,6 +13,11 @@ chrome.storage.sync.get({
     if (!storage.proxyList.length) {
         storage.proxyList.push({
             name: 'TEST',
+            color: "#0a77e5",
+            badge: {
+                text: 'test',
+                color: '#0a77e5'
+            },
             host: '127.0.0.1',
             port: 8080,
             auth: {
