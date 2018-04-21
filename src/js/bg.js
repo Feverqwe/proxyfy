@@ -85,12 +85,6 @@ class Bg {
         }
         break;
       }
-      case 'local': {
-        if (changes.profile) {
-          this.store.setProfile(changes.profile.newValue);
-        }
-        break;
-      }
     }
   }
   init() {
