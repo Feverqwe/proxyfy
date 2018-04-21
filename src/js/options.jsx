@@ -56,6 +56,7 @@ const storeModel = types.model('store', {
 }).views(self => {
   return {
     async saveOptions(options) {
+      if (self.saveState === 'loading') return;
       self.assign({saveState: 'loading'});
       try {
         self.assign({options: options});
@@ -169,8 +170,8 @@ const storeModel = types.model('store', {
 
     const saveBtnClassList = ['btn my-2 my-sm-0'];
     if (this.props.store.saveState === 'loading') {
-      saveBtnClassList.push('btn-success');
-    } else
+      saveBtnClassList.push('disabled');
+    }
     if (this.props.store.saveState === 'error') {
       saveBtnClassList.push('btn-outline-danger')
     } else {
