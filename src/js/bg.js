@@ -2,7 +2,7 @@ import {types, resolveIdentifier} from 'mobx-state-tree';
 import promisifyApi from "./tools/promisifyApi";
 import optionsModel from "./model/options";
 import profileModel from "./model/profile";
-import getActiveProfile from "./tools/getActiveProfile";
+import getProxySettings from "./tools/getProxySettings";
 
 const debug = require('debug')('bg');
 
@@ -56,7 +56,7 @@ class Bg {
   handleMessage(message, sender, response) {
     switch (message.action) {
       case 'getState': {
-        getActiveProfile().catch(err => {
+        getProxySettings().catch(err => {
           debug('getActiveProfile error', err);
           return null;
         }).then(profile => {

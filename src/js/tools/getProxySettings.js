@@ -1,6 +1,6 @@
 import promisifyApi from "./promisifyApi";
 
-const getActiveProfile = () => {
+const getProxySettings = () => {
   return promisifyApi(chrome.proxy.settings.get)({
     incognito: false
   }).then(details => {
@@ -24,4 +24,4 @@ const getActiveProfile = () => {
   });
 };
 
-export default getActiveProfile;
+export default getProxySettings;
