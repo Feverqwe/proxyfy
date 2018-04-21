@@ -23,9 +23,9 @@ if (isWatch) {
 
 const config = {
   entry: {
-    bg: './src/js/bg.js',
-    popup: './src/js/popup.js',
-    options: './src/js/options.js'
+    bg: './src/js/bg',
+    popup: './src/js/popup',
+    options: './src/js/options'
   },
   output: {
     path: outputPath,

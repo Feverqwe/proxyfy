@@ -28,6 +28,10 @@
     "debug": "^3.1.0",
     "file-loader": "^1.1.11",
     "jsoneditor": "^5.14.1",
-    "raw-loader": "^0.5.1"
+    "mobx": "^4.2.0",
+    "mobx-react": "^5.0.0",
+    "mobx-state-tree": "^2.0.4",
+    "raw-loader": "^0.5.1",
+    "react": "^16.3.2"
   }
 }
