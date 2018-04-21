@@ -7,41 +7,9 @@ import {observer} from 'mobx-react';
 import 'jsoneditor/dist/jsoneditor.css';
 import JSONEditor from "jsoneditor";
 import '../css/options.less'
+import optionsModel from "./model/options";
 
 const debug = require('debug')('options');
-
-// regexp https://docs.microsoft.com/ru-ru/dotnet/standard/base-types/regular-expression-language-quick-reference
-// micromatch https://github.com/micromatch/micromatch
-
-const rule = types.model('rule', {
-  parser: types.string, // regexp, micromatch
-  pattern: types.string
-});
-
-const proxyModel = types.model('proxy', {
-  host: types.string,
-  port: types.number,
-  auth: types.maybe(types.model({
-    username: types.string,
-    password: types.string,
-  })),
-  rules: types.optional(types.array(rule), [])
-});
-
-const profileModel = types.model('profile', {
-  name: types.string,
-  color: types.string,
-  badge: types.maybe(types.model('badge', {
-    text: types.string,
-    color: types.string,
-  })),
-  proxy: types.reference(proxyModel),
-});
-
-const optionsModel = types.model('options', {
-  profiles: types.optional(types.array(profileModel), []),
-  proxies: types.optional(types.array(proxyModel), []),
-});
 
 const storeModel = types.model('store', {
   state: types.optional(types.string, 'idle'),
@@ -71,19 +39,54 @@ const storeModel = types.model('store', {
       }
     },
     afterCreate() {
-      self.assign({
-        state: 'loading'
-      });
+      self.assign({state: 'loading'});
       promisifyApi(chrome.storage.sync.get)({
-        options: {}
+        options: {
+          profiles: [{
+            name: 'Profile #1',
+            proxy: 'localProxy',
+            color: '#0a77e5',
+            badge: {
+              text: 'test',
+              color: '#0a77e5'
+            },
+            invertRules: false,
+            rules: [{
+              parser: 'micromatch',
+              pattern: '*://localhost',
+            }, {
+              parser: 'micromatch',
+              pattern: '*://192.168.*.*',
+            }, {
+              parser: 'micromatch',
+              pattern: '*://172.16.*.*',
+            }, {
+              parser: 'micromatch',
+              pattern: '*://169.254.*.*',
+            }, {
+              parser: 'micromatch',
+              pattern: '*://127.*.*.*',
+            }, {
+              parser: 'micromatch',
+              pattern: '*://10.*.*.*',
+            }]
+          }],
+          proxies: [{
+            name: 'localProxy',
+            host: '127.0.0.1',
+            port: 8080,
+            auth: {
+              username: 'username',
+              password: 'password',
+            }
+          }]
+        }
       }).then(storage => {
         self.assign(storage);
       }).catch(err => {
         debug('Load options error', err);
       }).then(() => {
-        self.assign({
-          state: 'done'
-        });
+        self.assign({state: 'done'});
       });
     }
   };
@@ -94,7 +97,7 @@ const storeModel = types.model('store', {
     super();
 
     this.state = {
-      page: 'gui' // json
+      page: 'json' // gui
     };
 
     this.changePage = this.changePage.bind(this);
@@ -117,7 +120,7 @@ const storeModel = types.model('store', {
       case 'done':
         switch (this.state.page) {
           case 'gui':
-            body = 'Ready';
+            body = 'Coming soon...';
             break;
           case 'json':
             body = (
@@ -125,7 +128,6 @@ const storeModel = types.model('store', {
             );
             break;
         }
-
         break;
     }
 
@@ -156,14 +158,14 @@ const storeModel = types.model('store', {
   }
   render() {
     const menuItems = [];
-    ['gui', 'json'].forEach(page => {
+    ['json', 'gui'].forEach(page => {
       const classList = ['nav-item'];
       if (page === this.props.page) {
         classList.push('active');
       }
       menuItems.push(
         <li key={page} className={classList.join(' ')}>
-          <a onClick={this.handleMenuClick} className="nav-link" href="#" data-page={page}>{page}</a>
+          <a onClick={this.handleMenuClick} className="nav-link" href="#" data-page={page}>{page.toUpperCase()}</a>
         </li>
       );
     });

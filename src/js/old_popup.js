@@ -1,7 +1,7 @@
 /**
  * Created by Anton on 22.01.2017.
  */
-import '../css/popup.css';
+import '../css/old_popup.css';
 
 const utils = require('./utils');
 const tmpl = require('./tmpl');
