@@ -7,7 +7,6 @@ import getActiveProfile from "./tools/getActiveProfile";
 const debug = require('debug')('bg');
 
 const storeModel = types.model('store', {
-  profile: types.maybe(types.string),
   options: types.maybe(optionsModel)
 }).actions(self => {
   return {
@@ -17,37 +16,27 @@ const storeModel = types.model('store', {
   };
 }).views(self => {
   return {
-    getProfile() {
-      return self.profile && resolveIdentifier(profileModel, self, self.profile);
+    getProfile(name) {
+      return name && resolveIdentifier(profileModel, self, name);
     },
     setProfile(name) {
-      self.assign({
-        profile: name
-      });
+      // todo: set profile proxy
     },
     setOptions(options) {
       self.assign({
         options: options
       });
     },
-    getState() {
-      return {
-        profile: self.profile,
-        profiles: self.options.profiles.map(profile => {
-          return profile.name;
-        }),
-      };
+    getProfiles() {
+      return self.options.profiles.map(profile => {
+        return profile.name;
+      });
     },
     afterCreate() {
-      Promise.all([
-        getActiveProfile(),
-        promisifyApi(chrome.storage.sync.get)({
-          options: {}
-        })
-      ]).then(([activeProfile, syncStorage]) => {
-        self.assign(Object.assign({}, syncStorage, {
-          profile: activeProfile.name
-        }));
+      promisifyApi(chrome.storage.sync.get)({
+        options: {}
+      }).then(storage => {
+        self.assign(storage);
       }).catch(err => {
         debug('Load error', err);
       });
@@ -67,13 +56,20 @@ class Bg {
   handleMessage(message, sender, response) {
     switch (message.action) {
       case 'getState': {
-        response(this.store.getState());
-        break;
+        getActiveProfile().catch(err => {
+          debug('getActiveProfile error', err);
+          return null;
+        }).then(profile => {
+          response({
+            profile: profile && profile.name,
+            profiles: this.store.getProfiles()
+          });
+        });
+        return true;
       }
       case 'setProfile': {
         this.store.setProfile(message.name);
-        response(true);
-        break;
+        return response(true);
       }
     }
   }

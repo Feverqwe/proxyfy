@@ -48,7 +48,7 @@ const storeModel = types.model('store', {
     e.preventDefault();
     const profile = e.target.dataset.name;
     promisifyApi(chrome.runtime.sendMessage)({action: 'setProfile', name: profile}).then(() => {
-      this.props.store.setProfile(null);
+      this.props.store.setProfile(profile);
     });
   }
   handleResetClick(e) {
