@@ -47,13 +47,13 @@ const storeModel = types.model('store', {
   handleProfileClick(e) {
     e.preventDefault();
     const profile = e.target.dataset.name;
-    promisifyApi(chrome.storage.local.set)({profile: profile}).then(() => {
-      this.props.store.setProfile(profile);
+    promisifyApi(chrome.runtime.sendMessage)({action: 'setProfile', name: profile}).then(() => {
+      this.props.store.setProfile(null);
     });
   }
   handleResetClick(e) {
     e.preventDefault();
-    promisifyApi(chrome.storage.local.set)({profile: null}).then(() => {
+    promisifyApi(chrome.runtime.sendMessage)({action: 'setProfile', name: null}).then(() => {
       this.props.store.setProfile(null);
     });
   }

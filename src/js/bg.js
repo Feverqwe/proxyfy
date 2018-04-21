@@ -2,6 +2,7 @@ import {types, resolveIdentifier} from 'mobx-state-tree';
 import promisifyApi from "./tools/promisifyApi";
 import optionsModel from "./model/options";
 import profileModel from "./model/profile";
+import getActiveProfile from "./tools/getActiveProfile";
 
 const debug = require('debug')('bg');
 
@@ -39,14 +40,14 @@ const storeModel = types.model('store', {
     },
     afterCreate() {
       Promise.all([
-        promisifyApi(chrome.storage.local.get)({
-          profile: null,
-        }),
+        getActiveProfile(),
         promisifyApi(chrome.storage.sync.get)({
           options: {}
         })
-      ]).then(([localStorage, syncStorage]) => {
-        self.assign(Object.assign({}, syncStorage, localStorage));
+      ]).then(([activeProfile, syncStorage]) => {
+        self.assign(Object.assign({}, syncStorage, {
+          profile: activeProfile.name
+        }));
       }).catch(err => {
         debug('Load error', err);
       });
@@ -67,6 +68,11 @@ class Bg {
     switch (message.action) {
       case 'getState': {
         response(this.store.getState());
+        break;
+      }
+      case 'setProfile': {
+        this.store.setProfile(message.name);
+        response(true);
         break;
       }
     }
