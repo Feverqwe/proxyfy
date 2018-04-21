@@ -1,7 +1,7 @@
 /**
  * Created by Anton on 22.01.2017.
  */
-import '../css/options.css';
+import '../css/old_options.css';
 import 'jsoneditor/dist/jsoneditor.css';
 import JSONEditor from 'jsoneditor';
 
