@@ -3,6 +3,7 @@ import promisifyApi from "./tools/promisifyApi";
 import optionsModel from "./model/options";
 import profileModel from "./model/profile";
 import getProxySettings from "./tools/getProxySettings";
+import setProxySettings from "./tools/setProxySettings";
 
 const debug = require('debug')('bg');
 
@@ -15,12 +16,25 @@ const storeModel = types.model('store', {
     }
   };
 }).views(self => {
+  const onProxyChange = () => {
+
+  };
+
   return {
     getProfile(name) {
       return name && resolveIdentifier(profileModel, self, name);
     },
     setProfile(name) {
-      // todo: set profile proxy
+      return Promise.resolve().then(() => {
+        const profile = self.getProfile(name);
+        if (profile) {
+          return setProxySettings(profile);
+        } else {
+          return promisifyApi(chrome.proxy.settings.clear)({scope: 'regular'});
+        }
+      }).then(() => {
+        return onProxyChange();
+      });
     },
     setOptions(options) {
       self.assign({
@@ -37,6 +51,10 @@ const storeModel = types.model('store', {
         options: {}
       }).then(storage => {
         self.assign(storage);
+      }).then(() => {
+        return getProxySettings().then(settings => {
+          return onProxyChange(settings);
+        });
       }).catch(err => {
         debug('Load error', err);
       });
@@ -59,17 +77,19 @@ class Bg {
         getProxySettings().catch(err => {
           debug('getActiveProfile error', err);
           return null;
-        }).then(profile => {
+        }).then(settings => {
           response({
-            profile: profile && profile.name,
+            profile: settings && settings.name,
             profiles: this.store.getProfiles()
           });
         });
         return true;
       }
       case 'setProfile': {
-        this.store.setProfile(message.name);
-        return response(true);
+        this.store.setProfile(message.name).then(() => {
+          response(true);
+        });
+        return true;
       }
     }
   }
