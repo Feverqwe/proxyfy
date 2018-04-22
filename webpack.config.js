@@ -23,8 +23,7 @@ if (isWatch) {
 
 const config = {
   entry: {
-    urlRoll: './src/js/urlRoll',
-    ip6addrRoll: './src/js/ip6addrRoll',
+    rolls: ['./src/js/urlRoll', './src/js/ip6addrRoll'],
     bg: './src/js/bg',
     popup: './src/js/popup',
     options: './src/js/options'
@@ -103,6 +102,7 @@ const config = {
 };
 
 if (!isWatch) {
+  config.devtool = 'none';
   Object.keys(config.entry).forEach(entryName => {
     let value = config.entry[entryName];
     if (!Array.isArray(value)) {

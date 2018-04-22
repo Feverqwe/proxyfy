@@ -12,7 +12,7 @@ class AuthListener {
       if (m) {
         const protocol = m[1];
         const proxy = this.profile.getProxyByProtocol(protocol);
-        if (proxy) {
+        if (proxy && proxy.auth) {
           result.authCredentials = {
             username: proxy.auth.username,
             password: proxy.auth.password

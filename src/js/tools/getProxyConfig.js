@@ -1,6 +1,6 @@
 const debug = require('debug')('getProxyConfig');
 
-const getProxyConfig = (profile, urlRoll, ip6addrRoll) => {
+const getProxyConfig = (profile, rolls) => {
   const meta = '//' + JSON.stringify({proxyfy: profile.name});
 
   const proxies = {};
@@ -37,7 +37,7 @@ const getProxyConfig = (profile, urlRoll, ip6addrRoll) => {
   const config = {
     mode: 'pac_script',
     pacScript: {
-      data: `${meta}\nvar URL = null;\n${urlRoll}\nvar ip6addr = null;\n${ip6addrRoll};\nvar FindProxyForURL=(${function (bypassListRe, cidrList, invertBypassList, proxies) {
+      data: `${meta}\nvar URL = null;\nvar ip6addr = null;\n${rolls}\nvar FindProxyForURL=(${function (bypassListRe, cidrList, invertBypassList, proxies) {
         const bypassList = bypassListRe && new RegExp(bypassListRe);
         const notEmptyCidrList = cidrList.length;
         
