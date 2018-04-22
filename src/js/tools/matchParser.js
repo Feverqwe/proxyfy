@@ -19,7 +19,7 @@ const ipToRePatten = (scheme, hostname, port) => {
 };
 
 const hostnameToRePatten = (scheme, hostname, port) => {
-  return '^' + getScheme(scheme) + _escapeRegExp(hostname).replace(/\\\*/g, '.*') + getPort(port) + '$';
+  return '^' + getScheme(scheme) + _escapeRegExp(hostname).replace(/\\\*/g, '.+') + getPort(port) + '$';
 };
 
 const getIpAddr = ipLiteral => {
