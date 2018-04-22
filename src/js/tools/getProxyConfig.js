@@ -41,8 +41,12 @@ const getProxyConfig = (profile, urlRoll, ip6addrRoll) => {
         const bypassList = bypassListRe && new RegExp(bypassListRe);
         const notEmptyCidrList = cidrList.length;
         
-        const getIpAddr = hostname => {
+        const getIpAddr = hostname => { 
           if (/^\[.+\]$|^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/.test(hostname)) {
+            const m = /^\[(.+)\]$/.exec(hostname);
+            if (m) {
+              hostname = m[1];
+            }
             try {
               return ip6addr.parse(hostname);
             } catch (err) {
@@ -62,15 +66,16 @@ const getProxyConfig = (profile, urlRoll, ip6addrRoll) => {
         
         return function (url) {
           const {protocol, host, hostname} = new URL(url);
-          let useProxy = true;
           
-          let inBypassList = bypassList && bypassList.test(host);
+          let inBypassList = bypassList && bypassList.test(protocol + '//' + host);
           if (!inBypassList) {
             const ipAddr = notEmptyCidrList && getIpAddr(hostname);
             if (ipAddr) {
               inBypassList = containsByPassCidrList(ipAddr);
             }
           }
+          
+          let useProxy = true;
           if (inBypassList) {
             useProxy = false;
           }
@@ -104,7 +109,8 @@ const getProxyConfig = (profile, urlRoll, ip6addrRoll) => {
     }
   };
 
-  // debug('config', config);
+  // debug('bypassListRe', bypassListRe);
+  // debug('cidrList', cidrList);
 
   return config;
 };
