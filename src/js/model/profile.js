@@ -20,7 +20,13 @@ const profileModel = types.model('profile', {
       }
     }, types.string, types.array(types.number))),
   })),
-  bypassList: types.optional(types.array(ruleModel), []),
+  bypassList: types.optional(types.array(types.union(snapshot => {
+    if (typeof snapshot === 'string') {
+      return types.string;
+    } else {
+      return ruleModel;
+    }
+  }, ruleModel, types.string)), []),
   invertBypassList: types.optional(types.boolean, false),
 }).views(self => {
   return {
@@ -58,7 +64,13 @@ const profileModel = types.model('profile', {
     },
     getBypassList() {
       const list = [];
-      self.bypassList.forEach(rule => {
+      self.bypassList.forEach(ruleOrString => {
+        let rule = ruleOrString;
+        if (typeof ruleOrString === 'string') {
+          rule = ruleModel.create({
+            pattern: ruleOrString
+          });
+        }
         list.push(...rule.getPatterns());
       });
       return list;

@@ -51,25 +51,14 @@ const storeModel = types.model('store', {
               color: '#0a77e5'
             },
             invertBypassList: false,
-            bypassList: [{
-              parser: 'match',
-              pattern: '<local>',
-            }, {
-              parser: 'match',
-              pattern: '192.168.0.0/16',
-            }, {
-              parser: 'match',
-              pattern: '172.16.0.0/16',
-            }, {
-              parser: 'match',
-              pattern: '169.254.0.0/16',
-            }, {
-              parser: 'match',
-              pattern: '127.0.0.0/8',
-            }, {
-              parser: 'match',
-              pattern: '10.0.0.0/8',
-            }]
+            bypassList: [
+              '<local>',
+              '192.168.0.0/16',
+              '172.16.0.0/16',
+              '169.254.0.0/16',
+              '127.0.0.0/8',
+              '10.0.0.0/8'
+            ]
           }],
           proxies: [{
             name: 'localProxy',
