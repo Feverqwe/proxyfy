@@ -55,49 +55,61 @@ const matchParser = pattern => {
   }
 
   patterns.forEach(pattern => {
-    const m = /^(?:([^:]+):\/\/)?(.+)(?::([0-9]+))?$/.exec(pattern);
-    if (m) {
-      m.shift();
-      const [scheme, hostnameOrIpLiteral, port] = m;
-      const ipAddr = getIpAddr(hostnameOrIpLiteral);
-      if (ipAddr) {
-        if (ipAddr.kind() === 'ipv4') {
-          result.push({
-            type: 'regexp',
-            pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4'}), port)
-          });
+    const cidr = getCIDR(pattern);
+    if (cidr) {
+      result.push({
+        type: 'CIDR',
+        pattern: pattern
+      });
+    } else {
+      const m = /^(?:([^:]+):\/\/)?(.+)(?::([0-9]+))?$/.exec(pattern);
+      if (m) {
+        m.shift();
+        const [scheme, hostnameOrIpLiteral, port] = m;
+        const ipAddr = getIpAddr(hostnameOrIpLiteral);
+        if (ipAddr) {
+          if (ipAddr.kind() === 'ipv4') {
+            result.push({
+              type: 'regexp',
+              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4'}), port)
+            });
+            result.push({
+              type: 'regexp',
+              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({format: 'v4-mapped'}) + ']', port)
+            });
+            result.push({
+              type: 'regexp',
+              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({zeroElide: false, format: 'v4-mapped'}) + ']', port)
+            });
+            result.push({
+              type: 'regexp',
+              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({
+                zeroElide: false,
+                zeroPad: true,
+                format: 'v4-mapped'
+              }) + ']', port)
+            });
+          } else {
+            result.push({
+              type: 'regexp',
+              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({format: 'v6'}) + ']', port)
+            });
+            result.push({
+              type: 'regexp',
+              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({zeroElide: false}) + ']', port)
+            });
+            result.push({
+              type: 'regexp',
+              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({zeroElide: false, zeroPad: true}) + ']', port)
+            });
+          }
         } else {
+          const hostname = hostnameOrIpLiteral;
           result.push({
             type: 'regexp',
-            pattern: ipToRePatten(scheme, '[' + ipAddr.toString({format: 'v6'}) + ']', port)
-          });
-          result.push({
-            type: 'regexp',
-            pattern: ipToRePatten(scheme, '[' + ipAddr.toString({format: 'v4-mapped'}) + ']', port)
-          });
-          result.push({
-            type: 'regexp',
-            pattern: ipToRePatten(scheme, '[' + ipAddr.toString({zeroElide: false}) + ']', port)
-          });
-          result.push({
-            type: 'regexp',
-            pattern: ipToRePatten(scheme, '[' + ipAddr.toString({zeroElide: false, zeroPad: true}) + ']', port)
+            pattern: hostnameToRePatten(scheme, hostname, port)
           });
         }
-      } else {
-        const hostname = hostnameOrIpLiteral;
-        result.push({
-          type: 'regexp',
-          pattern: hostnameToRePatten(scheme, hostname, port)
-        });
-      }
-    } else {
-      const cidr = getCIDR(pattern);
-      if (cidr) {
-        result.push({
-          type: 'CIDR',
-          pattern: pattern
-        });
       } else {
         debug('Can\'t parse pattern', pattern);
       }

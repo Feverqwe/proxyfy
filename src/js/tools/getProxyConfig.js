@@ -13,7 +13,7 @@ const getProxyConfig = profile => {
   const config = {
     mode: 'pac_script',
     pacScript: {
-      data: `${meta}\nvar FindProxyForURL=${function (bypassListRe, invertBypassList, proxyScheme, proxyUrl) {
+      data: `${meta}\nvar FindProxyForURL=(${function (bypassListRe, invertBypassList, proxyScheme, proxyUrl) {
         const bypassList = bypassListRe && new RegExp(bypassListRe);
         return function (url) {
           let r = true;
@@ -35,7 +35,7 @@ const getProxyConfig = profile => {
       }})(${[
         bypassListRe.join('|'),
         profile.invertBypassList,
-        profile.singleProxy.getScheme().toUpperCase(),
+        profile.singleProxy.getPacScheme(),
         profile.singleProxy.getUrl()
       ].map(JSON.stringify).join(',')});`
     }

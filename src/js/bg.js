@@ -80,10 +80,6 @@ const storeModel = types.model('store', {
           config.mode !== settings.config.mode ||
           config.pacScript.data !== settings.config.pacScript.data
         ) {
-          debug('syncProxySetting>');
-          debug(config.pacScript.data);
-          debug(settings.value.pacScript.data);
-          debug('<syncProxySetting');
           return setProxyConfig(config);
         }
       }

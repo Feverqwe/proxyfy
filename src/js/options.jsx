@@ -53,22 +53,22 @@ const storeModel = types.model('store', {
             invertBypassList: false,
             bypassList: [{
               parser: 'match',
-              pattern: '*://localhost',
+              pattern: '<local>',
             }, {
               parser: 'match',
-              pattern: '*://192.168.*.*',
+              pattern: '192.168.0.0/16',
             }, {
               parser: 'match',
-              pattern: '*://172.16.*.*',
+              pattern: '172.16.0.0/16',
             }, {
               parser: 'match',
-              pattern: '*://169.254.*.*',
+              pattern: '169.254.0.0/16',
             }, {
               parser: 'match',
-              pattern: '*://127.*.*.*',
+              pattern: '127.0.0.0/8',
             }, {
               parser: 'match',
-              pattern: '*://10.*.*.*',
+              pattern: '10.0.0.0/8',
             }]
           }],
           proxies: [{

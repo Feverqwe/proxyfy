@@ -18,6 +18,19 @@ const proxyModel = types.model('proxy', {
   };
 
   return {
+    getPacScheme() {
+      switch (self.getScheme()) {
+        case 'https':
+          return 'HTTPS';
+        case 'socks4':
+          return 'SOCKS4';
+        case 'socks5':
+          return 'SOCKS5';
+        default: {
+          return 'PROXY';
+        }
+      }
+    },
     getScheme() {
       return self.scheme.toLowerCase();
     },
