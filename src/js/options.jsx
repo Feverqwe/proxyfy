@@ -134,8 +134,13 @@ const storeModel = types.model('store', {
   constructor() {
     super();
 
+    this.state = {
+      show: false
+    };
+
     this.handleMenuClick = this.handleMenuClick.bind(this);
     this.handleSave = this.handleSave.bind(this);
+    this.handleOpen = this.handleOpen.bind(this);
   }
   handleMenuClick(e) {
     e.preventDefault();
@@ -145,6 +150,12 @@ const storeModel = types.model('store', {
   handleSave(e) {
     e.preventDefault();
     this.props.onSave();
+  }
+  handleOpen(e) {
+    e.preventDefault();
+    this.setState({
+      show: !this.state.show
+    });
   }
   render() {
     const menuItems = [];
@@ -173,6 +184,11 @@ const storeModel = types.model('store', {
         <button className={saveBtnClassList.join(' ')} type="submit">Save</button>
     );
 
+    const navBarClassList = ['collapse navbar-collapse'];
+    if (this.state.show) {
+      navBarClassList.push('show');
+    }
+
     return (
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <a className="navbar-brand">
@@ -180,7 +196,11 @@ const storeModel = types.model('store', {
           {' '}
           Proxyfy
         </a>
-        <div className="collapse navbar-collapse" id="navbarNav">
+        <button onClick={this.handleOpen} className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span className="navbar-toggler-icon"/>
+        </button>
+        <div className={navBarClassList.join(' ')} id="navbarNav">
           <ul className="navbar-nav mr-auto mt-2 mt-lg-0">
             {menuItems}
           </ul>
