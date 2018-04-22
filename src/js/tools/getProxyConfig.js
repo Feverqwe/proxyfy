@@ -1,3 +1,5 @@
+import _uniq from "lodash.uniq";
+
 const debug = require('debug')('getProxyConfig');
 
 const getProxyConfig = (profile, pacScript) => {
@@ -35,7 +37,7 @@ const getProxyConfig = (profile, pacScript) => {
   });
 
   const init = {
-    bypassListRe: bypassListRe.join('|'),
+    bypassListRe: _uniq(bypassListRe).join('|'),
     cidrList: cidrList,
     invertBypassList: profile.invertBypassList,
     proxies: proxies
