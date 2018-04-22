@@ -1,25 +1,24 @@
 import {types} from "mobx-state-tree";
-
-// regexp https://docs.microsoft.com/ru-ru/dotnet/standard/base-types/regular-expression-language-quick-reference
-// micromatch https://github.com/micromatch/micromatch
+import matchParser from "../tools/matchParser";
 
 const ruleModel = types.model('rule', {
-  parser: types.string, // regexp, micromatch
+  parser: types.optional(types.string, 'match'), // regexp, match
   pattern: types.string
 }).views(self => {
-  const regexpParser = pattern => pattern;
-
-  const micromatchParser = pattern => {
-    return pattern;
+  const regexpParser = pattern => {
+    return [{
+      type: 'regexp',
+      pattern: pattern
+    }];
   };
 
   const parser = {
     regexp: regexpParser,
-    micromatch: micromatchParser,
+    match: matchParser,
   };
 
   return {
-    getPattern() {
+    getPatterns() {
       return parser[self.parser](self.pattern);
     }
   }
