@@ -20,7 +20,7 @@ const storeModel = types.model('store', {
     }
   };
 }).views(self => {
-  let rolls = null;
+  let pacScript = null;
   let defaultBadgeColor = null;
   let proxyErrorListener = null;
   let authListener = null;
@@ -76,7 +76,7 @@ const storeModel = types.model('store', {
   const syncProxySetting = (settings, profile) => {
     return Promise.resolve().then(() => {
       if (profile) {
-        const config = getProxyConfig(profile, rolls);
+        const config = getProxyConfig(profile, pacScript);
         if (
           config.mode !== settings.config.mode ||
           config.pacScript.data !== settings.config.pacScript.data
@@ -95,7 +95,7 @@ const storeModel = types.model('store', {
       const profile = self.getProfile(name);
       return Promise.resolve().then(() => {
         if (profile) {
-          return setProxyConfig(getProxyConfig(profile, rolls));
+          return setProxyConfig(getProxyConfig(profile, pacScript));
         } else {
           return promisifyApi(chrome.proxy.settings.clear)({scope: 'regular'});
         }
@@ -121,8 +121,8 @@ const storeModel = types.model('store', {
       });
     },
     afterCreate() {
-      return fetch('./js/rolls.js').then(response => response.text()).then(text => {
-        rolls = text.replace(/[^\x00-\x7F]/g, '');
+      return fetch('./js/pacScript.js').then(response => response.text()).then(text => {
+        pacScript = text.replace(/[^\x00-\x7F]/g, '');
       }).then(() => {
         return promisifyApi(chrome.browserAction.getBadgeBackgroundColor)({}).then(color => {
           defaultBadgeColor = color;

@@ -23,7 +23,7 @@ if (isWatch) {
 
 const config = {
   entry: {
-    rolls: ['./src/js/urlRoll', './src/js/ip6addrRoll'],
+    pacScript: './src/js/pacScript',
     bg: './src/js/bg',
     popup: './src/js/popup',
     options: './src/js/options'

@@ -1,6 +1,6 @@
 const debug = require('debug')('getProxyConfig');
 
-const getProxyConfig = (profile, rolls) => {
+const getProxyConfig = (profile, pacScript) => {
   const meta = '//' + JSON.stringify({proxyfy: profile.name});
 
   const proxies = {};
@@ -34,78 +34,17 @@ const getProxyConfig = (profile, rolls) => {
     }
   });
 
+  const init = {
+    bypassListRe: bypassListRe.join('|'),
+    cidrList: cidrList,
+    invertBypassList: profile.invertBypassList,
+    proxies: proxies
+  };
+
   const config = {
     mode: 'pac_script',
     pacScript: {
-      data: `${meta}\nvar URL = null;\nvar ip6addr = null;\n${rolls}\nvar FindProxyForURL=(${function (bypassListRe, cidrList, invertBypassList, proxies) {
-        const bypassList = bypassListRe && new RegExp(bypassListRe);
-        const notEmptyCidrList = cidrList.length;
-        
-        const getIpAddr = hostname => { 
-          if (/^\[.+\]$|^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/.test(hostname)) {
-            const m = /^\[(.+)\]$/.exec(hostname);
-            if (m) {
-              hostname = m[1];
-            }
-            try {
-              return ip6addr.parse(hostname);
-            } catch (err) {
-              return null;
-            }
-          }
-        };
-
-        const containsByPassCidrList = ipAddr => {
-          return cidrList.some(item => {
-            if (!item.cidr) {
-              item.cidr = ip6addr.createCIDR(item.ipRange);
-            }
-            return item.cidr.contains(ipAddr);
-          });
-        };
-        
-        return function (url) {
-          const {protocol, host, hostname} = new URL(url);
-          
-          let inBypassList = bypassList && bypassList.test(protocol + '//' + host);
-          if (!inBypassList) {
-            const ipAddr = notEmptyCidrList && getIpAddr(hostname);
-            if (ipAddr) {
-              inBypassList = containsByPassCidrList(ipAddr);
-            }
-          }
-          
-          let useProxy = true;
-          if (inBypassList) {
-            useProxy = false;
-          }
-          if (invertBypassList) {
-            useProxy = !useProxy;
-          }
-
-          let proxy = null;
-          if (useProxy) {
-            proxy = proxies.singleProxy;
-            if (!proxy) {
-              proxy = proxies[protocol];
-              if (!proxy) {
-                proxy = proxies.fallbackProxy;
-              }
-            }
-          }
-          
-          if (proxy) {
-            return proxy.scheme + ' ' + proxy.url;
-          } else {
-            return "DIRECT";
-          }
-        };
-      }})(${[
-        bypassListRe.join('|'),
-        cidrList,
-        profile.invertBypassList,
-        proxies
-      ].map(JSON.stringify).join(',')});`
+      data: `${meta}\nvar FindProxyForURL=null;\nvar init=${JSON.stringify(init)};\n${pacScript};`
     }
   };
 
