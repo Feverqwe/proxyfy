@@ -28,9 +28,7 @@ const getProxyConfig = (profile, pacScript) => {
       bypassListRe.push(rule.pattern);
     } else
     if (rule.type === 'CIDR') {
-      cidrList.push({
-        ipRange: rule.pattern
-      });
+      cidrList.push(rule.pattern);
     } else {
       debug('Skip rule', rule);
     }

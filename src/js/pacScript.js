@@ -5,6 +5,9 @@ FindProxyForURL = (function () {
 
   const bypassList = bypassListRe && new RegExp(bypassListRe);
   const notEmptyCidrList = cidrList.length;
+  const cidrObjList = cidrList.map(addr => {
+    return ip6addr.createCIDR(addr);
+  });
 
   const getIpAddr = hostname => {
     if (/^\[.+\]$|^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/.test(hostname)) {
@@ -21,11 +24,8 @@ FindProxyForURL = (function () {
   };
 
   const containsByPassCidrList = ipAddr => {
-    return cidrList.some(item => {
-      if (!item.cidr) {
-        item.cidr = ip6addr.createCIDR(item.ipRange);
-      }
-      return item.cidr.contains(ipAddr);
+    return cidrObjList.some(cidr => {
+      return cidr.contains(ipAddr);
     });
   };
 
