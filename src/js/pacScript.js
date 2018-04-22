@@ -1,22 +1,18 @@
 FindProxyForURL = (function () {
-  const {bypassListRe, cidrList, invertBypassList, proxies} = init;
+  const {hostList, cidrList, invertBypassList, proxies} = init;
   const URL = require('url-parse');
   const ip6addr = require('ip6addr');
+  const isIp = require('validator/lib/isIP');
 
-  const bypassList = bypassListRe && new RegExp(bypassListRe);
-  const notEmptyCidrList = cidrList.length;
-  const cidrObjList = cidrList.map(addr => {
+  const hostListRe = hostList.length && new RegExp(hostList.join('|'));
+  const cidrObjList = cidrList.length && cidrList.map(addr => {
     return ip6addr.createCIDR(addr);
   });
 
-  const getIpAddr = hostname => {
-    if (/^\[.+\]$|^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/.test(hostname)) {
-      const m = /^\[(.+)\]$/.exec(hostname);
-      if (m) {
-        hostname = m[1];
-      }
+  const getIpAddr = ip => {
+    if (isIp(ip)) {
       try {
-        return ip6addr.parse(hostname);
+        return ip6addr.parse(ip);
       } catch (err) {
         return null;
       }
@@ -32,9 +28,9 @@ FindProxyForURL = (function () {
   return function (url) {
     const {protocol, host, hostname} = new URL(url);
 
-    let inBypassList = bypassList && bypassList.test(protocol + '//' + host);
+    let inBypassList = hostListRe && hostListRe.test(protocol + '//' + host);
     if (!inBypassList) {
-      const ipAddr = notEmptyCidrList && getIpAddr(hostname);
+      const ipAddr = cidrObjList && getIpAddr(hostname);
       if (ipAddr) {
         inBypassList = containsByPassCidrList(ipAddr);
       }

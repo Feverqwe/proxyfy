@@ -21,11 +21,11 @@ const getProxyConfig = (profile, pacScript) => {
     }
   });
 
-  const bypassListRe = [];
+  const hostList = [];
   const cidrList = [];
   profile.getBypassList().forEach(rule => {
     if (rule.type === 'regexp') {
-      bypassListRe.push(rule.pattern);
+      hostList.push(rule.pattern);
     } else
     if (rule.type === 'CIDR') {
       cidrList.push(rule.pattern);
@@ -35,8 +35,8 @@ const getProxyConfig = (profile, pacScript) => {
   });
 
   const init = {
-    bypassListRe: _uniq(bypassListRe).join('|'),
-    cidrList: cidrList,
+    hostList: _uniq(hostList),
+    cidrList: _uniq(cidrList),
     invertBypassList: profile.invertBypassList,
     proxies: proxies
   };
@@ -48,7 +48,7 @@ const getProxyConfig = (profile, pacScript) => {
     }
   };
 
-  // debug('bypassListRe', bypassListRe);
+  // debug('hostList', hostList);
   // debug('cidrList', cidrList);
 
   return config;
