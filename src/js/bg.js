@@ -74,13 +74,18 @@ const storeModel = types.model('store', {
 
   const syncProxySetting = (settings, profile) => {
     return Promise.resolve().then(() => {
-      const config = getProxyConfig(profile);
-      if (JSON.stringify(config) !== JSON.stringify(settings.config)) {
-        debug('syncProxySetting>');
-        debug(JSON.stringify(config));
-        debug(JSON.stringify(settings.config));
-        debug('<syncProxySetting');
-        return setProxyConfig(config);
+      if (profile) {
+        const config = getProxyConfig(profile);
+        if (
+          config.mode !== settings.config.mode ||
+          config.pacScript.data !== settings.config.pacScript.data
+        ) {
+          debug('syncProxySetting>');
+          debug(config.pacScript.data);
+          debug(settings.value.pacScript.data);
+          debug('<syncProxySetting');
+          return setProxyConfig(config);
+        }
       }
     });
   };
