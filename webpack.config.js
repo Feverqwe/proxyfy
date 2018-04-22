@@ -23,6 +23,8 @@ if (isWatch) {
 
 const config = {
   entry: {
+    urlRoll: './src/js/urlRoll',
+    ip6addrRoll: './src/js/ip6addrRoll',
     bg: './src/js/bg',
     popup: './src/js/popup',
     options: './src/js/options'
@@ -92,6 +94,11 @@ const config = {
       template: './src/options.html',
       chunks: ['options']
     }),
+    new DefinePlugin({
+      'process.env': {
+        'DEBUG': JSON.stringify('*')
+      }
+    }),
   ]
 };
 
@@ -105,16 +112,6 @@ if (!isWatch) {
 
     config.entry[entryName] = value;
   });
-}
-
-if (isWatch) {
-  config.plugins.push(
-    new DefinePlugin({
-      'process.env': {
-        'DEBUG': JSON.stringify('*')
-      }
-    })
-  );
 }
 
 module.exports = config;

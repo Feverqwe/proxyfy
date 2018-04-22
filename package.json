@@ -36,6 +36,7 @@
     "mobx-state-tree": "^2.0.4",
     "raw-loader": "^0.5.1",
     "react": "^16.3.2",
-    "react-dom": "^16.3.2"
+    "react-dom": "^16.3.2",
+    "url-parse": "^1.4.0"
   }
 }

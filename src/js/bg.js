@@ -20,6 +20,8 @@ const storeModel = types.model('store', {
     }
   };
 }).views(self => {
+  let ip6addrRoll = null;
+  let urlRoll = null;
   let defaultBadgeColor = null;
   let proxyErrorListener = null;
   let authListener = null;
@@ -75,7 +77,7 @@ const storeModel = types.model('store', {
   const syncProxySetting = (settings, profile) => {
     return Promise.resolve().then(() => {
       if (profile) {
-        const config = getProxyConfig(profile);
+        const config = getProxyConfig(profile, urlRoll, ip6addrRoll);
         if (
           config.mode !== settings.config.mode ||
           config.pacScript.data !== settings.config.pacScript.data
@@ -94,7 +96,7 @@ const storeModel = types.model('store', {
       const profile = self.getProfile(name);
       return Promise.resolve().then(() => {
         if (profile) {
-          return setProxyConfig(getProxyConfig(profile));
+          return setProxyConfig(getProxyConfig(profile, urlRoll, ip6addrRoll));
         } else {
           return promisifyApi(chrome.proxy.settings.clear)({scope: 'regular'});
         }
@@ -120,8 +122,17 @@ const storeModel = types.model('store', {
       });
     },
     afterCreate() {
-      promisifyApi(chrome.browserAction.getBadgeBackgroundColor)({}).then(color => {
-        defaultBadgeColor = color;
+      return Promise.all([
+        fetch('./js/ip6addrRoll.js').then(response => response.text()).then(text => {
+          ip6addrRoll = text.replace(/[^\x00-\x7F]/g, '');
+        }),
+        fetch('./js/urlRoll.js').then(response => response.text()).then(text => {
+          urlRoll = text.replace(/[^\x00-\x7F]/g, '');
+        }),
+      ]).then(() => {
+        return promisifyApi(chrome.browserAction.getBadgeBackgroundColor)({}).then(color => {
+          defaultBadgeColor = color;
+        });
       }).then(() => {
         return promisifyApi(chrome.storage.sync.get)({
           options: {}
