@@ -25,9 +25,14 @@ const profileModel = types.model('profile', {
 }).views(self => {
   return {
     hasAuth() {
-      return ['singleProxy', 'proxyForHttp', 'proxyForHttps', 'proxyForFtp', 'fallbackProxy'].some(proxy => {
-        return !!proxy.auth;
-      });
+      if (self.singleProxy) {
+        return !!self.singleProxy.auth;
+      } else {
+        return ['proxyForHttp', 'proxyForHttps', 'proxyForFtp', 'fallbackProxy'].some(type => {
+          const proxy = self[type];
+          return proxy && proxy.auth;
+        });
+      }
     },
     getProxyByProtocol(protocol) {
       let proxy = null;
