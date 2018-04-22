@@ -8,7 +8,7 @@ class AuthListener {
   handleAuthRequired(details) {
     const result = {};
     if (details.isProxy) {
-      const m = /^([^:])\/\//.exec(details.url);
+      const m = /^([^:]+:)\/\//.exec(details.url);
       if (m) {
         const protocol = m[1];
         const proxy = this.profile.getProxyByProtocol(protocol);

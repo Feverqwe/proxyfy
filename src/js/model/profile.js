@@ -40,13 +40,13 @@ const profileModel = types.model('profile', {
         proxy = self.singleProxy;
       } else {
         switch (protocol) {
-          case 'http':
+          case 'http:':
             proxy = self.proxyForHttp;
             break;
-          case 'https':
+          case 'https:':
             proxy = self.proxyForHttp;
             break;
-          case 'ftp':
+          case 'ftp:':
             proxy = self.proxyForFtp;
             break;
         }
