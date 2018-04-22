@@ -58,11 +58,13 @@ const storeModel = types.model('store', {
     if (profile) {
       const badge = profile.badge;
       if (badge) {
-        if (typeof badge.text === 'string') {
-          badgeText = badge.text;
-        }
-        if (typeof badge.color === 'string' || Array.isArray(badge.color)) {
-          badgeColor = badge.color;
+        badgeText = badge.text;
+        if (badge.color) {
+          if (typeof badge.color === 'string') {
+            badgeColor = badge.color;
+          } else {
+            badgeColor = badge.color.slice(0);
+          }
         }
       }
     }
