@@ -19,7 +19,7 @@ const ipToRePatten = (scheme, hostname, port) => {
 };
 
 const hostnameToRePatten = (scheme, hostname, port) => {
-  return '^' + getScheme(scheme) + _escapeRegExp(hostname).replace(/^\\\*\\\./g, '(?:.+\\.)?').replace(/\\\*/g, '.*') + getPort(port) + '$';
+  return '^' + getScheme(scheme) + _escapeRegExp(hostname).replace(/\\\*/g, '.*') + getPort(port) + '$';
 };
 
 const getIpAddr = ipLiteral => {
@@ -105,9 +105,15 @@ const matchParser = pattern => {
           }
         } else {
           const hostname = hostnameOrIpLiteral;
-          result.push({
-            type: 'regexp',
-            pattern: hostnameToRePatten(scheme, hostname, port)
+          const hostnameList = [hostname];
+          if (/^\*\./.test(hostname)) {
+            hostnameList.push(hostname.substr(2));
+          }
+          hostnameList.forEach(hostname => {
+            result.push({
+              type: 'regexp',
+              pattern: hostnameToRePatten(scheme, hostname, port)
+            });
           });
         }
       } else {
