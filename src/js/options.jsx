@@ -44,35 +44,36 @@ const storeModel = types.model('store', {
         options: {
           profiles: [{
             name: 'Profile #1',
-            proxy: 'localProxy',
+            singleProxy: 'localProxy',
             color: '#0a77e5',
             badge: {
               text: 'test',
               color: '#0a77e5'
             },
-            invertRules: false,
-            rules: [{
-              parser: 'micromatch',
+            invertBypassList: false,
+            bypassList: [{
+              parser: 'match',
               pattern: '*://localhost',
             }, {
-              parser: 'micromatch',
+              parser: 'match',
               pattern: '*://192.168.*.*',
             }, {
-              parser: 'micromatch',
+              parser: 'match',
               pattern: '*://172.16.*.*',
             }, {
-              parser: 'micromatch',
+              parser: 'match',
               pattern: '*://169.254.*.*',
             }, {
-              parser: 'micromatch',
+              parser: 'match',
               pattern: '*://127.*.*.*',
             }, {
-              parser: 'micromatch',
+              parser: 'match',
               pattern: '*://10.*.*.*',
             }]
           }],
           proxies: [{
             name: 'localProxy',
+            scheme: 'http',
             host: '127.0.0.1',
             port: 8080,
             auth: {

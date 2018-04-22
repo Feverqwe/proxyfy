@@ -1,7 +1,7 @@
 import _escapeRegExp from "lodash.escaperegexp";
 
+const debug = require('debug')('matchParser');
 const ip6addr = require('ip6addr');
-
 
 const getScheme = scheme => {
   if (!scheme) {
@@ -98,6 +98,8 @@ const matchParser = pattern => {
           type: 'CIDR',
           pattern: pattern
         });
+      } else {
+        debug('Can\'t parse pattern', pattern);
       }
     }
   });

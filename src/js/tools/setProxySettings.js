@@ -1,40 +1,45 @@
 import promisifyApi from "./promisifyApi";
 
+const debug = require('debug')('setProxySettings');
+
+
 const setProxySettings = profile => {
   const meta = '//' + JSON.stringify({proxyfy: profile.name});
-  const regexpRules = [];
-  profile.rules.forEach(rule => rule.getPatterns().forEach(pattern => {
-    if (pattern.type === 'regexp') {
-      regexpRules.push(pattern.pattern);
+  const bypassListRe = [];
+  profile.getBypassList().forEach(rule => {
+    if (rule.type === 'regexp') {
+      bypassListRe.push(rule.pattern);
+    } else {
+      debug('Skip rule', rule);
     }
-  }));
+  });
   const config = {
     mode: 'pac_script',
     pacScript: {
-      data: `${meta}\nvar FindProxyForURL=${function (rulesStrRe, invertRules, scheme, proxyUrl) {
-        const re = rulesStrRe && new RegExp(rulesStrRe);
+      data: `${meta}\nvar FindProxyForURL=${function (bypassListRe, invertBypassList, proxyScheme, proxyUrl) {
+        const bypassList = bypassListRe && new RegExp(bypassListRe);
         return function (url) {
           let r = true;
-          if (re) {
+          if (bypassList) {
             const m = /^([^:]+:\/\/[^\/?#]+)/.exec(url);
             if (m) {
-              r = re.test(m[1]); 
+              r = !bypassList.test(m[1]); 
             }
-            if (!invertRules) {
+            if (invertBypassList) {
               r = !r;
             }
           }
           if (r) {
-            return scheme + ' ' + proxyUrl;
+            return proxyScheme + ' ' + proxyUrl;
           } else {
             return "DIRECT";
           }
         };
       }})(${[
-        regexpRules.join('|'),
-        profile.invertRules,
-        profile.proxy.getScheme().toUpperCase(),
-        profile.proxy.getUrl()
+        bypassListRe.join('|'),
+        profile.invertBypassList,
+        profile.singleProxy.getScheme().toUpperCase(),
+        profile.singleProxy.getUrl()
       ].map(JSON.stringify).join(',')});`
     }
   };
