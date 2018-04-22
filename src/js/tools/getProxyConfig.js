@@ -1,9 +1,6 @@
-import promisifyApi from "./promisifyApi";
+const debug = require('debug')('getProxyConfig');
 
-const debug = require('debug')('setProxySettings');
-
-
-const setProxySettings = profile => {
+const getProxyConfig = profile => {
   const meta = '//' + JSON.stringify({proxyfy: profile.name});
   const bypassListRe = [];
   profile.getBypassList().forEach(rule => {
@@ -23,7 +20,7 @@ const setProxySettings = profile => {
           if (bypassList) {
             const m = /^([^:]+:\/\/[^\/?#]+)/.exec(url);
             if (m) {
-              r = !bypassList.test(m[1]); 
+              r = !bypassList.test(m[1]);
             }
             if (invertBypassList) {
               r = !r;
@@ -43,10 +40,7 @@ const setProxySettings = profile => {
       ].map(JSON.stringify).join(',')});`
     }
   };
-  return promisifyApi(chrome.proxy.settings.set)({
-    value: config,
-    scope: 'regular'
-  });
+  return config;
 };
 
-export default setProxySettings;
+export default getProxyConfig;

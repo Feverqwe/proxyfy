@@ -12,12 +12,45 @@ const profileModel = types.model('profile', {
   color: types.string,
   badge: types.maybe(types.model('badge', {
     text: types.string,
-    color: types.string,
+    color: types.maybe(types.union(snapshot => {
+      if (Array.isArray(snapshot)) {
+        return types.array(types.number);
+      } else {
+        return types.string;
+      }
+    }, types.string, types.array(types.number))),
   })),
   bypassList: types.optional(types.array(ruleModel), []),
   invertBypassList: types.optional(types.boolean, false),
 }).views(self => {
   return {
+    hasAuth() {
+      return ['singleProxy', 'proxyForHttp', 'proxyForHttps', 'proxyForFtp', 'fallbackProxy'].some(proxy => {
+        return !!proxy.auth;
+      });
+    },
+    getProxyByProtocol(protocol) {
+      let proxy = null;
+      if (self.singleProxy) {
+        proxy = self.singleProxy;
+      } else {
+        switch (protocol) {
+          case 'http':
+            proxy = self.proxyForHttp;
+            break;
+          case 'https':
+            proxy = self.proxyForHttp;
+            break;
+          case 'ftp':
+            proxy = self.proxyForFtp;
+            break;
+        }
+        if (!proxy) {
+          proxy = self.fallbackProxy;
+        }
+      }
+      return proxy;
+    },
     getBypassList() {
       const list = [];
       self.bypassList.forEach(rule => {

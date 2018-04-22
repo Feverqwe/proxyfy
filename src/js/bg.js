@@ -3,7 +3,11 @@ import promisifyApi from "./tools/promisifyApi";
 import optionsModel from "./model/options";
 import profileModel from "./model/profile";
 import getProxySettings from "./tools/getProxySettings";
-import setProxySettings from "./tools/setProxySettings";
+import setProxyConfig from "./tools/setProxyConfig";
+import AuthListener from "./tools/authListener";
+import ProxyErrorListener from "./tools/proxyErrorListener";
+import getExtensionIcon from "./tools/getExtensionIcon";
+import getProxyConfig from "./tools/getProxyConfig";
 
 const debug = require('debug')('bg');
 
@@ -16,8 +20,69 @@ const storeModel = types.model('store', {
     }
   };
 }).views(self => {
-  const onProxyChange = () => {
+  let defaultBadgeColor = null;
+  let proxyErrorListener = null;
+  let authListener = null;
 
+  const onProxyChange = profile => {
+    if (proxyErrorListener) {
+      proxyErrorListener.destroy();
+      proxyErrorListener = null;
+    }
+
+    if (profile) {
+      proxyErrorListener = new ProxyErrorListener();
+    }
+
+    if (authListener) {
+      authListener.destroy();
+      authListener = null;
+    }
+
+    if (profile && profile.hasAuth()) {
+      authListener = new AuthListener(profile);
+    }
+
+    const icon = getExtensionIcon(profile ? profile.color : '#737373');
+    chrome.browserAction.setIcon({
+      path: {
+        19: icon,
+        38: icon
+      }
+    });
+
+    let badgeText = '';
+    let badgeColor = defaultBadgeColor;
+    if (profile) {
+      const badge = profile.badge;
+      if (badge) {
+        if (typeof badge.text === 'string') {
+          badgeText = badge.text;
+        }
+        if (typeof badge.color === 'string' || Array.isArray(badge.color)) {
+          badgeColor = badge.color;
+        }
+      }
+    }
+    chrome.browserAction.setBadgeBackgroundColor({
+      color: badgeColor
+    });
+    chrome.browserAction.setBadgeText({
+      text: badgeText
+    });
+  };
+
+  const syncProxySetting = (settings, profile) => {
+    return Promise.resolve().then(() => {
+      const config = getProxyConfig(profile);
+      if (JSON.stringify(config) !== JSON.stringify(settings.config)) {
+        debug('syncProxySetting>');
+        debug(JSON.stringify(config));
+        debug(JSON.stringify(settings.config));
+        debug('<syncProxySetting');
+        return setProxyConfig(config);
+      }
+    });
   };
 
   return {
@@ -25,20 +90,27 @@ const storeModel = types.model('store', {
       return name && resolveIdentifier(profileModel, self, name);
     },
     setProfile(name) {
+      const profile = self.getProfile(name);
       return Promise.resolve().then(() => {
-        const profile = self.getProfile(name);
         if (profile) {
-          return setProxySettings(profile);
+          return setProxyConfig(getProxyConfig(profile));
         } else {
           return promisifyApi(chrome.proxy.settings.clear)({scope: 'regular'});
         }
       }).then(() => {
-        return onProxyChange();
+        return onProxyChange(profile);
       });
     },
     setOptions(options) {
       self.assign({
         options: options
+      });
+
+      return getProxySettings().then(settings => {
+        const profile = self.getProfile(settings.name);
+        return syncProxySetting(settings, profile).then(() => {
+          return onProxyChange(profile);
+        });
       });
     },
     getProfiles() {
@@ -47,14 +119,14 @@ const storeModel = types.model('store', {
       });
     },
     afterCreate() {
-      promisifyApi(chrome.storage.sync.get)({
-        options: {}
-      }).then(storage => {
-        self.assign(storage);
+      promisifyApi(chrome.browserAction.getBadgeBackgroundColor)({}).then(color => {
+        defaultBadgeColor = color;
       }).then(() => {
-        return getProxySettings().then(settings => {
-          return onProxyChange(settings);
+        return promisifyApi(chrome.storage.sync.get)({
+          options: {}
         });
+      }).then(storage => {
+        return self.setOptions(storage.options);
       }).catch(err => {
         debug('Load error', err);
       });
