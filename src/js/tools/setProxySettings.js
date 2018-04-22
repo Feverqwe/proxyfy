@@ -20,7 +20,7 @@ const setProxySettings = profile => {
             if (m) {
               r = re.test(m[1]); 
             }
-            if (invertRules) {
+            if (!invertRules) {
               r = !r;
             }
           }
