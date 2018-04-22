@@ -31,7 +31,6 @@ const storeModel = types.model('store', {
       proxyErrorListener.destroy();
       proxyErrorListener = null;
     }
-
     if (profile) {
       proxyErrorListener = new ProxyErrorListener();
     }
@@ -40,12 +39,11 @@ const storeModel = types.model('store', {
       authListener.destroy();
       authListener = null;
     }
-
     if (profile && profile.hasAuth()) {
       authListener = new AuthListener(profile);
     }
 
-    const icon = getExtensionIcon(profile ? profile.color : '#737373');
+    const icon = getExtensionIcon(profile && profile.color);
     chrome.browserAction.setIcon({
       path: {
         19: icon,
