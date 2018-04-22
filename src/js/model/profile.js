@@ -9,7 +9,7 @@ const profileModel = types.model('profile', {
   proxyForHttps: types.maybe(types.reference(proxyModel)),
   proxyForFtp: types.maybe(types.reference(proxyModel)),
   fallbackProxy: types.maybe(types.reference(proxyModel)),
-  color: types.maybe(types.string),
+  color: types.optional(types.string, '#0a77e5'),
   badge: types.maybe(types.model('badge', {
     text: types.string,
     color: types.maybe(types.union(snapshot => {
