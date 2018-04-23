@@ -16,7 +16,7 @@
     "options_page": "options.html",
     "permissions": ["storage", "proxy", "webRequest", "webRequestBlocking", "<all_urls>"],
     "background": {
-        "scripts": ["js/bg.js"]
+        "scripts": ["js/commons.js", "js/bg.js"]
     },
     "name": "Proxyfy",
     "description": "Tiny proxy switcher",

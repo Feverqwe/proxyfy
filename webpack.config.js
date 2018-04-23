@@ -33,6 +33,24 @@ const config = {
     filename: 'js/[name].js'
   },
   devtool: 'source-map',
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          name: "commons",
+          chunks: chunk => ['bg', 'popup', 'options'].indexOf(chunk.name) !== -1,
+          minChunks: 3,
+          priority: -10
+        },
+        commonsRender: {
+          name: "commonsRender",
+          chunks: chunk => ['popup', 'options'].indexOf(chunk.name) !== -1,
+          minChunks: 2,
+          priority: -20
+        },
+      }
+    }
+  },
   module: {
     rules: [
       {
@@ -86,12 +104,12 @@ const config = {
     new HtmlWebpackPlugin({
       filename: 'popup.html',
       template: './src/popup.html',
-      chunks: ['popup']
+      chunks: ['commonsRender', 'commons', 'popup']
     }),
     new HtmlWebpackPlugin({
       filename: 'options.html',
       template: './src/options.html',
-      chunks: ['options']
+      chunks: ['commonsRender', 'commons', 'options']
     }),
     new DefinePlugin({
       'process.env': {
