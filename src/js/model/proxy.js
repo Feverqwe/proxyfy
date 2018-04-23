@@ -48,9 +48,6 @@ const proxyModel = types.model('proxy', {
     },
     getPacUrl() {
       return [self.getPacHost(), self.getPort()].join(':');
-    },
-    getUrl() {
-      return [self.host, self.getPort()].join(':');
     }
   };
 });
