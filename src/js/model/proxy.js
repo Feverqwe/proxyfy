@@ -39,15 +39,18 @@ const proxyModel = types.model('proxy', {
     getPort() {
       return self.port || schemePort[self.getScheme()];
     },
-    getHost() {
+    getPacHost() {
       if (isIp6(self.host)) {
         return `[${self.host}]`;
       } else {
         return self.host;
       }
     },
+    getPacUrl() {
+      return [self.getPacHost(), self.getPort()].join(':');
+    },
     getUrl() {
-      return [self.getHost(), self.getPort()].join(':');
+      return [self.host, self.getPort()].join(':');
     }
   };
 });
