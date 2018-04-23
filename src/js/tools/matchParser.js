@@ -3,8 +3,6 @@ import _escapeRegExp from "lodash.escaperegexp";
 const debug = require('debug')('matchParser');
 const ip6addr = require('ip6addr');
 
-const any = {};
-
 const getScheme = scheme => {
   if (!scheme) {
     return '[^:]+:\/\/';
@@ -16,7 +14,7 @@ const getPort = port => {
   if (!port) {
     return '';
   }
-  if (port === any) {
+  if (port === '*') {
     return '(?::\\\d+)?';
   }
   return _escapeRegExp(':' + port);
@@ -56,13 +54,11 @@ const getCIDR = cidr => {
 const matchParser = pattern => {
   const result = [];
   const patterns = [];
-  let forceAnyPort = false;
 
   if (pattern === '<local>') {
-    patterns.push('127.0.0.1');
-    patterns.push('[::1]');
-    patterns.push('localhost');
-    forceAnyPort = true;
+    patterns.push('127.0.0.1:*');
+    patterns.push('[::1]:*');
+    patterns.push('localhost:*');
   } else {
     patterns.push(pattern);
   }
@@ -75,11 +71,11 @@ const matchParser = pattern => {
         pattern: pattern
       });
     } else {
-      const m = /^(?:([^:]+):\/\/)?(?:(.+):([0-9]+)|(.+))$/.exec(pattern);
+      const m = /^(?:([^:]+):\/\/)?(?:(.+):([0-9]+|\*)|(.+))$/.exec(pattern);
       if (m) {
         const scheme = m[1];
         const hostnameOrIpLiteral = m[2] || m[4];
-        const port = forceAnyPort ? any : m[3];
+        const port = m[3];
         const ipAddr = getIpAddr(hostnameOrIpLiteral);
         if (ipAddr) {
           if (ipAddr.kind() === 'ipv4') {
