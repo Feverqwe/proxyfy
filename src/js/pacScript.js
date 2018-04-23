@@ -2,7 +2,6 @@ FindProxyForURL = (function () {
   const {hostList, cidrList, invertBypassList, proxies} = init;
   const URL = require('url-parse');
   const ip6addr = require('ip6addr');
-  const isIp = require('validator/lib/isIP');
 
   const hostListRe = hostList.length && new RegExp(hostList.join('|'));
   const cidrObjList = cidrList.length && cidrList.map(addr => {
@@ -10,7 +9,9 @@ FindProxyForURL = (function () {
   });
 
   const getIpAddr = ip => {
-    if (isIp(ip)) {
+    const m = /^\[(.+)\]$|^([\d.]+)$/.exec(ip);
+    if (m) {
+      ip = m[1] || m[2];
       try {
         return ip6addr.parse(ip);
       } catch (err) {
