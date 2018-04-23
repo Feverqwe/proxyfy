@@ -17,6 +17,9 @@ const getProxyConfig = (profile, pacScript) => {
       proxies[protocol] = {
         scheme: proxy.getPacScheme(),
         url: proxy.getUrl(),
+      };
+      if (type === 'singleProxy') {
+        return true;
       }
     }
   });

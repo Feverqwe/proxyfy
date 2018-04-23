@@ -18,8 +18,11 @@ const ruleModel = types.model('rule', {
   };
 
   return {
+    getParser() {
+      return self.parser.toLowerCase();
+    },
     getPatterns() {
-      return parser[self.parser](self.pattern);
+      return parser[self.getParser()](self.pattern);
     }
   }
 });

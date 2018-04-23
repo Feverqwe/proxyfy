@@ -45,7 +45,7 @@ const profileModel = types.model('profile', {
       if (self.singleProxy) {
         proxy = self.singleProxy;
       } else {
-        switch (protocol) {
+        switch (protocol.toLowerCase()) {
           case 'http:':
             proxy = self.proxyForHttp;
             break;

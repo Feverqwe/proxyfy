@@ -7,19 +7,25 @@ const getScheme = scheme => {
   if (!scheme) {
     return '[^:]+:\/\/';
   }
-  return _escapeRegExp(scheme) + ':\/\/';
+  return _escapeRegExp(scheme.toLowerCase()) + ':\/\/';
 };
 
 const getPort = port => {
-  return port ? ':' + _escapeRegExp(port) : '';
+  if (!port) {
+    return '';
+  }
+  return _escapeRegExp(':' + port);
 };
 
-const ipToRePatten = (scheme, hostname, port) => {
-  return '^' + getScheme(scheme) + _escapeRegExp(hostname) + getPort(port) + '$';
+const ipToRePatten = (scheme, ip, port, isIpv6) => {
+  if (isIpv6) {
+    ip = `[${ip}]`;
+  }
+  return '^' + getScheme(scheme) + _escapeRegExp(ip) + getPort(port) + '$';
 };
 
 const hostnameToRePatten = (scheme, hostname, port) => {
-  return '^' + getScheme(scheme) + _escapeRegExp(hostname).replace(/\\\*/g, '.+') + getPort(port) + '$';
+  return '^' + getScheme(scheme) + _escapeRegExp(hostname.toLowerCase()).replace(/\\\*/g, '.+') + getPort(port) + '$';
 };
 
 const getIpAddr = ipLiteral => {
@@ -72,36 +78,32 @@ const matchParser = pattern => {
           if (ipAddr.kind() === 'ipv4') {
             result.push({
               type: 'regexp',
-              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4'}), port)
+              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4'}), port, false)
             });
             result.push({
               type: 'regexp',
-              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({format: 'v4-mapped'}) + ']', port)
+              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4-mapped'}), port, true)
             });
             result.push({
               type: 'regexp',
-              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({zeroElide: false, format: 'v4-mapped'}) + ']', port)
+              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4-mapped', zeroElide: false}), port, true)
             });
             result.push({
               type: 'regexp',
-              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({
-                zeroElide: false,
-                zeroPad: true,
-                format: 'v4-mapped'
-              }) + ']', port)
+              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4-mapped', zeroElide: false, zeroPad: true}), port, true)
             });
           } else {
             result.push({
               type: 'regexp',
-              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({format: 'v6'}) + ']', port)
+              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v6'}), port, true)
             });
             result.push({
               type: 'regexp',
-              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({zeroElide: false}) + ']', port)
+              pattern: ipToRePatten(scheme, ipAddr.toString({zeroElide: false}), port, true)
             });
             result.push({
               type: 'regexp',
-              pattern: ipToRePatten(scheme, '[' + ipAddr.toString({zeroElide: false, zeroPad: true}) + ']', port)
+              pattern: ipToRePatten(scheme, ipAddr.toString({zeroElide: false, zeroPad: true}), port, true)
             });
           }
         } else {
