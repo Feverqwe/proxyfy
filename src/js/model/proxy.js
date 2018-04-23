@@ -23,6 +23,7 @@ const proxyModel = types.model('proxy', {
       switch (self.getScheme()) {
         case 'https':
           return 'HTTPS';
+        case 'socks':
         case 'socks4':
           return 'SOCKS';
         case 'socks5':
