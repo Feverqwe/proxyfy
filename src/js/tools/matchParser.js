@@ -80,30 +80,22 @@ const matchParser = pattern => {
               type: 'regexp',
               pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4'}), port, false)
             });
-            result.push({
-              type: 'regexp',
-              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4-mapped'}), port, true)
-            });
-            result.push({
-              type: 'regexp',
-              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4-mapped', zeroElide: false}), port, true)
-            });
-            result.push({
-              type: 'regexp',
-              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4-mapped', zeroElide: false, zeroPad: true}), port, true)
+            [true, false].forEach(zeroElide => {
+              [true, false].forEach(zeroPad => {
+                result.push({
+                  type: 'regexp',
+                  pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4-mapped', zeroElide, zeroPad}), port, true)
+                });
+              });
             });
           } else {
-            result.push({
-              type: 'regexp',
-              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v6'}), port, true)
-            });
-            result.push({
-              type: 'regexp',
-              pattern: ipToRePatten(scheme, ipAddr.toString({zeroElide: false}), port, true)
-            });
-            result.push({
-              type: 'regexp',
-              pattern: ipToRePatten(scheme, ipAddr.toString({zeroElide: false, zeroPad: true}), port, true)
+            [true, false].forEach(zeroElide => {
+              [true, false].forEach(zeroPad => {
+                result.push({
+                  type: 'regexp',
+                  pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v6', zeroElide, zeroPad}), port, true)
+                });
+              });
             });
           }
         } else {
