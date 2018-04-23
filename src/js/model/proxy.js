@@ -1,4 +1,5 @@
 import {types} from "mobx-state-tree";
+import isIp6 from "../tools/isIp6";
 
 const proxyModel = types.model('proxy', {
   name: types.identifier(types.string),
@@ -23,7 +24,7 @@ const proxyModel = types.model('proxy', {
         case 'https':
           return 'HTTPS';
         case 'socks4':
-          return 'SOCKS4';
+          return 'SOCKS';
         case 'socks5':
           return 'SOCKS5';
         default: {
@@ -37,8 +38,15 @@ const proxyModel = types.model('proxy', {
     getPort() {
       return self.port || schemePort[self.getScheme()];
     },
+    getHost() {
+      if (isIp6(self.host)) {
+        return `[${self.host}]`;
+      } else {
+        return self.host;
+      }
+    },
     getUrl() {
-      return [self.host, self.getPort()].join(':');
+      return [self.getHost(), self.getPort()].join(':');
     }
   };
 });
