@@ -4,7 +4,7 @@ const debug = require('debug')('matchParser');
 const ip6addr = require('ip6addr');
 
 const getScheme = scheme => {
-  if (!scheme) {
+  if (!scheme || scheme === '*') {
     return '[^:]+:\/\/';
   }
   return _escapeRegExp(scheme.toLowerCase()) + ':\/\/';
