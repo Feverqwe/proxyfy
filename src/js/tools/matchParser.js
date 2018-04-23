@@ -62,10 +62,11 @@ const matchParser = pattern => {
         pattern: pattern
       });
     } else {
-      const m = /^(?:([^:]+):\/\/)?(.+)(?::([0-9]+))?$/.exec(pattern);
+      const m = /^(?:([^:]+):\/\/)?(?:(.+):([0-9]+)|(.+))$/.exec(pattern);
       if (m) {
-        m.shift();
-        const [scheme, hostnameOrIpLiteral, port] = m;
+        const scheme = m[1];
+        const hostnameOrIpLiteral = m[2] || m[4];
+        const port = m[3];
         const ipAddr = getIpAddr(hostnameOrIpLiteral);
         if (ipAddr) {
           if (ipAddr.kind() === 'ipv4') {
@@ -104,10 +105,9 @@ const matchParser = pattern => {
             });
           }
         } else {
-          const hostname = hostnameOrIpLiteral;
-          const hostnameList = [hostname];
-          if (/^\*\./.test(hostname)) {
-            hostnameList.push(hostname.substr(2));
+          const hostnameList = [hostnameOrIpLiteral];
+          if (/^\*\./.test(hostnameOrIpLiteral)) {
+            hostnameList.push(hostnameOrIpLiteral.substr(2));
           }
           hostnameList.forEach(hostname => {
             result.push({
