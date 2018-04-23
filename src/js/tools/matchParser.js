@@ -54,7 +54,7 @@ const matchParser = pattern => {
 
   if (pattern === '<local>') {
     patterns.push('127.0.0.1');
-    patterns.push('::1');
+    patterns.push('[::1]');
     patterns.push('localhost');
   } else {
     patterns.push(pattern);
