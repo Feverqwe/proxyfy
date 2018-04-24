@@ -8,7 +8,7 @@ const getProxySettings = () => {
 
     let name = null;
 
-    if (['controlled_by_this_extension'].indexOf(details.levelOfControl) !== -1) {
+    if (details.levelOfControl === 'controlled_by_this_extension') {
       if (value.mode === 'pac_script') {
         try {
           const meta = /^\/\/(.+)\n/.exec(value.pacScript.data);
