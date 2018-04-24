@@ -5,7 +5,7 @@ FindProxyForURL = (function () {
   const getIpAddrFromHostname = require('./tools/getIpAddrFromHostname').default;
   const ip6addr = require('ip6addr');
 
-  const cache = new Cache(300);
+  const cache = new Cache(1000);
   const originRe = regexpPatterns.length !== 0 && new RegExp(regexpPatterns.join('|'));
   const cidrList = cidrPatterns.length !== 0 && cidrPatterns.map(pattern => ip6addr.createCIDR(pattern));
 
