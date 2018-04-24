@@ -24,22 +24,22 @@ const getProxyConfig = (profile, pacScript) => {
     }
   });
 
-  const hostList = [];
-  const cidrList = [];
+  const regexpPatterns = [];
+  const cidrPatterns = [];
   profile.getBypassList().forEach(rule => {
     if (rule.type === 'regexp') {
-      hostList.push(rule.pattern);
+      regexpPatterns.push(rule.pattern);
     } else
     if (rule.type === 'CIDR') {
-      cidrList.push(rule.pattern);
+      cidrPatterns.push(rule.pattern);
     } else {
       debug('Skip rule', rule);
     }
   });
 
   const init = {
-    hostList: _uniq(hostList),
-    cidrList: _uniq(cidrList),
+    regexpPatterns: _uniq(regexpPatterns),
+    cidrPatterns: _uniq(cidrPatterns),
     invertBypassList: profile.invertBypassList,
     proxies: proxies
   };
@@ -47,12 +47,12 @@ const getProxyConfig = (profile, pacScript) => {
   const config = {
     mode: 'pac_script',
     pacScript: {
-      data: `${meta}\nvar FindProxyForURL=null;\nvar init=${JSON.stringify(init)};\n${pacScript};`
+      data: `${meta}\nvar FindProxyForURL=null;\nvar config=${JSON.stringify(init)};\n${pacScript};`
     }
   };
 
-  // debug('hostList', hostList);
-  // debug('cidrList', cidrList);
+  // debug('regexpPatterns', regexpPatterns);
+  // debug('cidrPatterns', cidrPatterns);
 
   return config;
 };

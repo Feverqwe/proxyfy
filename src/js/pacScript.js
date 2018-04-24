@@ -1,12 +1,10 @@
 FindProxyForURL = (function () {
-  const {hostList, cidrList, invertBypassList, proxies} = init;
+  const {regexpPatterns, cidrPatterns, invertBypassList, proxies} = config;
   const URL = require('url-parse');
   const ip6addr = require('ip6addr');
 
-  const hostListRe = hostList.length && new RegExp(hostList.join('|'));
-  const cidrObjList = cidrList.length && cidrList.map(addr => {
-    return ip6addr.createCIDR(addr);
-  });
+  const hostRe = regexpPatterns.length !== 0 && new RegExp(regexpPatterns.join('|'));
+  const cidrList = cidrPatterns.length !== 0 && cidrPatterns.map(pattern => ip6addr.createCIDR(pattern));
 
   const getIpAddr = ip => {
     const m = /^\[(.+)\]$|^([\d.]+)$/.exec(ip);
@@ -20,20 +18,14 @@ FindProxyForURL = (function () {
     }
   };
 
-  const containsByPassCidrList = ipAddr => {
-    return cidrObjList.some(cidr => {
-      return cidr.contains(ipAddr);
-    });
-  };
-
   return function (url) {
     const {protocol, host, hostname} = new URL(url);
 
-    let inBypassList = hostListRe && hostListRe.test(protocol + '//' + host);
-    if (!inBypassList) {
-      const ipAddr = cidrObjList && getIpAddr(hostname);
+    let inBypassList = hostRe && hostRe.test(`${protocol}//${host}`);
+    if (!inBypassList && cidrList) {
+      const ipAddr = getIpAddr(hostname);
       if (ipAddr) {
-        inBypassList = containsByPassCidrList(ipAddr);
+        inBypassList = cidrList.some(cidr => cidr.contains(ipAddr));
       }
     }
 
@@ -57,9 +49,9 @@ FindProxyForURL = (function () {
     }
 
     if (proxy) {
-      return proxy.scheme + ' ' + proxy.url;
+      return `${proxy.scheme} ${proxy.url}`;
     } else {
-      return "DIRECT";
+      return 'DIRECT';
     }
   };
 })();
