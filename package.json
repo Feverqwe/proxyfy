@@ -38,6 +38,7 @@
     "raw-loader": "^0.5.1",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
+    "requires-port": "^1.0.0",
     "url-parse": "^1.4.0"
   }
 }

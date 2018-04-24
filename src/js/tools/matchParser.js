@@ -2,20 +2,21 @@ import _escapeRegExp from "lodash.escaperegexp";
 
 const debug = require('debug')('matchParser');
 const ip6addr = require('ip6addr');
+const required = require('requires-port');
 
 const getScheme = scheme => {
-  if (!scheme || scheme === '*') {
+  if (!scheme || scheme === '*:') {
     return '[^:]+:\/\/';
   }
-  return _escapeRegExp(scheme.toLowerCase()) + ':\/\/';
+  return _escapeRegExp(scheme.toLowerCase()) + '\/\/';
 };
 
-const getPort = port => {
+const getPort = (port, scheme) => {
   if (!port) {
-    return '';
-  }
-  if (port === '*') {
     return '(?::\\\d+)?';
+  }
+  if (!required(port, scheme)) {
+    return '';
   }
   return _escapeRegExp(':' + port);
 };
@@ -24,11 +25,11 @@ const ipToRePatten = (scheme, ip, port, isIpv6) => {
   if (isIpv6) {
     ip = `[${ip}]`;
   }
-  return '^' + getScheme(scheme) + _escapeRegExp(ip) + getPort(port) + '$';
+  return '^' + getScheme(scheme) + _escapeRegExp(ip) + getPort(port, scheme) + '$';
 };
 
 const hostnameToRePatten = (scheme, hostname, port) => {
-  return '^' + getScheme(scheme) + _escapeRegExp(hostname.toLowerCase()).replace(/\\\*/g, '.+') + getPort(port) + '$';
+  return '^' + getScheme(scheme) + _escapeRegExp(hostname.toLowerCase()).replace(/\\\*/g, '.+') + getPort(port, scheme) + '$';
 };
 
 const getIpAddr = ipLiteral => {
@@ -56,9 +57,9 @@ const matchParser = pattern => {
   const patterns = [];
 
   if (pattern === '<local>') {
-    patterns.push('127.0.0.1:*');
-    patterns.push('[::1]:*');
-    patterns.push('localhost:*');
+    patterns.push('127.0.0.1');
+    patterns.push('[::1]');
+    patterns.push('localhost');
   } else {
     patterns.push(pattern);
   }
@@ -71,7 +72,7 @@ const matchParser = pattern => {
         pattern: pattern
       });
     } else {
-      const m = /^(?:([^:]+):\/\/)?(?:(.+):([0-9]+|\*)|(.+))$/.exec(pattern);
+      const m = /^(?:([^:]+:)\/\/)?(?:(.+):([0-9]+)|(.+))$/.exec(pattern);
       if (m) {
         const scheme = m[1];
         const hostnameOrIpLiteral = m[2] || m[4];
