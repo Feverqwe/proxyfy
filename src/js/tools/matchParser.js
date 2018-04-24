@@ -15,7 +15,7 @@ const getPort = (port, scheme) => {
   if (!port) {
     return '(?::\\\d+)?';
   }
-  if (!required(port, scheme)) {
+  if (scheme && !required(port, scheme)) {
     return '';
   }
   return _escapeRegExp(':' + port);
