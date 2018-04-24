@@ -53,7 +53,7 @@ const getCIDR = cidr => {
   }
 };
 
-const matchParser = pattern => {
+const matchPacParser = pattern => {
   const result = [];
   const patterns = [];
 
@@ -130,4 +130,4 @@ const matchParser = pattern => {
   return result;
 };
 
-export default matchParser;
+export default matchPacParser;
