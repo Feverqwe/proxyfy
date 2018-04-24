@@ -1,4 +1,5 @@
 import _escapeRegExp from "lodash.escaperegexp";
+import getPortSchemes from "./getPortSchemes";
 
 const debug = require('debug')('matchParser');
 const ip6addr = require('ip6addr');
@@ -77,47 +78,50 @@ const matchParser = pattern => {
         const scheme = m[1];
         const hostnameOrIpLiteral = m[2] || m[4];
         const port = m[3];
-        const ipAddr = getIpAddr(hostnameOrIpLiteral);
-        if (ipAddr) {
-          if (ipAddr.kind() === 'ipv4') {
-            result.push({
-              type: 'regexp',
-              pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4'}), port, false)
-            });
-            [true, false].forEach(zeroElide => {
-              [true, false].forEach(zeroPad => {
-                result.push({
-                  type: 'regexp',
-                  pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4-mapped', zeroElide, zeroPad}), port, true)
+        const schemes = [scheme, ...getPortSchemes(port)];
+        schemes.forEach(scheme => {
+          const ipAddr = getIpAddr(hostnameOrIpLiteral);
+          if (ipAddr) {
+            if (ipAddr.kind() === 'ipv4') {
+              result.push({
+                type: 'regexp',
+                pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4'}), port, false)
+              });
+              [true, false].forEach(zeroElide => {
+                [true, false].forEach(zeroPad => {
+                  result.push({
+                    type: 'regexp',
+                    pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v4-mapped', zeroElide, zeroPad}), port, true)
+                  });
                 });
               });
-            });
+            } else {
+              [true, false].forEach(zeroElide => {
+                [true, false].forEach(zeroPad => {
+                  result.push({
+                    type: 'regexp',
+                    pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v6', zeroElide, zeroPad}), port, true)
+                  });
+                });
+              });
+            }
           } else {
-            [true, false].forEach(zeroElide => {
-              [true, false].forEach(zeroPad => {
-                result.push({
-                  type: 'regexp',
-                  pattern: ipToRePatten(scheme, ipAddr.toString({format: 'v6', zeroElide, zeroPad}), port, true)
-                });
+            let hostname = hostnameOrIpLiteral;
+            if (/^\./.test(hostname)) {
+              hostname = '*' + hostname;
+            }
+            const hostnameList = [hostname];
+            if (/^\*\./.test(hostname)) {
+              hostnameList.push(hostname.substr(2));
+            }
+            hostnameList.forEach(hostname => {
+              result.push({
+                type: 'regexp',
+                pattern: hostnameToRePatten(scheme, hostname, port)
               });
             });
           }
-        } else {
-          let hostname = hostnameOrIpLiteral;
-          if (/^\./.test(hostname)) {
-            hostname = '*' + hostname;
-          }
-          const hostnameList = [hostname];
-          if (/^\*\./.test(hostname)) {
-            hostnameList.push(hostname.substr(2));
-          }
-          hostnameList.forEach(hostname => {
-            result.push({
-              type: 'regexp',
-              pattern: hostnameToRePatten(scheme, hostname, port)
-            });
-          });
-        }
+        });
       } else {
         debug('Can\'t parse pattern', pattern);
       }
