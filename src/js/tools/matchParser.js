@@ -105,7 +105,7 @@ const matchParser = pattern => {
         } else {
           let hostname = hostnameOrIpLiteral;
           if (/^\./.test(hostname)) {
-            hostname = '*' + hostnameOrIpLiteral;
+            hostname = '*' + hostname;
           }
           const hostnameList = [hostname];
           if (/^\*\./.test(hostname)) {
