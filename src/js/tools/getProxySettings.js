@@ -9,6 +9,15 @@ const getProxySettings = () => {
     let name = null;
 
     if (details.levelOfControl === 'controlled_by_this_extension') {
+      if (value.mode === 'fixed_servers') {
+        value.rules.bypassList.some(pattern => {
+          const m = /^(.+)\.proxyfy\.localhost/.exec(pattern);
+          if (m) {
+            name = decodeURIComponent(m[1]);
+            return true;
+          }
+        });
+      } else
       if (value.mode === 'pac_script') {
         try {
           const meta = /^\/\/(.+)\n/.exec(value.pacScript.data);

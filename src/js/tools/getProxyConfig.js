@@ -2,7 +2,7 @@ import _uniq from "lodash.uniq";
 
 const debug = require('debug')('getProxyConfig');
 
-const getProxyConfig = (profile, pacScript) => {
+const getPacScriptConfig = (profile, pacScript) => {
   const meta = '//' + JSON.stringify({proxyfy: profile.name});
 
   const proxies = {};
@@ -26,7 +26,7 @@ const getProxyConfig = (profile, pacScript) => {
 
   const regexpPatterns = [];
   const cidrPatterns = [];
-  profile.getBypassList().forEach(rule => {
+  profile.getPacBypassList().forEach(rule => {
     if (rule.type === 'regexp') {
       regexpPatterns.push(rule.pattern);
     } else
@@ -56,6 +56,43 @@ const getProxyConfig = (profile, pacScript) => {
   // debug('cidrPatterns', cidrPatterns);
 
   return config;
+};
+
+const getFixedServersConfig = profile => {
+  const rules = {};
+
+  ['singleProxy', 'proxyForHttp', 'proxyForHttps', 'proxyForFtp', 'fallbackProxy'].some(type => {
+    const proxy = profile[type];
+    if (proxy) {
+      rules[type] = {
+        scheme: proxy.getScheme(),
+        host: proxy.host,
+        port: proxy.getPort(),
+      };
+      if (type === 'singleProxy') {
+        return true;
+      }
+    }
+  });
+
+  rules.bypassList = profile.getBypassList();
+
+  rules.bypassList.push(encodeURIComponent(profile.name) + '.proxyfy.localhost');
+
+  const config = {
+    mode: 'fixed_servers',
+    rules: rules
+  };
+
+  return config;
+};
+
+const getProxyConfig = (profile, pacScript) => {
+  if (profile.hasUnsupportedRules()) {
+    return getPacScriptConfig(profile, pacScript);
+  } else {
+    return getFixedServersConfig(profile, pacScript);
+  }
 };
 
 export default getProxyConfig;

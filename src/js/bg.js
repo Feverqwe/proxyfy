@@ -8,7 +8,7 @@ import AuthListener from "./tools/authListener";
 import ProxyErrorListener from "./tools/proxyErrorListener";
 import getExtensionIcon from "./tools/getExtensionIcon";
 import getProxyConfig from "./tools/getProxyConfig";
-import _isEqual from "lodash.isequal";
+import syncProxySetting from "./tools/syncProxySetting";
 
 const debug = require('debug')('bg');
 
@@ -74,17 +74,6 @@ const storeModel = types.model('store', {
     });
   };
 
-  const syncProxySetting = (settings, profile) => {
-    return Promise.resolve().then(() => {
-      if (profile) {
-        const config = getProxyConfig(profile, pacScript);
-        if (!_isEqual(config, settings.config)) {
-          return setProxyConfig(config);
-        }
-      }
-    });
-  };
-
   return {
     getProfile(name) {
       return name && resolveIdentifier(profileModel, self, name);
@@ -108,7 +97,7 @@ const storeModel = types.model('store', {
 
       return getProxySettings().then(settings => {
         const profile = self.getProfile(settings.name);
-        return syncProxySetting(settings, profile).then(() => {
+        return syncProxySetting(settings, profile, pacScript).then(() => {
           return onProxyChange(profile);
         });
       });

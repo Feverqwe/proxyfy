@@ -40,6 +40,20 @@ const profileModel = types.model('profile', {
         });
       }
     },
+    hasUnsupportedRules() {
+      return self.invertBypassList || self.getBypassListRules().some(rule => rule.parser === 'regexp');
+    },
+    getBypassListRules() {
+      return self.bypassList.map(ruleOrString => {
+        let rule = ruleOrString;
+        if (typeof ruleOrString === 'string') {
+          rule = ruleModel.create({
+            pattern: ruleOrString
+          });
+        }
+        return rule;
+      });
+    },
     getProxyByProtocol(protocol) {
       let proxy = null;
       if (self.singleProxy) {
@@ -62,19 +76,20 @@ const profileModel = types.model('profile', {
       }
       return proxy;
     },
-    getBypassList() {
+    getPacBypassList() {
       const list = [];
-      self.bypassList.forEach(ruleOrString => {
-        let rule = ruleOrString;
-        if (typeof ruleOrString === 'string') {
-          rule = ruleModel.create({
-            pattern: ruleOrString
-          });
-        }
-        list.push(...rule.getPatterns());
+      self.getBypassListRules().forEach(rule => {
+        list.push(...rule.getPacPatterns());
       });
       return list;
     },
+    getBypassList() {
+      const list = [];
+      self.getBypassListRules().forEach(rule => {
+        list.push(...rule.getPatterns());
+      });
+      return list;
+    }
   }
 });
 
