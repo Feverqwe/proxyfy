@@ -8,6 +8,7 @@ import AuthListener from "./tools/authListener";
 import ProxyErrorListener from "./tools/proxyErrorListener";
 import getExtensionIcon from "./tools/getExtensionIcon";
 import getProxyConfig from "./tools/getProxyConfig";
+import _isEqual from "lodash.isequal";
 
 const debug = require('debug')('bg');
 
@@ -77,10 +78,7 @@ const storeModel = types.model('store', {
     return Promise.resolve().then(() => {
       if (profile) {
         const config = getProxyConfig(profile, pacScript);
-        if (
-          config.mode !== settings.config.mode ||
-          config.pacScript.data !== settings.config.pacScript.data
-        ) {
+        if (!_isEqual(config, settings.config)) {
           return setProxyConfig(config);
         }
       }

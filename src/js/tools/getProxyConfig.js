@@ -47,7 +47,8 @@ const getProxyConfig = (profile, pacScript) => {
   const config = {
     mode: 'pac_script',
     pacScript: {
-      data: `${meta}\nvar FindProxyForURL=null;\nvar config=${JSON.stringify(init)};\n${pacScript};`
+      data: `${meta}\nvar FindProxyForURL=null;\nvar config=${JSON.stringify(init)};\n${pacScript};`,
+      mandatory: false
     }
   };
 
