@@ -1,51 +1,46 @@
 FindProxyForURL = (function () {
   const {regexpPatterns, cidrPatterns, invertBypassList, proxies} = config;
   const URL = require('url-parse');
+  const Cache = require('./tools/cache').default;
+  const getIpAddrFromHostname = require('./tools/getIpAddrFromHostname').default;
   const ip6addr = require('ip6addr');
 
-  const hostRe = regexpPatterns.length !== 0 && new RegExp(regexpPatterns.join('|'));
+  const cache = new Cache(1000);
+  const originRe = regexpPatterns.length !== 0 && new RegExp(regexpPatterns.join('|'));
   const cidrList = cidrPatterns.length !== 0 && cidrPatterns.map(pattern => ip6addr.createCIDR(pattern));
 
-  const getIpAddr = ip => {
-    const m = /^\[(.+)\]$|^([\d.]+)$/.exec(ip);
-    if (m) {
-      ip = m[1] || m[2];
-      try {
-        return ip6addr.parse(ip);
-      } catch (err) {
-        return null;
-      }
-    }
-  };
-
   return function (url) {
-    const {protocol, host, hostname} = new URL(url);
+    const {protocol, origin, hostname} = new URL(url);
 
-    let inBypassList = hostRe && hostRe.test(`${protocol}//${host}`);
-    if (!inBypassList && cidrList) {
-      const ipAddr = getIpAddr(hostname);
-      if (ipAddr) {
-        inBypassList = cidrList.some(cidr => cidr.contains(ipAddr));
-      }
-    }
-
-    let useProxy = true;
-    if (inBypassList) {
-      useProxy = false;
-    }
-    if (invertBypassList) {
-      useProxy = !useProxy;
-    }
-
-    let proxy = null;
-    if (useProxy) {
-      proxy = proxies.singleProxy;
-      if (!proxy) {
-        proxy = proxies[protocol];
-        if (!proxy) {
-          proxy = proxies.fallbackProxy;
+    let proxy = cache.get(origin);
+    if (proxy === undefined) {
+      let inBypassList = originRe && originRe.test(origin);
+      if (!inBypassList && cidrList) {
+        const ipAddr = getIpAddrFromHostname(hostname);
+        if (ipAddr) {
+          inBypassList = cidrList.some(cidr => cidr.contains(ipAddr));
         }
       }
+
+      let useProxy = true;
+      if (inBypassList) {
+        useProxy = false;
+      }
+      if (invertBypassList) {
+        useProxy = !useProxy;
+      }
+
+      if (useProxy) {
+        proxy = proxies.singleProxy;
+        if (!proxy) {
+          proxy = proxies[protocol];
+          if (!proxy) {
+            proxy = proxies.fallbackProxy;
+          }
+        }
+      }
+
+      cache.set(origin, proxy || null);
     }
 
     if (proxy) {
