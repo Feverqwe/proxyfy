@@ -41,7 +41,7 @@ const profileModel = types.model('profile', {
       }
     },
     hasUnsupportedRules() {
-      return self.invertBypassList || self.getBypassListRules().some(rule => rule.parser === 'regexp');
+      return self.invertBypassList || self.getBypassListRules().some(rule => rule.parser !== 'match');
     },
     getBypassListRules() {
       return self.bypassList.map(ruleOrString => {
