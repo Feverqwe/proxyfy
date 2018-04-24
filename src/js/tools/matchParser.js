@@ -103,9 +103,13 @@ const matchParser = pattern => {
             });
           }
         } else {
-          const hostnameList = [hostnameOrIpLiteral];
-          if (/^\*\./.test(hostnameOrIpLiteral)) {
-            hostnameList.push(hostnameOrIpLiteral.substr(2));
+          let hostname = hostnameOrIpLiteral;
+          if (/^\./.test(hostname)) {
+            hostname = '*' + hostnameOrIpLiteral;
+          }
+          const hostnameList = [hostname];
+          if (/^\*\./.test(hostname)) {
+            hostnameList.push(hostname.substr(2));
           }
           hostnameList.forEach(hostname => {
             result.push({
