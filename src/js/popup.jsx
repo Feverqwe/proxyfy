@@ -25,7 +25,7 @@ const storeModel = types.model('store', {
     },
     afterCreate() {
       self.assign({state: 'loading'});
-      promisifyApi(chrome.runtime.sendMessage)({action: 'getState'}).then(state => {
+      promisifyApi('chrome.runtime.sendMessage')({action: 'getState'}).then(state => {
         self.assign(state);
       }).catch(err => {
         debug('Load profiles error', err);
@@ -47,13 +47,13 @@ const storeModel = types.model('store', {
   handleProfileClick(e) {
     e.preventDefault();
     const profile = e.target.dataset.name;
-    promisifyApi(chrome.runtime.sendMessage)({action: 'setProfile', name: profile}).then(() => {
+    promisifyApi('chrome.runtime.sendMessage')({action: 'setProfile', name: profile}).then(() => {
       this.props.store.setProfile(profile);
     });
   }
   handleResetClick(e) {
     e.preventDefault();
-    promisifyApi(chrome.runtime.sendMessage)({action: 'setProfile', name: null}).then(() => {
+    promisifyApi('chrome.runtime.sendMessage')({action: 'setProfile', name: null}).then(() => {
       this.props.store.setProfile(null);
     });
   }

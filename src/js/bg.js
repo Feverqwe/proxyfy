@@ -84,7 +84,7 @@ const storeModel = types.model('store', {
         if (profile) {
           return setProxyConfig(getProxyConfig(profile, pacScript));
         } else {
-          return promisifyApi(chrome.proxy.settings.clear)({scope: 'regular'});
+          return promisifyApi('chrome.proxy.settings.clear')({scope: 'regular'});
         }
       }).then(() => {
         return onProxyChange(profile);
@@ -111,11 +111,11 @@ const storeModel = types.model('store', {
       return fetch('./js/pacScript.js').then(response => response.text()).then(text => {
         pacScript = text.replace(/[^\x00-\x7F]/g, '');
       }).then(() => {
-        return promisifyApi(chrome.browserAction.getBadgeBackgroundColor)({}).then(color => {
+        return promisifyApi('chrome.browserAction.getBadgeBackgroundColor')({}).then(color => {
           defaultBadgeColor = color;
         });
       }).then(() => {
-        return promisifyApi(chrome.storage.sync.get)({
+        return promisifyApi('chrome.storage.sync.get')({
           options: {}
         });
       }).then(storage => {

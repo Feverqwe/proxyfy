@@ -1,7 +1,7 @@
 import promisifyApi from "./promisifyApi";
 
 const getProxySettings = () => {
-  return promisifyApi(chrome.proxy.settings.get)({
+  return promisifyApi('chrome.proxy.settings.get')({
     incognito: false
   }).then(details => {
     const value = details.value;

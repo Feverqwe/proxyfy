@@ -29,7 +29,7 @@ const storeModel = types.model('store', {
       try {
         self.assign({options: options});
         await Promise.all([
-          promisifyApi(chrome.storage.sync.set)({options: options}),
+          promisifyApi('chrome.storage.sync.set')({options: options}),
           new Promise(resolve => setTimeout(resolve, 150)),
         ]);
         self.assign({saveState: 'success'});
@@ -40,7 +40,7 @@ const storeModel = types.model('store', {
     },
     afterCreate() {
       self.assign({state: 'loading'});
-      promisifyApi(chrome.storage.sync.get)({
+      promisifyApi('chrome.storage.sync.get')({
         options: {
           profiles: [{
             name: 'Profile #1',
