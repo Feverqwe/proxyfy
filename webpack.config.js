@@ -13,7 +13,7 @@ const outputPath = path.resolve('./dist/');
 
 const env = {
   targets: {
-    browsers: ['Chrome >= 32']
+    browsers: ['Chrome >= 36']
   }
 };
 
@@ -126,7 +126,20 @@ if (!isWatch) {
     if (!Array.isArray(value)) {
       value = [value];
     }
-    value.unshift('babel-polyfill', 'whatwg-fetch');
+    if (entryName === 'pacScript') {
+      // value.unshift();
+    } else
+    if (entryName === 'bg') {
+      value.unshift(
+        'whatwg-fetch',
+        'core-js/fn/map',
+        'core-js/fn/object/assign',
+      );
+    } else {
+      value.unshift(
+        'babel-polyfill',
+      );
+    }
 
     config.entry[entryName] = value;
   });
