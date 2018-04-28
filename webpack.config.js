@@ -13,7 +13,7 @@ const outputPath = path.resolve('./dist/');
 
 const env = {
   targets: {
-    browsers: ['Chrome >= 53']
+    browsers: ['Chrome >= 32']
   }
 };
 
@@ -121,6 +121,15 @@ const config = {
 
 if (!isWatch) {
   config.devtool = 'none';
+  Object.keys(config.entry).forEach(entryName => {
+    let value = config.entry[entryName];
+    if (!Array.isArray(value)) {
+      value = [value];
+    }
+    value.unshift('babel-polyfill', 'whatwg-fetch');
+
+    config.entry[entryName] = value;
+  });
 }
 
 module.exports = config;

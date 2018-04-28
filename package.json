@@ -40,6 +40,7 @@
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "requires-port": "^1.0.0",
-    "url-parse": "^1.4.0"
+    "url-parse": "^1.4.0",
+    "whatwg-fetch": "^2.0.4"
   }
 }
