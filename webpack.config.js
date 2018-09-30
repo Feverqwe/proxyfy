@@ -60,11 +60,11 @@ const config = {
           loader: 'babel-loader',
           options: {
             plugins: [
-              'transform-decorators-legacy'
+              ["@babel/plugin-proposal-decorators", { "legacy": true }],
             ],
             presets: [
-              'react',
-              ['env', env]
+              '@babel/preset-react',
+              ['@babel/preset-env', env]
             ]
           }
         }

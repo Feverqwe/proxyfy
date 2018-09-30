@@ -1,7 +1,7 @@
 import {types, resolveIdentifier} from 'mobx-state-tree';
 import promisifyApi from "./tools/promisifyApi";
-import optionsModel from "./model/options";
-import profileModel from "./model/profile";
+import OptionsStore from "./model/OptionsStore";
+import ProfileStore from "./model/ProfileStore";
 import getProxySettings from "./tools/getProxySettings";
 import setProxyConfig from "./tools/setProxyConfig";
 import AuthListener from "./tools/authListener";
@@ -13,7 +13,7 @@ import syncProxySetting from "./tools/syncProxySetting";
 const debug = require('debug')('bg');
 
 const storeModel = types.model('store', {
-  options: types.maybe(optionsModel)
+  options: types.maybeNull(OptionsStore)
 }).actions(self => {
   return {
     assign(obj) {
@@ -76,7 +76,7 @@ const storeModel = types.model('store', {
 
   return {
     getProfile(name) {
-      return name && resolveIdentifier(profileModel, self, name);
+      return name && resolveIdentifier(ProfileStore, self, name);
     },
     setProfile(name) {
       const profile = self.getProfile(name);

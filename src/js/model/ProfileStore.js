@@ -1,32 +1,62 @@
 import {types} from "mobx-state-tree";
-import proxyModel from "./proxy";
-import ruleModel from "./rule";
+import ProxyStore from "./ProxyStore";
+import RuleStore from "./RuleStore";
 
-const profileModel = types.model('profile', {
-  name: types.identifier(types.string),
-  singleProxy: types.maybe(types.reference(proxyModel)),
-  proxyForHttp: types.maybe(types.reference(proxyModel)),
-  proxyForHttps: types.maybe(types.reference(proxyModel)),
-  proxyForFtp: types.maybe(types.reference(proxyModel)),
-  fallbackProxy: types.maybe(types.reference(proxyModel)),
-  color: types.optional(types.string, '#0a77e5'),
-  badge: types.maybe(types.model('badge', {
-    text: types.string,
-    color: types.maybe(types.union(snapshot => {
+/**
+ * @typedef {{}} BadgeStore
+ * @property {string} text
+ * @property {*|undefined} color
+ */
+const BadgeStore = types.model('BadgeStore', {
+  text: types.string,
+  color: types.maybeNull(types.union({
+    dispatcher: snapshot => {
       if (Array.isArray(snapshot)) {
         return types.array(types.number);
       } else {
         return types.string;
       }
-    }, types.string, types.array(types.number))),
-  })),
-  bypassList: types.optional(types.array(types.union(snapshot => {
-    if (typeof snapshot === 'string') {
-      return types.string;
-    } else {
-      return ruleModel;
     }
-  }, ruleModel, types.string)), []),
+  }, types.string, types.array(types.number))),
+});
+
+/**
+ * @typedef {{}} ProfileStore
+ * @property {string} name
+ * @property {ProxyStore|undefined} singleProxy
+ * @property {ProxyStore|undefined} proxyForHttp
+ * @property {ProxyStore|undefined} proxyForHttps
+ * @property {ProxyStore|undefined} proxyForFtp
+ * @property {ProxyStore|undefined} fallbackProxy
+ * @property {string} [color]
+ * @property {BadgeStore|undefined} badge
+ * @property {*[]} bypassList
+ * @property {boolean} [invertBypassList]
+ * @property {function} hasAuth
+ * @property {function} hasUnsupportedRules
+ * @property {function} getBypassListRules
+ * @property {function} getProxyByProtocol
+ * @property {function} getPacBypassList
+ * @property {function} getBypassList
+ */
+const ProfileStore = types.model('ProfileStore', {
+  name: types.identifier,
+  singleProxy: types.maybeNull(types.reference(ProxyStore)),
+  proxyForHttp: types.maybeNull(types.reference(ProxyStore)),
+  proxyForHttps: types.maybeNull(types.reference(ProxyStore)),
+  proxyForFtp: types.maybeNull(types.reference(ProxyStore)),
+  fallbackProxy: types.maybeNull(types.reference(ProxyStore)),
+  color: types.optional(types.string, '#0a77e5'),
+  badge: types.maybeNull(BadgeStore),
+  bypassList: types.array(types.union({
+    dispatcher: snapshot => {
+      if (typeof snapshot === 'string') {
+        return types.string;
+      } else {
+        return RuleStore;
+      }
+    },
+  }, RuleStore, types.string)),
   invertBypassList: types.optional(types.boolean, false),
 }).views(self => {
   return {
@@ -47,7 +77,7 @@ const profileModel = types.model('profile', {
       return self.bypassList.map(ruleOrString => {
         let rule = ruleOrString;
         if (typeof ruleOrString === 'string') {
-          rule = ruleModel.create({
+          rule = RuleStore.create({
             pattern: ruleOrString
           });
         }
@@ -93,4 +123,4 @@ const profileModel = types.model('profile', {
   }
 });
 
-export default profileModel;
+export default ProfileStore;

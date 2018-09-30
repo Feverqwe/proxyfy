@@ -1,12 +1,25 @@
 import {types} from "mobx-state-tree";
 import isIp6 from "../tools/isIp6";
 
-const proxyModel = types.model('proxy', {
-  name: types.identifier(types.string),
+/**
+ * @typedef {{}} ProxyStore
+ * @property {string} name
+ * @property {string} [scheme]
+ * @property {string} host
+ * @property {number|undefined} port
+ * @property {{username:string,password:string}|undefined} auth
+ * @property {function} getPacScheme
+ * @property {function} getScheme
+ * @property {function} getPort
+ * @property {function} getPacHost
+ * @property {function} getPacUrl
+ */
+const ProxyStore = types.model('ProxyStore', {
+  name: types.identifier,
   scheme: types.optional(types.string, 'http'),
   host: types.string,
-  port: types.maybe(types.number),
-  auth: types.maybe(types.model({
+  port: types.maybeNull(types.number),
+  auth: types.maybeNull(types.model({
     username: types.string,
     password: types.string,
   })),
@@ -52,4 +65,4 @@ const proxyModel = types.model('proxy', {
   };
 });
 
-export default proxyModel;
+export default ProxyStore;

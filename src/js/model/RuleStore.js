@@ -3,7 +3,16 @@ import matchPacParser from "../tools/matchPacParser";
 import regexpParser from "../tools/regexpParser";
 import matchParser from "../tools/matchParser";
 
-const ruleModel = types.model('rule', {
+/**
+ * @typedef {{}} RuleStore
+ * @property {string} [parser]
+ * @property {string} pattern
+ * @property {function} getPacParser
+ * @property {function} getParser
+ * @property {function} getPacPatterns
+ * @property {function} getPatterns
+ */
+const RuleStore = types.model('RuleStore', {
   parser: types.optional(types.string, 'match'), // regexp, match
   pattern: types.string
 }).views(self => {
@@ -35,4 +44,4 @@ const ruleModel = types.model('rule', {
   }
 });
 
-export default ruleModel;
+export default RuleStore;

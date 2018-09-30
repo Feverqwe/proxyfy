@@ -7,14 +7,14 @@ import {observer} from 'mobx-react';
 import 'jsoneditor/dist/jsoneditor.css';
 import JSONEditor from "jsoneditor";
 import '../css/options.less'
-import optionsModel from "./model/options";
+import OptionsStore from "./model/OptionsStore";
 
 const debug = require('debug')('options');
 
 const storeModel = types.model('store', {
   state: types.optional(types.string, 'idle'),
   saveState: types.optional(types.string, 'idle'),
-  options: types.maybe(optionsModel),
+  options: types.maybeNull(OptionsStore),
 }).actions(self => {
   return {
     assign(obj) {

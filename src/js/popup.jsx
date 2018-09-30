@@ -10,8 +10,8 @@ const debug = require('debug')('popup');
 
 const storeModel = types.model('store', {
   state: types.optional(types.string, 'idle'),
-  profile: types.maybe(types.string),
-  profiles: types.optional(types.array(types.string), []),
+  profile: types.maybeNull(types.string),
+  profiles: types.array(types.string),
 }).actions(self => {
   return {
     assign(obj) {
