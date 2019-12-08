@@ -1,6 +1,6 @@
 const {DefinePlugin} = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
@@ -78,7 +78,10 @@ const config = {
         }, {
           loader: "clean-css-loader"
         }, {
-          loader: "less-loader"
+          loader: "less-loader",
+          options: {
+            strictMath: true,
+          }
         }]
       },
       {
@@ -96,7 +99,7 @@ const config = {
     extensions: ['.js', '.jsx'],
   },
   plugins: [
-    new CleanWebpackPlugin(outputPath),
+    new CleanWebpackPlugin(),
     new CopyWebpackPlugin([
       {from: './src/manifest.json',},
       {from: './src/icons', to: './icons'},
