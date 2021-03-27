@@ -148,7 +148,8 @@ export class Background {
                 scheme: proxy.scheme,
                 host: proxy.host,
                 port: proxy.port,
-              }
+              },
+              bypassList: [encodeURIComponent(proxy.id) + '.proxyfy.localhost'],
             },
           };
         }
