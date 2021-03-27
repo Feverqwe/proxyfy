@@ -101,9 +101,9 @@ const Options = React.memo(() => {
                 </List>
               </Box>
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs>
               <Box m={2} className={classes.mainBox}>
-                <MySelectNoLabel value={"auto_detect"}>
+                <MySelectNoLabel defaultValue={"auto_detect"}>
                   <MenuItem value="auto_detect">
                     Use enabled proxies by patterns and order
                   </MenuItem>
@@ -118,62 +118,56 @@ const Options = React.memo(() => {
                     );
                   })}
                 </MySelectNoLabel>
-                <TableContainer>
-                  <Table>
-                    <TableBody>
-                      {proxies.map((proxy) => {
-                        const isFirst = proxies.indexOf(proxy) === 0;
-                        const isLast = proxies.indexOf(proxy) === proxies.length - 1;
+                <Grid container direction={'column'}>
+                  {proxies.map((proxy) => {
+                    const isFirst = proxies.indexOf(proxy) === 0;
+                    const isLast = proxies.indexOf(proxy) === proxies.length - 1;
 
-                        return (
-                          <TableRow key={proxy.id}>
-                            <TableCell size={'small'}>
-                              <Color color={proxy.color}/>
-                            </TableCell>
-                            <TableCell size={'small'}>
-                              {proxy.title}
-                            </TableCell>
-                            <TableCell size={'small'}>
-                              {proxy.host}
-                            </TableCell>
-                            <TableCell size={'small'}>
-                              <Grid container spacing={1} alignItems="center">
-                                <Grid item>
-                                  <Checkbox defaultChecked={proxy.enabled}/>
-                                </Grid>
-                                <Grid item>
-                                  <Button variant="outlined" size={'small'} color="secondary">
-                                    Edit
-                                  </Button>
-                                </Grid>
-                                <Grid item>
-                                  <Button variant="outlined" size={'small'} color="secondary">
-                                    Patterns
-                                  </Button>
-                                </Grid>
-                                <Grid item>
-                                  <IconButton size={'small'}>
-                                    <DeleteIcon fontSize="small"/>
-                                  </IconButton>
-                                </Grid>
-                                <Grid item>
-                                  <IconButton disabled={isFirst} size={'small'}>
-                                    <ArrowUpwardIcon fontSize="small"/>
-                                  </IconButton>
-                                </Grid>
-                                <Grid item>
-                                  <IconButton disabled={isLast} size={'small'}>
-                                    <ArrowDownwardIcon fontSize="small"/>
-                                  </IconButton>
-                                </Grid>
-                              </Grid>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                    return (
+                      <Grid item key={proxy.id}>
+                        <Grid container direction="row" spacing={1} justify={'space-between'} alignItems="center">
+                          <Grid item>
+                            <Color color={proxy.color}/>
+                          </Grid>
+                          <Grid item xs>
+                            {proxy.title}
+                          </Grid>
+                          <Grid item xs>
+                            {proxy.host}
+                          </Grid>
+                          <Grid item>
+                            <Checkbox defaultChecked={proxy.enabled}/>
+                          </Grid>
+                          <Grid item>
+                            <Button variant="outlined" size={'small'} color="primary">
+                              Edit
+                            </Button>
+                          </Grid>
+                          <Grid item>
+                            <Button variant="outlined" size={'small'} color="primary">
+                              Patterns
+                            </Button>
+                          </Grid>
+                          <Grid item>
+                            <IconButton size={'small'}>
+                              <DeleteIcon fontSize="small"/>
+                            </IconButton>
+                          </Grid>
+                          <Grid item>
+                            <IconButton disabled={isFirst} size={'small'}>
+                              <ArrowUpwardIcon fontSize="small"/>
+                            </IconButton>
+                          </Grid>
+                          <Grid item>
+                            <IconButton disabled={isLast} size={'small'}>
+                              <ArrowDownwardIcon fontSize="small"/>
+                            </IconButton>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
               </Box>
             </Grid>
           </Grid>
@@ -185,7 +179,7 @@ const Options = React.memo(() => {
 
 const MySelectNoLabel = React.memo(({children, ...props}) => {
   return (
-    <FormControl margin={'dense'}>
+    <FormControl style={{width: '350px'}} margin={'dense'}>
       <Select
         variant="outlined"
         size="small"
@@ -205,6 +199,7 @@ const Color = React.memo(({color}) => {
       height: '22px',
       backgroundColor: color,
       verticalAlign: 'middle',
+      borderRadius: '4px',
     }}/>
   );
 });
