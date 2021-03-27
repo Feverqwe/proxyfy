@@ -14,7 +14,7 @@ type PacScriptPattern = Pick<ProxyPattern, 'type' | 'pattern'>; //  | 'protocol'
 
 export type PacScript = {
   rules: {
-    scheme: 'http' | 'https' | 'socks4' | 'socks5',
+    type: 'http' | 'https' | 'socks4' | 'socks5',
     host: string,
     whitePatterns: PacScriptPattern[],
     blackPatterns: PacScriptPattern[],
@@ -145,7 +145,7 @@ export class Background {
             mode: 'fixed_servers',
             rules: {
               singleProxy: {
-                scheme: proxy.scheme,
+                scheme: proxy.type,
                 host: proxy.host,
                 port: proxy.port,
               },
@@ -205,7 +205,7 @@ async function getPacScript(proxies: Config['proxies']) {
     if (!proxy.enabled) return;
 
     return {
-      scheme: proxy.scheme,
+      type: proxy.type,
       host: proxy.host,
       whitePatterns: getPatterns(proxy.whitePatterns),
       blackPatterns: getPatterns(proxy.blackPatterns),

@@ -18,11 +18,11 @@ const ProxyStruct = s.type({
   title: s.string(),
   color: s.string(),
   badgeColor: s.optional(s.tuple([s.number(), s.number(), s.number(), s.number()])),
-  scheme: s.union([s.literal('http'), s.literal('https'), s.literal('socks4'), s.literal('socks5')]),
+  type: s.union([s.literal('http'), s.literal('https'), s.literal('socks4'), s.literal('socks5'), s.literal('system'), s.literal('direct')]),
   host: s.string(),
   port: s.number(),
-  username: s.string(),
-  password: s.string(),
+  username: s.optional(s.string()),
+  password: s.optional(s.string()),
   whitePatterns: s.array(ProxyPatternStruct),
   blackPatterns: s.array(ProxyPatternStruct),
 });
@@ -31,9 +31,21 @@ const ConfigStruct = s.type({
   proxies: s.array(ProxyStruct),
 });
 
+const DefaultProxyStruct = s.defaulted(ProxyStruct, {
+  id: '',
+  enabled: true,
+  title: '',
+  color: '#66cc66',
+  type: 'http',
+  host: '',
+  port: 3128,
+  whitePatterns: [],
+  blackPatterns: [],
+});
+
 const DefaultConfigStruct = s.defaulted(ConfigStruct, {
   proxies: [],
 });
 
 export default ConfigStruct;
-export {ProxyPatternStruct, DefaultConfigStruct};
+export {ProxyStruct, ProxyPatternStruct, DefaultConfigStruct, DefaultProxyStruct};

@@ -13,12 +13,7 @@ import {
   makeStyles,
   MenuItem,
   Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow
+  Select
 } from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
 import {Link} from "react-router-dom";
@@ -46,32 +41,6 @@ const Options = React.memo(() => {
     let isMounted = true;
     getConfig().then(({proxies}) => {
       if (!isMounted) return;
-      proxies.push({
-        id: '1',
-        enabled: true,
-        title: 'Alpine RP',
-        color: '#FCB900',
-        scheme: 'http',
-        host: '192.168.0.123',
-        port: 8080,
-        username: '',
-        password: '',
-        whitePatterns: [],
-        blackPatterns: [],
-      });
-      proxies.push({
-        id: '2',
-        enabled: true,
-        title: 'Do',
-        color: '#7BDCB5',
-        scheme: 'socks5',
-        host: '192.168.0.2',
-        port: 1080,
-        username: '',
-        password: '',
-        whitePatterns: [],
-        blackPatterns: [],
-      });
       setProxies(proxies);
     }, (err) => {
       console.error('getConfig error: %O', err);
@@ -112,7 +81,7 @@ const Options = React.memo(() => {
                   </MenuItem>
                   {proxies.map((proxy) => {
                     return (
-                      <MenuItem id={proxy.id} value={proxy.id}>
+                      <MenuItem key={proxy.id} value={proxy.id}>
                         {proxy.title}
                       </MenuItem>
                     );
