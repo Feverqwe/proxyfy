@@ -25,13 +25,9 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/styles": "^4.11.3",
     "classnames": "^2.2.6",
-    "escape-string-regexp": "^2.0.0",
-    "ip6addr": "^0.2.3",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-router": "^5.2.0",
-    "react-router-dom": "^5.2.0",
     "superstruct": "^0.15.0",
     "url-parse": "^1.5.1"
   },
