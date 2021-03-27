@@ -21,6 +21,7 @@ import {
 import getConfig from "../../tools/getConfig";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Header from "../Header";
 
 const useStyles = makeStyles(() => {
   return {
@@ -69,54 +70,57 @@ const Patterns = React.memo(() => {
   }];
 
   return (
-    <Box p={2}>
-      <Paper>
-        <Grid container>
-          <Grid item xs={12}>
-            <Box m={2}>
-              <Box my={2}>
+    <>
+      <Header title={'Edit patterns'}/>
+      <Box p={2}>
+        <Paper>
+          <Grid container>
+            <Grid item xs={12}>
+              <Box m={2}>
+                <Box my={2}>
+                  <Typography variant={'h5'}>
+                    White Patterns
+                  </Typography>
+                  <PatternList list={list}/>
+                  <Box my={2} className={classes.center}>
+                    Add whitelist pattern to match all URLs
+                    <Button variant="contained" size={'small'} className={classes.button} color="secondary">
+                      Add
+                    </Button>
+                  </Box>
+                </Box>
                 <Typography variant={'h5'}>
-                  White Patterns
+                  Black Patterns
                 </Typography>
-                <PatternList list={list}/>
+                <PatternList list={[]}/>
                 <Box my={2} className={classes.center}>
-                  Add whitelist pattern to match all URLs
+                  Add black patterns to prevent this proxy being used for localhost & intranet/private IP addresses
                   <Button variant="contained" size={'small'} className={classes.button} color="secondary">
                     Add
                   </Button>
                 </Box>
               </Box>
-              <Typography variant={'h5'}>
-                Black Patterns
-              </Typography>
-              <PatternList list={[]}/>
-              <Box my={2} className={classes.center}>
-                Add black patterns to prevent this proxy being used for localhost & intranet/private IP addresses
-                <Button variant="contained" size={'small'} className={classes.button} color="secondary">
-                  Add
+            </Grid>
+            <Grid item xs={12}>
+              <Box mx={2} mb={2} className={classes.actionBox}>
+                <Button variant="contained" className={classes.button}>
+                  Cancel
+                </Button>
+                <Button variant="contained" className={classes.button} color="secondary">
+                  New White
+                </Button>
+                <Button variant="contained" className={classes.button} color="secondary">
+                  New Black
+                </Button>
+                <Button variant="contained" className={classes.button} color="primary">
+                  Save
                 </Button>
               </Box>
-            </Box>
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <Box mx={2} mb={2} className={classes.actionBox}>
-              <Button variant="contained" className={classes.button}>
-                Cancel
-              </Button>
-              <Button variant="contained" className={classes.button} color="secondary">
-                New White
-              </Button>
-              <Button variant="contained" className={classes.button} color="secondary">
-                New Black
-              </Button>
-              <Button variant="contained" className={classes.button} color="primary">
-                Save
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
-    </Box>
+        </Paper>
+      </Box>
+    </>
   );
 });
 
