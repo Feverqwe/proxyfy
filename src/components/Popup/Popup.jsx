@@ -1,6 +1,6 @@
 import * as React from "react";
-import {Box, List, ListItem, ListItemText, makeStyles} from "@material-ui/core";
 import {useEffect} from "react";
+import {Box, List, ListItem, ListItemText, makeStyles} from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
 
 const useStyles = makeStyles(() => {
@@ -13,7 +13,7 @@ const useStyles = makeStyles(() => {
 
 const defaultItems = [
   {title: 'Use enabled proxies by patterns and order', mode: 'auto_detect', id: 'auto_detect'},
-  {title: 'Off (use system settings)', mode: 'system', id: 'system'},
+  {title: 'Off (use Chrome settings)', mode: 'off', id: 'off'},
 ];
 
 const Popup = React.memo(() => {
@@ -41,7 +41,7 @@ const Popup = React.memo(() => {
 
   return (
     <Box className={classes.box}>
-      <List className="list" component="nav" disablePadding>
+      <List component="nav" disablePadding>
         {proxies.map((item) => {
           return (
             <ProxyItem key={'_' + item.id} item={item} isProxy={true}/>
@@ -53,7 +53,6 @@ const Popup = React.memo(() => {
           )
         })}
         <ListItem
-          className="list-item"
           button
           component={'a'}
           href={'./options.html'}
@@ -68,7 +67,7 @@ const Popup = React.memo(() => {
 
 const ProxyItem = React.memo(({item, isProxy = false}) => {
   return (
-    <ListItem className="list-item" button>
+    <ListItem button>
       <ListItemText primary={item.title}/>
     </ListItem>
   );

@@ -12,7 +12,7 @@ const config = {
     pacScript: './src/pacScript',
     background: './src/background',
     popup: './src/popup',
-    // options: './src/options'
+    options: './src/options'
   },
   output: {
     path: outputPath,
@@ -21,6 +21,14 @@ const config = {
   devtool: 'inline-source-map',
   module: {
     rules: [
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.(woff|woff2)$/,
+        use: ['file-loader']
+      },
       {
         test: /\.[jt]sx?$/,
         use: 'ts-loader',

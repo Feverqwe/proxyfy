@@ -10,22 +10,25 @@ const ProxyPatternStruct = s.type({
 });
 
 export type Config = Infer<typeof ConfigStruct>;
+export type Proxy = Infer<typeof ProxyStruct>;
+
+const ProxyStruct = s.type({
+  id: s.string(),
+  enabled: s.boolean(),
+  title: s.string(),
+  color: s.optional(s.string()),
+  badgeColor: s.optional(s.tuple([s.number(), s.number(), s.number(), s.number()])),
+  scheme: s.union([s.literal('http'), s.literal('https'), s.literal('socks4'), s.literal('socks5')]),
+  host: s.string(),
+  port: s.number(),
+  username: s.string(),
+  password: s.string(),
+  whitePatterns: s.array(ProxyPatternStruct),
+  blackPatterns: s.array(ProxyPatternStruct),
+});
 
 const ConfigStruct = s.type({
-  proxies: s.array(s.type({
-    id: s.string(),
-    enabled: s.boolean(),
-    title: s.string(),
-    color: s.optional(s.string()),
-    badgeColor: s.optional(s.tuple([s.number(), s.number(), s.number(), s.number()])),
-    scheme: s.union([s.literal('http'), s.literal('https'), s.literal('socks4'), s.literal('socks5')]),
-    host: s.string(),
-    port: s.number(),
-    username: s.string(),
-    password: s.string(),
-    whitePatterns: s.array(ProxyPatternStruct),
-    blackPatterns: s.array(ProxyPatternStruct),
-  })),
+  proxies: s.array(ProxyStruct),
 });
 
 const DefaultConfigStruct = s.defaulted(ConfigStruct, {
