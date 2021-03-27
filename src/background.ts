@@ -71,7 +71,7 @@ export class Background {
 
     let badgeColor = this.defaultBadgeColor;
     let badgeText = '';
-    let icon: ImageData | null = null;
+    let icon = getExtensionIcon();
 
     if (state) {
       switch (state?.mode) {
@@ -85,20 +85,15 @@ export class Background {
               badgeColor = proxy.badgeColor;
             }
             if (proxy.color) {
-              icon = await getExtensionIcon(proxy.color);
+              icon = getExtensionIcon(proxy.color);
             }
           }
           break;
         }
         case 'pac_script': {
           badgeText = 'pattern';
-          icon = await getExtensionIcon('#0a77e5');
+          icon = getExtensionIcon('#0a77e5');
           break;
-        }
-        default: {
-          // badgeText = 'other';
-          // badgeColor = [255,215,0,1];
-          // icon = await getExtensionIcon('#0a77e5');
         }
       }
     }
@@ -109,11 +104,9 @@ export class Background {
     chrome.action.setBadgeBackgroundColor({
       color: badgeColor,
     });
-    if (icon) {
-      chrome.action.setIcon({
-        imageData: icon
-      });
-    }
+    chrome.action.setIcon({
+      imageData: icon
+    });
   }
 
   async applyConfig(config: Config) {
