@@ -74,13 +74,13 @@ const Proxy = React.memo(() => {
             </Grid>
             <Grid item xs={6}>
               <Box m={2}>
-                <MySelect label={'Proxy type'} value={'HTTP'}>
-                  <MenuItem value="HTTP">HTTP</MenuItem>
-                  <MenuItem value="HTTPS">HTTPS</MenuItem>
-                  <MenuItem value="SOCKS4">SOCKS4</MenuItem>
-                  <MenuItem value="SOCKS5">SOCKS5</MenuItem>
-                  <MenuItem value="System">System (use system settings)</MenuItem>
-                  <MenuItem value="Direct">Direct (no proxy)</MenuItem>
+                <MySelect label={'Proxy type'} defaultValue={'http'}>
+                  <MenuItem value="http">HTTP</MenuItem>
+                  <MenuItem value="https">HTTPS</MenuItem>
+                  <MenuItem value="socks4">SOCKS4</MenuItem>
+                  <MenuItem value="socks5">SOCKS5</MenuItem>
+                  <MenuItem value="system">System (use system settings)</MenuItem>
+                  <MenuItem value="direct">Direct (no proxy)</MenuItem>
                 </MySelect>
                 <MyInput
                   label="Proxy IP address or DNS name"

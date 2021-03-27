@@ -16,7 +16,7 @@ const ProxyStruct = s.type({
   id: s.string(),
   enabled: s.boolean(),
   title: s.string(),
-  color: s.optional(s.string()),
+  color: s.string(),
   badgeColor: s.optional(s.tuple([s.number(), s.number(), s.number(), s.number()])),
   scheme: s.union([s.literal('http'), s.literal('https'), s.literal('socks4'), s.literal('socks5')]),
   host: s.string(),

@@ -161,15 +161,15 @@ const PatternList = React.memo(({list}) => {
                 </Select>
               </TableCell>
               <TableCell size={'small'}>
-                <Grid container direction="row">
+                <Grid container spacing={1} alignItems={'center'}>
                   <Grid item xs>
                     <Checkbox defaultChecked={row.enabled} />
                   </Grid>
                   <Grid item>
+                    <IconButton size={'small'}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
                   </Grid>
-                  <IconButton aria-label="delete">
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
                 </Grid>
               </TableCell>
             </TableRow>
