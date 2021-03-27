@@ -1,57 +1,60 @@
-import {PacScript} from "./bg";
+import {PacScript} from "./background";
 
 declare let FindProxyForURL: (url: string) => string;
-declare const pacScript: PacScript;
+declare let Config: PacScript | null;
 FindProxyForURL = (function () {
-  const URL = require('url-parse');
-  const escapeStringRegexp = require('escape-string-regexp');
+  const config = Config!;
+  Config = null;
 
-  const config = pacScript;
+  const rules = config.rules.map(({scheme, host, whitePatterns, blackPatterns}) => {
+    const [whiteRe, blackRe] = [whitePatterns, blackPatterns].map((patterns) => {
+      const wildcardPatterns: string[] = [];
+      const regexpPatterns: string[] = [];
+      patterns.forEach(({pattern, type}) => {
+        if (type === 'wildcard') {
+          wildcardPatterns.push(pattern);
+        } else
+        if (type === 'regexp') {
+          regexpPatterns.push(pattern);
+        }
+      });
 
-  const rules = config.rules.map(({scheme, protocol, host, patterns}) => {
-    const wildcardPatterns: string[] = [];
-    const regexpPatterns: string[] = [];
-    patterns.forEach((pattern) => {
-      if (pattern.type === 'wildcard') {
-        wildcardPatterns.push(pattern.pattern);
-      } else
-      if (pattern.type === 'regexp') {
-        regexpPatterns.push(pattern.pattern);
+      wildcardPatterns.forEach((pattern) => {
+        const re = pattern.replace(/([*?])/g, '.$1');
+        regexpPatterns.push(re);
+      });
+
+      let re = null;
+      if (regexpPatterns.length) {
+        re = new RegExp(regexpPatterns.map(v => `(?:${v})`).join('|'));
       }
+      return re;
     });
 
-    wildcardPatterns.forEach((pattern) => {
-      const re = escapeStringRegexp(pattern).replace(/\\([*?])/g, '$1');
-      regexpPatterns.push(re);
-    });
-
-    let re = null;
-    if (regexpPatterns.length) {
-      re = new RegExp(regexpPatterns.map(v => `(?:${v})`).join('|'));
-    }
     return {
-      protocol,
-      re,
+      whiteRe,
+      blackRe,
       scheme: scheme.toUpperCase(),
       host,
     };
   });
 
+  const originRe = /^([^:]+:\/\/[^\/]+)/;
   return function (url: string) {
-    const {protocol, hostname} = new URL(url);
+    const m = originRe.exec(url);
+    if (m) {
+      const origin = m[1];
 
-    const currentRule = rules.find((rule) => {
-      if (!rule.protocol || rule.protocol === protocol) {
-        if (!rule.re || rule.re.test(hostname)) {
-          return rule;
-        }
+      const currentRule = rules.find((rule) => {
+        const inWhitePattern = !rule.whiteRe || rule.whiteRe.test(origin);
+        const inBlackPattern = rule.blackRe && rule.blackRe.test(origin);
+        return !inBlackPattern && inWhitePattern;
+      });
+
+      if (currentRule) {
+        return `${currentRule.scheme} ${currentRule.host}`;
       }
-    });
-
-    if (currentRule) {
-      return `${currentRule.scheme} ${currentRule.host}`;
-    } else {
-      return 'DIRECT';
     }
+    return 'DIRECT';
   };
 })();

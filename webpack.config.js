@@ -5,70 +5,26 @@ const path = require('path');
 
 const isProduction = process.argv[process.argv.indexOf('--mode') + 1] !== 'development';
 
-const outputPath = path.resolve('./dist/');
+const outputPath = path.resolve('./dist/chrome/');
 
 const config = {
   entry: {
     pacScript: './src/pacScript',
-    bg: './src/bg',
+    background: './src/background',
     // popup: './src/popup',
     // options: './src/options'
   },
   output: {
     path: outputPath,
-    filename: 'js/[name].js'
+    filename: '[name].js'
   },
-  devtool: 'source-map',
-  optimization: {
-    splitChunks: {
-      cacheGroups: {
-        commons: {
-          name: "commons",
-          chunks: chunk => ['bg', 'popup', 'options'].indexOf(chunk.name) !== -1,
-          minChunks: 3,
-          priority: -10
-        },
-        commonsRender: {
-          name: "commonsRender",
-          chunks: chunk => ['popup', 'options'].indexOf(chunk.name) !== -1,
-          minChunks: 2,
-          priority: -20
-        },
-      }
-    }
-  },
+  devtool: 'inline-source-map',
   module: {
     rules: [
       {
-        test: /.jsx?$/,
+        test: /\.[jt]sx?$/,
+        use: 'ts-loader',
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            plugins: [
-              ["@babel/plugin-proposal-decorators", { "legacy": true }],
-            ],
-            presets: [
-              '@babel/preset-react',
-              ['@babel/preset-env', env]
-            ]
-          }
-        }
-      },
-      {
-        test: /\.(css|less)$/,
-        use: [{
-          loader: "style-loader"
-        }, {
-          loader: "css-loader"
-        }, {
-          loader: "clean-css-loader"
-        }, {
-          loader: "less-loader",
-          options: {
-            strictMath: true,
-          }
-        }]
       },
       {
         test: /\.(png|svg)$/,
@@ -82,23 +38,24 @@ const config = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
   plugins: [
-    new CleanWebpackPlugin(),
-    new CopyWebpackPlugin([
-      {from: './src/manifest.json',},
-      {from: './src/icons', to: './icons'},
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        {from: './src/assets/manifest.json',},
+        {from: './src/assets/icons', to: './icons'},
+      ],
+    }),
     new HtmlWebpackPlugin({
       filename: 'popup.html',
-      template: './src/popup.html',
-      chunks: ['commonsRender', 'commons', 'popup']
+      template: './src/assets/popup.html',
+      chunks: ['popup']
     }),
     new HtmlWebpackPlugin({
       filename: 'options.html',
-      template: './src/options.html',
-      chunks: ['commonsRender', 'commons', 'options']
+      template: './src/assets/options.html',
+      chunks: ['options']
     }),
     new DefinePlugin({
       'process.env': {
