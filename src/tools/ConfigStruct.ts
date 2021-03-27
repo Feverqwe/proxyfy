@@ -1,4 +1,5 @@
 import * as s from "superstruct";
+import {Infer} from "superstruct";
 
 const ProxyPatternStruct = s.type({
   enabled: s.boolean(),
@@ -7,6 +8,8 @@ const ProxyPatternStruct = s.type({
   pattern: s.string(),
   // protocol: s.nullable(s.union([s.literal('http'), s.literal('https')]))
 });
+
+export type Config = Infer<typeof ConfigStruct>;
 
 const ConfigStruct = s.type({
   proxies: s.array(s.type({
@@ -25,6 +28,9 @@ const ConfigStruct = s.type({
   })),
 });
 
+const DefaultConfigStruct = s.defaulted(ConfigStruct, {
+  proxies: [],
+});
 
 export default ConfigStruct;
-export {ProxyPatternStruct};
+export {ProxyPatternStruct, DefaultConfigStruct};

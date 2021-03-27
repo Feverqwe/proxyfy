@@ -1,13 +1,13 @@
 import {Infer} from "superstruct";
 import promisifyApi from "./tools/promisifyApi";
 import getExtensionIcon from "./tools/getExtensionIcon";
-import ConfigStruct, {ProxyPatternStruct} from "./tools/ConfigStruct";
+import {Config, ProxyPatternStruct} from "./tools/ConfigStruct";
+import getConfig from "./tools/getConfig";
 import ChromeSettingGetResultDetails = chrome.types.ChromeSettingGetResultDetails;
 import ChromeSettingClearDetails = chrome.types.ChromeSettingClearDetails;
 import ChromeSettingSetDetails = chrome.types.ChromeSettingSetDetails;
 import ColorArray = chrome.action.ColorArray;
 
-type Config = Infer<typeof ConfigStruct>;
 type ProxyPattern = Infer<typeof ProxyPatternStruct>;
 
 type PacScriptPattern = Pick<ProxyPattern, 'type' | 'pattern'>; //  | 'protocol'
@@ -234,10 +234,6 @@ function getPatterns(patterns: ProxyPattern[]): PacScriptPattern[] {
   });
 
   return pacScriptPatterns;
-}
-
-async function getConfig() {
-  return promisifyApi<Config>('chrome.storage.sync.get')();
 }
 
 const background = new Background();
