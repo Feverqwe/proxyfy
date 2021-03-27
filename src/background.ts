@@ -1,13 +1,11 @@
-import * as s from "superstruct";
 import {Infer} from "superstruct";
 import promisifyApi from "./tools/promisifyApi";
+import getExtensionIcon from "./tools/getExtensionIcon";
+import ConfigStruct, {ProxyPatternStruct} from "./tools/ConfigStruct";
 import ChromeSettingGetResultDetails = chrome.types.ChromeSettingGetResultDetails;
-import StorageChange = chrome.storage.StorageChange;
 import ChromeSettingClearDetails = chrome.types.ChromeSettingClearDetails;
 import ChromeSettingSetDetails = chrome.types.ChromeSettingSetDetails;
 import ColorArray = chrome.action.ColorArray;
-import getExtensionIcon from "./tools/getExtensionIcon";
-import ConfigStruct, {ProxyPatternStruct} from "./tools/ConfigStruct";
 
 type Config = Infer<typeof ConfigStruct>;
 type ProxyPattern = Infer<typeof ProxyPatternStruct>;
@@ -29,12 +27,46 @@ export class Background {
   async init() {
     this.defaultBadgeColor = await promisifyApi<ColorArray>('chrome.action.getBadgeBackgroundColor')({});
 
-    chrome.storage.onChanged.addListener(this.handleStorageChanged);
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      switch (message.action) {
+        case 'set': {
+          const {mode, id} = message;
+          this.setProxy(mode, id);
+          break;
+        }
+        case 'get': {
+          getCurrentState().then((state) => {
+            sendResponse(state);
+          });
+          return true;
+        }
+      }
+    });
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      switch (areaName) {
+        case 'sync': {
+          if (changes.config) {
+            this.applyConfig().catch((err) => {
+              console.error('applyConfig error: %O', err);
+            });
+          }
+          break;
+        }
+      }
+    });
+    chrome.proxy.onProxyError.addListener(({details, error, fatal}) => {
+      console.error('[%s] Proxy error: %s %o', fatal ? 'fatal' : 'warn', details, error);
+    });
+    chrome.proxy.settings.onChange.addListener(() => {
+      this.syncUiState().catch((err) => {
+        console.error('Sync state error: %O', err);
+      });
+    });
 
-    await this.syncState();
+    await this.syncUiState();
   }
 
-  async syncState() {
+  async syncUiState() {
     const state = await getCurrentState();
 
     let badgeColor = this.defaultBadgeColor;
@@ -42,7 +74,7 @@ export class Background {
     let icon = getExtensionIcon();
 
     if (state) {
-      switch (state?.mode) {
+      switch (state.mode) {
         case 'fixed_servers': {
           const id = state.id;
           const config = await getConfig();
@@ -77,11 +109,16 @@ export class Background {
     });
   }
 
-  async applyConfig(config: Config) {
-    await promisifyApi<ChromeSettingClearDetails>('chrome.proxy.settings.clear')({scope: 'regular'});
+  async applyConfig() {
+    const state = await getCurrentState();
+    if (!state) return;
 
+    await this.setProxy(state.mode, state.id);
+  }
+
+  async setProxy(mode: string, id?: string) {
     let value = null;
-    switch (config.mode) {
+    switch (mode) {
       case "auto_detect": {
         value = {
           mode: 'auto_detect',
@@ -101,7 +138,8 @@ export class Background {
         break;
       }
       case "fixed_servers": {
-        const proxy = config.proxies.find(proxy => proxy.id === config.fixedProxyId);
+        const config = await getConfig();
+        const proxy = config.proxies.find(proxy => proxy.id === id);
         if (proxy) {
           value = {
             mode: 'fixed_servers',
@@ -117,6 +155,7 @@ export class Background {
         break;
       }
       case "patterns": {
+        const config = await getConfig();
         value = {
           mode: 'pac_script',
           pacScript: {
@@ -124,24 +163,16 @@ export class Background {
             mandatory: false,
           }
         };
+        break;
       }
     }
 
     if (value) {
       await promisifyApi<ChromeSettingSetDetails>('chrome.proxy.settings.set')({value, scope: 'regular'});
+    } else {
+      await promisifyApi<ChromeSettingClearDetails>('chrome.proxy.settings.clear')({scope: 'regular'});
     }
   }
-
-  handleStorageChanged = (changes: Record<string, StorageChange>, areaName: string) => {
-    switch (areaName) {
-      case 'sync': {
-        if (changes.config) {
-          this.applyConfig(changes.config.newValue);
-        }
-        break;
-      }
-    }
-  };
 }
 
 async function getCurrentState() {
@@ -151,14 +182,8 @@ async function getCurrentState() {
   const {mode, rules} = proxySettings.value;
   let result: null | {mode: string, id?: string} = null;
 
-  if (['direct', 'auto_detect', 'system'].includes(mode)) {
-    result = {mode: mode};
-  }
-
   if (proxySettings.levelOfControl === 'controlled_by_this_extension') {
-    if (mode === 'pac_script') {
-      result = {mode};
-    } else
+    result = {mode};
     if (mode === 'fixed_servers' && rules && rules.bypassList) {
       rules.bypassList.some((pattern: string) => {
         const m = /^(.+)\.proxyfy\.localhost/.exec(pattern);

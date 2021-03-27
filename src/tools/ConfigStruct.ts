@@ -9,14 +9,6 @@ const ProxyPatternStruct = s.type({
 });
 
 const ConfigStruct = s.type({
-  mode: s.union([
-    s.literal('patterns'),
-    s.literal('fixed_servers'),
-    s.literal('auto_detect'),
-    s.literal('system'),
-    s.literal('direct'),
-  ]),
-  fixedProxyId: s.nullable(s.string()),
   proxies: s.array(s.type({
     id: s.string(),
     enabled: s.boolean(),
