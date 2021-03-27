@@ -11,7 +11,7 @@ const config = {
   entry: {
     pacScript: './src/pacScript',
     background: './src/background',
-    // popup: './src/popup',
+    popup: './src/popup',
     // options: './src/options'
   },
   output: {
