@@ -2,11 +2,21 @@ import * as React from "react";
 import {useEffect} from "react";
 import {Box, List, ListItem, ListItemText, makeStyles, Paper} from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
+import promiseTry from "../../tools/promiseTry";
+import promisifyApi from "../../tools/promisifyApi";
 
 const useStyles = makeStyles(() => {
   return {
     box: {
-      minWidth: '400px',
+      minWidth: '350px',
+    },
+    active: {
+      color: '#fff',
+      backgroundColor: '#007bff',
+      '&:hover': {
+        color: '#fff',
+        backgroundColor: '#007bff',
+      }
     }
   };
 });
@@ -21,36 +31,56 @@ const Popup = React.memo(() => {
   const classes = useStyles();
 
   const [proxies, setProxies] = React.useState([]);
+  const [state, setState] = React.useState({});
 
   useEffect(() => {
     let isMounted = true;
-    getConfig().then(({proxies}) => {
+    promiseTry(async () => {
+      const [state, {proxies}] = await Promise.all([
+        promisifyApi('chrome.runtime.sendMessage')({
+          action: 'get'
+        }),
+        getConfig(),
+      ]);
       if (!isMounted) return;
-      setProxies(proxies.map((proxy) => {
-        return {
-          id: proxy.id,
-          title: proxy.title,
-        };
-      }));
-    }, (err) => {
+      setState(state);
+      setProxies(proxies);
+    }).catch((err) => {
       console.error('getConfig error: %O', err);
     });
+
     return () => {
       isMounted = false;
     }
   }, []);
 
+  const handleClick = React.useCallback((mode, id) => {
+    return promiseTry(async () => {
+      await promisifyApi('chrome.runtime.sendMessage')({
+        action: 'set', mode, id
+      });
+
+      const state = await promisifyApi('chrome.runtime.sendMessage')({
+        action: 'get'
+      });
+
+      setState(state);
+    });
+  }, []);
+
   return (
-    <Box component={Paper} m={1} className={classes.box}>
+    <Box component={Paper} className={classes.box}>
       <List component="nav" disablePadding>
         {defaultItems.map((item, index) => {
+          const checked = state.mode === item.mode;
           return (
-            <ProxyItem key={index} item={item} mode={item.mode}/>
+            <ProxyItem key={index} item={item} checked={checked} mode={item.mode} onClick={handleClick}/>
           )
         })}
         {proxies.map((item) => {
+          const checked = state.id === item.id;
           return (
-            <ProxyItem key={'_' + item.id} item={item} mode={'fixed_servers'}/>
+            <ProxyItem key={'_' + item.id} item={item} checked={checked} mode={'fixed_servers'} onClick={handleClick}/>
           )
         })}
         <ListItem
@@ -66,18 +96,22 @@ const Popup = React.memo(() => {
   );
 });
 
-const ProxyItem = React.memo(({item, mode}) => {
+const ProxyItem = React.memo(({item, mode, checked, onClick}) => {
+  const classes = useStyles();
+
   const handleClick = React.useCallback((e) => {
     e.preventDefault();
     const id = item.id;
-    chrome.runtime.sendMessage({
-      action: 'set',
-      mode, id,
-    });
+    onClick(mode, id);
   }, [item, mode]);
 
+  const classNames = [];
+  if (checked) {
+    classNames.push(classes.active);
+  }
+
   return (
-    <ListItem onClick={handleClick} button>
+    <ListItem onClick={handleClick} className={classNames.join(' ')} button>
       <ListItemText primary={item.title}/>
     </ListItem>
   );

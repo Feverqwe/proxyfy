@@ -34,8 +34,10 @@ export class Background {
           const {mode, id} = message;
           this.applyProxy(mode, id).catch((err) => {
             console.error('applyProxy error: %O', err);
+          }).then(() => {
+            sendResponse();
           });
-          break;
+          return true;
         }
         case 'get': {
           getCurrentState().then((state) => {
