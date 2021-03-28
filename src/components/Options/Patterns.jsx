@@ -92,6 +92,32 @@ const Patterns = React.memo(() => {
   );
 });
 
+export const matchAllPresets = [
+  {
+    name: 'all URLs',
+    pattern: '*',
+    type: 'wildcard',
+  },
+];
+
+export const localhostPresets = [
+  {
+    name: `local hostnames (usually no dots in the name). Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.`,
+    pattern: `^[^:]+\\/\\/(?:[^:@/]+(?::[^@/]+)?@)?(?:localhost|127\\.\\d+\\.\\d+\\.\\d+)(?::\\d+)?(?:/.*)?$`,
+    type: 'regexp',
+  },
+  {
+    name: `local subnets (IANA reserved address space). Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.`,
+    pattern: `^[^:]+\\/\\/(?:[^:@/]+(?::[^@/]+)?@)?(?:192\\.168\\.\\d+\\.\\d+|10\\.\\d+\\.\\d+\\.\\d+|172\\.(?:1[6789]|2[0-9]|3[01])\\.\\d+\\.\\d+)(?::\\d+)?(?:/.*)?$`,
+    type: 'regexp',
+  },
+  {
+    name: `localhost - matches the local host optionally prefixed by a user:password authentication string and optionally suffixed by a port number. The entire local subnet (127.0.0.0/8) matches. Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.`,
+    pattern: `^[^:]+\\/\\/(?:[^:@/]+(?::[^@/]+)?@)?[\\w-]+(?::\\d+)?(?:/.*)?$`,
+    type: 'regexp'
+  }
+];
+
 const PatternsLoaded = React.memo(({proxy}) => {
   const history = useHistory();
   const classes = useStyles();
@@ -100,12 +126,12 @@ const PatternsLoaded = React.memo(({proxy}) => {
 
   const handleNewWhite = React.useCallback((e) => {
     e.preventDefault();
-    refWhiteRules.current.newRule();
+    refWhiteRules.current.addRule();
   }, []);
 
   const handleNewBlack = React.useCallback((e) => {
     e.preventDefault();
-    refBlackRules.current.newRule();
+    refBlackRules.current.addRule();
   }, []);
 
   const handleSave = React.useCallback((e) => {
@@ -132,26 +158,16 @@ const PatternsLoaded = React.memo(({proxy}) => {
 
   const handleWhitelistMatchAll = React.useCallback((e) => {
     e.preventDefault();
-    refWhiteRules.current.newRule('all URLs', '*', 'wildcard');
+    matchAllPresets.forEach(({name, pattern, type}) => {
+      refWhiteRules.current.addRule(name, pattern, type);
+    });
   }, []);
 
   const handleBlacklistLocalhost = React.useCallback((e) => {
     e.preventDefault();
-    refBlackRules.current.newRule(
-      `local hostnames (usually no dots in the name). Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.`,
-      `^[^:]+\\/\\/(?:[^:@/]+(?::[^@/]+)?@)?(?:localhost|127\\.\\d+\\.\\d+\\.\\d+)(?::\\d+)?(?:/.*)?$`,
-      'regexp'
-    );
-    refBlackRules.current.newRule(
-      `local subnets (IANA reserved address space). Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.`,
-      `^[^:]+\\/\\/(?:[^:@/]+(?::[^@/]+)?@)?(?:192\\.168\\.\\d+\\.\\d+|10\\.\\d+\\.\\d+\\.\\d+|172\\.(?:1[6789]|2[0-9]|3[01])\\.\\d+\\.\\d+)(?::\\d+)?(?:/.*)?$`,
-      'regexp'
-    );
-    refBlackRules.current.newRule(
-      `localhost - matches the local host optionally prefixed by a user:password authentication string and optionally suffixed by a port number. The entire local subnet (127.0.0.0/8) matches. Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.`,
-      `^[^:]+\\/\\/(?:[^:@/]+(?::[^@/]+)?@)?[\\w-]+(?::\\d+)?(?:/.*)?$`,
-      'regexp'
-    );
+    localhostPresets.forEach(({name, pattern, type}) => {
+      refBlackRules.current.addRule(name, pattern, type);
+    });
   }, []);
 
   return (
@@ -222,7 +238,7 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
 
   React.useImperativeHandle(ref, () => {
     return {
-      newRule(name = '', pattern = '', type = 'wildcard') {
+      addRule(name = '', pattern = '', type = 'wildcard') {
         const {patterns} = scope;
         patterns.push({
           id: getId(),

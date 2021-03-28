@@ -8,7 +8,6 @@ const useStyles = makeStyles(() => {
   return {
     box: {
       minWidth: '350px',
-      borderRadius: 0,
     },
     active: {
       color: '#fff',
@@ -44,7 +43,7 @@ const Popup = React.memo(() => {
   if (!proxies) return null;
 
   return (
-    <Box component={Paper} className={classes.box}>
+    <Box component={Paper} elevation={0} square className={classes.box}>
       <List component="nav" disablePadding>
         {defaultItems.map((item, index) => {
           const checked = state && state.mode === item.mode;

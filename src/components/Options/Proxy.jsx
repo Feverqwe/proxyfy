@@ -3,7 +3,10 @@ import {useEffect} from "react";
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
+  FormGroup,
   Grid,
   makeStyles,
   MenuItem,
@@ -23,6 +26,7 @@ import promisifyApi from "../../tools/promisifyApi";
 import {Link} from "react-router-dom";
 import getId from "../../tools/getId";
 import getObjectId from "../../tools/getObjectId";
+import {localhostPresets, matchAllPresets} from "./Patterns";
 
 const noProxyTypes = ['direct'];
 
@@ -100,12 +104,14 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
   const [isValidHost, setValidHost] = React.useState(true);
   const [isValidPort, setValidPort] = React.useState(true);
   const [type, setType] = React.useState(proxy.type);
+  const isNew = React.useMemo(() => !proxy.id, []);
 
   const save = React.useMemo(() => {
     return async () => {
       const {
         title: titleEl, color: colorEl,
         type: typeEl, host: hostEl, port: portEl,
+        enabled: enabledEl, useMatchAllPreset: useMatchAllPresetEl, useLocalhostPreset: useLocalhostPresetEl
       } = refForm.current.elements;
 
       const data = {};
@@ -118,6 +124,18 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
         }
         data[key] = value;
       });
+
+      [enabledEl, useMatchAllPresetEl, useLocalhostPresetEl].forEach((element) => {
+        if (!element) return;
+        const key = element.name;
+        let value = element.checked;
+        data[key] = value;
+      });
+
+      const useMatchAllPreset = data.useMatchAllPreset;
+      const useLocalhostPreset = data.useLocalhostPreset;
+      delete data.useMatchAllPreset;
+      delete data.useLocalhostPreset;
 
       if (noProxyTypes.includes(data.type)) {
         setValidHost(true);
@@ -153,14 +171,37 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
 
       const changedProxy = Object.assign({}, proxy, data);
 
+      if (useMatchAllPreset) {
+        matchAllPresets.forEach(({name, pattern, type}) => {
+          changedProxy.whitePatterns.push({
+            id: getId(),
+            enabled: true,
+            name, pattern, type,
+          });
+        });
+      }
+
+      if (useLocalhostPreset) {
+        localhostPresets.forEach(({name, pattern, type}) => {
+          changedProxy.blackPatterns.push({
+            id: getId(),
+            enabled: true,
+            name, pattern, type,
+          });
+        });
+      }
+
       const config = await getConfig();
-      const existsProxy = config.proxies.find(p => p.id === proxy.id);
-      const pos = config.proxies.indexOf(existsProxy);
-      if (pos !== -1) {
-        config.proxies.splice(pos, 1, changedProxy);
-      } else {
+      if (isNew) {
         changedProxy.id = getId();
         config.proxies.push(changedProxy);
+      } else {
+        const existsProxy = config.proxies.find(p => p.id === proxy.id);
+        const pos = config.proxies.indexOf(existsProxy);
+        if (pos === -1) {
+          throw new Error('Proxy is not found');
+        }
+        config.proxies.splice(pos, 1, changedProxy);
       }
       ConfigStruct.assert(config);
       await promisifyApi('chrome.storage.sync.set')(config);
@@ -199,10 +240,10 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
   const handleSaveAndAddAnother = React.useCallback((e) => {
     e.preventDefault();
     save().then(() => {
-      if (proxy.id) {
-        history.push('/proxy');
-      } else {
+      if (isNew) {
         onReset();
+      } else {
+        history.push('/proxy');
       }
     }).catch((err) => {
       console.error('Save error: %O', err);
@@ -213,7 +254,7 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
 
   return (
     <>
-      <Header title={proxy.id ? 'Edit proxy' : 'Add Proxy'}/>
+      <Header title={isNew ? 'Add Proxy' : 'Edit proxy'}/>
       <Box component={Paper} m={2}>
         <form ref={refForm} onSubmit={handleSubmit}>
           <Grid container>
@@ -230,6 +271,29 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
                   value={proxy.color}
                   name={'color'}
                 />
+                {isNew && (
+                  <FormControl fullWidth margin={'dense'}>
+                    <Typography variant={"subtitle1"}>
+                      Pattern Shortcuts
+                    </Typography>
+                    <Box component={Paper} p={1} variant="outlined">
+                      <FormGroup>
+                        <FormControlLabel
+                          control={<Checkbox defaultChecked={true} name="enabled" />}
+                          label="Enabled"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox defaultChecked={true} name="useMatchAllPreset" />}
+                          label="Add whitelist pattern to match all URLs"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox defaultChecked={false} name="useLocalhostPreset" />}
+                          label="Do not use for localhost and intranet/private IP addresses"
+                        />
+                      </FormGroup>
+                    </Box>
+                  </FormControl>
+                )}
               </Box>
             </Grid>
             <Grid item xs={6}>
