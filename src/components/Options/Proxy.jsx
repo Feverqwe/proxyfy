@@ -193,7 +193,13 @@ const ProxyLoaded = React.memo(({proxy}) => {
 
   const handleSaveAndAddAnother = React.useCallback((e) => {
     e.preventDefault();
-    save().catch((err) => {
+    save().then(() => {
+      if (proxy.id) {
+        history.push('/proxy');
+      } else {
+        location.reload();
+      }
+    }).catch((err) => {
       console.error('Save error: %O', err);
     });
   }, []);
