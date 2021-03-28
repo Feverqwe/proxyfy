@@ -62,7 +62,8 @@ export class Background {
     chrome.proxy.onProxyError.addListener(({details, error, fatal}) => {
       console.error('[%s] Proxy error: %s %o', fatal ? 'fatal' : 'warn', details, error);
     });
-    chrome.proxy.settings.onChange.addListener(() => {
+    chrome.proxy.settings.onChange.addListener((details) => {
+      if (details.levelOfControl === 'controlled_by_this_extension') return;
       this.syncUiState().catch((err) => {
         console.error('Sync state error: %O', err);
       });
