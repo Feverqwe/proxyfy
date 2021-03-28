@@ -7,6 +7,7 @@ import ChromeSettingGetResultDetails = chrome.types.ChromeSettingGetResultDetail
 import ChromeSettingClearDetails = chrome.types.ChromeSettingClearDetails;
 import ChromeSettingSetDetails = chrome.types.ChromeSettingSetDetails;
 import ColorArray = chrome.action.ColorArray;
+import AuthListener from "./tools/authListener";
 
 type ProxyPattern = Infer<typeof ProxyPatternStruct>;
 
@@ -27,6 +28,8 @@ export type PacScript = {
 };
 
 export class Background {
+  authListener: AuthListener | null = null;
+
   async init() {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       switch (message.action) {
@@ -75,6 +78,7 @@ export class Background {
     let badgeColor: ColorArray = [0,0,0,0];
     let badgeText = '';
     let icon = getExtensionIcon();
+    let authListener: AuthListener | null = null;
 
     if (state) {
       switch (state.mode) {
@@ -104,14 +108,28 @@ export class Background {
               badgeColor = proxy.badgeColor;
             }
             icon = getExtensionIcon(proxy.color);
+            authListener = new AuthListener([proxy]);
           }
           break;
         }
         case 'pac_script': {
           badgeText = 'pattern';
           icon = getExtensionIcon('#0a77e5');
+          const config = await getConfig();
+          authListener = new AuthListener(config.proxies);
           break;
         }
+      }
+    }
+
+    if (authListener) {
+      if (this.authListener) {
+        this.authListener.destroy();
+        this.authListener = null;
+      }
+      if (authListener.isRequired) {
+        this.authListener = authListener;
+        this.authListener.enable();
       }
     }
 

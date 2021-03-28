@@ -11,8 +11,10 @@ const ProxyPatternStruct = s.type({
 
 export type Config = Infer<typeof ConfigStruct>;
 export type Proxy = Infer<typeof ProxyStruct>;
+export type GenericProxy = Infer<typeof GenericProxyStruct>;
+export type DirectProxy = Infer<typeof DirectProxyStruct>;
 
-const ProxyStruct = s.union([s.type({
+const GenericProxyStruct = s.type({
   id: s.string(),
   enabled: s.boolean(),
   title: s.string(),
@@ -25,7 +27,9 @@ const ProxyStruct = s.union([s.type({
   password: s.optional(s.string()),
   whitePatterns: s.array(ProxyPatternStruct),
   blackPatterns: s.array(ProxyPatternStruct),
-}), s.type({
+});
+
+const DirectProxyStruct = s.type({
   id: s.string(),
   enabled: s.boolean(),
   title: s.string(),
@@ -34,7 +38,9 @@ const ProxyStruct = s.union([s.type({
   type: s.literal('direct'),
   whitePatterns: s.array(ProxyPatternStruct),
   blackPatterns: s.array(ProxyPatternStruct),
-})]);
+});
+
+const ProxyStruct = s.union([GenericProxyStruct, DirectProxyStruct]);
 
 const ConfigStruct = s.type({
   proxies: s.array(ProxyStruct),
