@@ -27,7 +27,7 @@ export type PacScript = {
 };
 
 export class Background {
-  async init() {
+  init() {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       switch (message.action) {
         case 'set': {
@@ -75,7 +75,9 @@ export class Background {
       // pass
     });
 
-    await this.syncUiState();
+    this.syncUiState().catch((err) => {
+      console.error('Sync state on run error: %O', err);
+    });
   }
 
   async syncUiState() {
