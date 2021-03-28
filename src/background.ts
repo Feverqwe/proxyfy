@@ -79,6 +79,18 @@ export class Background {
 
     if (state) {
       switch (state.mode) {
+        case 'direct': {
+          const config = await getConfig();
+          const proxy = config.proxies.find((p) => p.type === 'direct');
+          if (proxy) {
+            badgeText = proxy.title;
+            if (proxy.badgeColor) {
+              badgeColor = proxy.badgeColor;
+            }
+            icon = getExtensionIcon(proxy.color);
+          }
+          break;
+        }
         case 'fixed_servers': {
           const id = state.id;
           const config = await getConfig();
@@ -88,9 +100,7 @@ export class Background {
             if (proxy.badgeColor) {
               badgeColor = proxy.badgeColor;
             }
-            if (proxy.color) {
-              icon = getExtensionIcon(proxy.color);
-            }
+            icon = getExtensionIcon(proxy.color);
           }
           break;
         }
@@ -136,9 +146,6 @@ export class Background {
           if (proxy.type === 'direct') {
             value = {
               mode: 'direct',
-              rules: {
-                bypassList: [encodeURIComponent(proxy.id) + '.proxyfy.localhost'],
-              },
             };
           } else {
             value = {
