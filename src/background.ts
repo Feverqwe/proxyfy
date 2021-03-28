@@ -14,7 +14,7 @@ export type PacScriptPattern = Pick<ProxyPattern, 'type' | 'pattern'>; //  | 'pr
 
 export type PacScript = {
   rules: ({
-    type: 'http' | 'https' | 'socks4' | 'socks5',
+    type: 'http' | 'https' | 'socks4' | 'socks5' | 'quic',
     host: string,
     port: number,
     whitePatterns: PacScriptPattern[],

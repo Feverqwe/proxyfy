@@ -234,6 +234,7 @@ const ProxyLoaded = React.memo(({proxy}) => {
                   <MenuItem value="https">HTTPS</MenuItem>
                   <MenuItem value="socks4">SOCKS4</MenuItem>
                   <MenuItem value="socks5">SOCKS5</MenuItem>
+                  <MenuItem value="quic">QUIC</MenuItem>
                   <MenuItem value="direct">Direct (no proxy)</MenuItem>
                 </MySelect>
                 <MyInput

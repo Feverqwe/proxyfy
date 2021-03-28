@@ -20,7 +20,7 @@ const GenericProxyStruct = s.type({
   title: s.string(),
   color: s.string(),
   badgeColor: s.optional(s.tuple([s.number(), s.number(), s.number(), s.number()])),
-  type: s.union([s.literal('http'), s.literal('https'), s.literal('socks4'), s.literal('socks5')]),
+  type: s.union([s.literal('http'), s.literal('https'), s.literal('socks4'), s.literal('socks5'), s.literal('quic')]),
   host: s.string(),
   port: s.number(),
   username: s.optional(s.string()),
