@@ -54,7 +54,7 @@ FindProxyForURL = (function () {
       const origin = m[1];
 
       const currentRule = rules.find((rule) => {
-        const inWhitePattern = !rule.whiteRe || rule.whiteRe.test(origin);
+        const inWhitePattern = rule.whiteRe && rule.whiteRe.test(origin);
         const inBlackPattern = rule.blackRe && rule.blackRe.test(origin);
         return !inBlackPattern && inWhitePattern;
       });
