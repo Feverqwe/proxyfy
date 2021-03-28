@@ -101,11 +101,10 @@ const ProxyLoaded = React.memo(({proxy}) => {
       const {
         title: titleEl, color: colorEl,
         type: typeEl, host: hostEl, port: portEl,
-        username: usernameEl, password: passwordEl
       } = refForm.current.elements;
 
       const data = {};
-      [titleEl, typeEl, colorEl, hostEl, portEl, usernameEl, passwordEl].forEach((element) => {
+      [titleEl, typeEl, colorEl, hostEl, portEl].forEach((element) => {
         if (!element) return;
         const key = element.name;
         let value = element.value;
@@ -135,11 +134,6 @@ const ProxyLoaded = React.memo(({proxy}) => {
         if (hasErrors) {
           throw new Error('Incorrect data');
         }
-      }
-
-      if (!data.username) {
-        delete data.password;
-        delete data.username;
       }
 
       if (!data.title) {
@@ -248,19 +242,6 @@ const ProxyLoaded = React.memo(({proxy}) => {
                         defaultValue={String(proxy.port)}
                         name={'port'}
                         isError={!isValidPort}
-                      />
-                      <MyInput
-                        label="Username (optional)"
-                        placeholder="username"
-                        defaultValue={proxy.username || ''}
-                        name={'username'}
-                      />
-                      <MyInput
-                        label="Password (optional)"
-                        placeholder="*****"
-                        type={"password"}
-                        defaultValue={proxy.password || ''}
-                        name={'password'}
                       />
                     </>
                   )}
