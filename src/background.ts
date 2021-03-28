@@ -78,26 +78,14 @@ export class Background {
 
     if (state) {
       switch (state.mode) {
-        case 'direct': {
-          const config = await getConfig();
-          const {lastDirectId} = await promisifyApi<{lastDirectId?: string}>('chrome.storage.local.get')('lastDirectId');
-          let proxy = config.proxies.find((p) => p.id === lastDirectId);
-          if (!proxy) {
-            proxy = config.proxies.find((p) => p.type === 'direct');
-          }
-          if (proxy) {
-            badgeText = proxy.title;
-            if (proxy.badgeColor) {
-              badgeColor = proxy.badgeColor;
-            }
-            icon = getExtensionIcon(proxy.color);
-          }
-          break;
-        }
+        case 'direct':
         case 'fixed_servers': {
           const id = state.id;
           const config = await getConfig();
-          const proxy = config.proxies.find(p => p.id === id);
+          let proxy = config.proxies.find(p => p.id === id);
+          if (!proxy && state.mode === 'direct') {
+            proxy = config.proxies.find((p) => p.type === 'direct');
+          }
           if (proxy) {
             badgeText = proxy.title;
             if (proxy.badgeColor) {
@@ -213,12 +201,15 @@ async function getCurrentState() {
 
   if (proxySettings.levelOfControl === 'controlled_by_this_extension') {
     result = {mode};
+    if (mode === 'direct') {
+      const {lastDirectId} = await promisifyApi<{lastDirectId?: string}>('chrome.storage.local.get')('lastDirectId');
+      result.id = lastDirectId;
+    } else
     if (mode === 'fixed_servers' && rules && rules.bypassList) {
       rules.bypassList.some((pattern: string) => {
         const m = /^(.+)\.proxyfy\.localhost/.exec(pattern);
         if (m) {
-          const id = decodeURIComponent(m[1]);
-          result = {mode, id};
+          result!.id = decodeURIComponent(m[1]);
           return true;
         }
       });
