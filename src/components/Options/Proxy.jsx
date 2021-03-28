@@ -21,6 +21,7 @@ import promiseTry from "../../tools/promiseTry";
 import ConfigStruct, {DefaultProxyStruct} from "../../tools/ConfigStruct";
 import promisifyApi from "../../tools/promisifyApi";
 import {Link} from "react-router-dom";
+import getId from "../../tools/getId";
 
 const noProxyTypes = ['direct'];
 
@@ -157,7 +158,7 @@ const ProxyLoaded = React.memo(({proxy}) => {
       if (pos !== -1) {
         config.proxies.splice(pos, 1, changedProxy);
       } else {
-        changedProxy.id = '' + Date.now();
+        changedProxy.id = getId();
         config.proxies.push(changedProxy);
       }
       ConfigStruct.assert(config);

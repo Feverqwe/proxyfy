@@ -22,10 +22,14 @@ import getConfig from "../../tools/getConfig";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Header from "../Header";
-import {Redirect, useLocation} from "react-router";
+import {Redirect, useHistory, useLocation} from "react-router";
 import qs from "querystring-es3";
 import promiseTry from "../../tools/promiseTry";
 import {Link} from "react-router-dom";
+import PropTypes from "prop-types";
+import ConfigStruct from "../../tools/ConfigStruct";
+import promisifyApi from "../../tools/promisifyApi";
+import getId from "../../tools/getId";
 
 const useStyles = makeStyles(() => {
   return {
@@ -89,7 +93,66 @@ const Patterns = React.memo(() => {
 });
 
 const PatternsLoaded = React.memo(({proxy}) => {
+  const history = useHistory();
   const classes = useStyles();
+  const refWhiteRules = React.useRef();
+  const refBlackRules = React.useRef();
+
+  const handleNewWhite = React.useCallback((e) => {
+    e.preventDefault();
+    refWhiteRules.current.newRule();
+  }, []);
+
+  const handleNewBlack = React.useCallback((e) => {
+    e.preventDefault();
+    refBlackRules.current.newRule();
+  }, []);
+
+  const handleSave = React.useCallback((e) => {
+    e.preventDefault();
+    const whitePatterns = refWhiteRules.current.getPatterns();
+    const blackPatterns = refBlackRules.current.getPatterns();
+
+    return promiseTry(async () => {
+      const config = await getConfig();
+      const existsProxy = config.proxies.find(p => p.id === proxy.id);
+      if (!existsProxy) {
+        throw new Error('Proxy is not found');
+      }
+      existsProxy.whitePatterns = whitePatterns;
+      existsProxy.blackPatterns = blackPatterns
+      ConfigStruct.assert(config);
+      await promisifyApi('chrome.storage.sync.set')(config);
+    }).then(() => {
+      history.push('/');
+    }, (err) => {
+      console.error('Save proxy error: %O', err);
+    });
+  }, [proxy]);
+
+  const handleWhitelistMatchAll = React.useCallback((e) => {
+    e.preventDefault();
+    refWhiteRules.current.newRule('all URLs', '*', 'wildcard');
+  }, []);
+
+  const handleBlacklistLocalhost = React.useCallback((e) => {
+    e.preventDefault();
+    refBlackRules.current.newRule(
+      `local hostnames (usually no dots in the name). Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.`,
+      `^[^:]+\\/\\/(?:[^:@/]+(?::[^@/]+)?@)?(?:localhost|127\\.\\d+\\.\\d+\\.\\d+)(?::\\d+)?(?:/.*)?$`,
+      'regexp'
+    );
+    refBlackRules.current.newRule(
+      `local subnets (IANA reserved address space). Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.`,
+      `^[^:]+\\/\\/(?:[^:@/]+(?::[^@/]+)?@)?(?:192\\.168\\.\\d+\\.\\d+|10\\.\\d+\\.\\d+\\.\\d+|172\\.(?:1[6789]|2[0-9]|3[01])\\.\\d+\\.\\d+)(?::\\d+)?(?:/.*)?$`,
+      'regexp'
+    );
+    refBlackRules.current.newRule(
+      `localhost - matches the local host optionally prefixed by a user:password authentication string and optionally suffixed by a port number. The entire local subnet (127.0.0.0/8) matches. Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.`,
+      `^[^:]+\\/\\/(?:[^:@/]+(?::[^@/]+)?@)?[\\w-]+(?::\\d+)?(?:/.*)?$`,
+      'regexp'
+    );
+  }, []);
 
   return (
     <>
@@ -103,10 +166,10 @@ const PatternsLoaded = React.memo(({proxy}) => {
                   <Typography variant={'h5'}>
                     White Patterns
                   </Typography>
-                  <PatternList list={proxy.whitePatterns}/>
+                  <PatternList ref={refWhiteRules} list={proxy.whitePatterns}/>
                   <Box my={2} className={classes.center}>
                     Add whitelist pattern to match all URLs
-                    <Button variant="contained" size={'small'} className={classes.button} color="secondary">
+                    <Button onClick={handleWhitelistMatchAll} variant="contained" size={'small'} className={classes.button} color="secondary">
                       Add
                     </Button>
                   </Box>
@@ -114,10 +177,10 @@ const PatternsLoaded = React.memo(({proxy}) => {
                 <Typography variant={'h5'}>
                   Black Patterns
                 </Typography>
-                <PatternList list={proxy.blackPatterns}/>
+                <PatternList ref={refBlackRules} list={proxy.blackPatterns}/>
                 <Box my={2} className={classes.center}>
                   Add black patterns to prevent this proxy being used for localhost & intranet/private IP addresses
-                  <Button variant="contained" size={'small'} className={classes.button} color="secondary">
+                  <Button onClick={handleBlacklistLocalhost} variant="contained" size={'small'} className={classes.button} color="secondary">
                     Add
                   </Button>
                 </Box>
@@ -133,13 +196,13 @@ const PatternsLoaded = React.memo(({proxy}) => {
                 >
                   Cancel
                 </Button>
-                <Button variant="contained" className={classes.button} color="secondary">
+                <Button onClick={handleNewWhite} variant="contained" className={classes.button} color="secondary">
                   New White
                 </Button>
-                <Button variant="contained" className={classes.button} color="secondary">
+                <Button onClick={handleNewBlack} variant="contained" className={classes.button} color="secondary">
                   New Black
                 </Button>
-                <Button variant="contained" className={classes.button} color="primary">
+                <Button onClick={handleSave} variant="contained" className={classes.button} color="primary">
                   Save
                 </Button>
               </Box>
@@ -151,8 +214,39 @@ const PatternsLoaded = React.memo(({proxy}) => {
   );
 });
 
-const PatternList = React.memo(({list}) => {
+const PatternList = React.memo(React.forwardRef(({list}, ref) => {
   const classes = useStyles();
+  const [scope] = React.useState({});
+  const [patterns, setPatterns] = React.useState(list);
+
+  scope.patterns = patterns;
+
+  React.useImperativeHandle(ref, () => {
+    return {
+      newRule(name = '', pattern = '', type = 'wildcard') {
+        const {patterns} = scope;
+        patterns.push({
+          id: getId(),
+          enabled: true,
+          name,
+          type,
+          pattern,
+        });
+        setPatterns(patterns.slice(0));
+      },
+      getPatterns() {
+        return scope.patterns;
+      }
+    };
+  }, []);
+
+  const handlePatternDelete = React.useCallback((pattern) => {
+    const {patterns} = scope;
+    const pos = patterns.indexOf(pattern);
+    if (pos === -1) return;
+    patterns.splice(pos, 1);
+    setPatterns(patterns.slice(0));
+  }, []);
 
   return (
     <TableContainer>
@@ -166,45 +260,79 @@ const PatternList = React.memo(({list}) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {list.map((row) => (
-            <TableRow key={row.name}>
-              <TableCell size={'small'}>
-                <InputBase defaultValue={row.name} fullWidth />
-              </TableCell>
-              <TableCell size={'small'}>
-                <InputBase defaultValue={row.pattern} fullWidth />
-              </TableCell>
-              <TableCell size={'small'}>
-                <Select
-                  defaultValue={row.type}
-                  fullWidth
-                  input={<InputBase />}
-                  inputProps={{
-                    underline: 'none',
-                  }}
-                >
-                  <MenuItem value={'wildcard'}>Wildcard</MenuItem>
-                  <MenuItem value={'regexp'}>RegExp</MenuItem>
-                </Select>
-              </TableCell>
-              <TableCell size={'small'}>
-                <Grid container spacing={1} alignItems={'center'}>
-                  <Grid item xs>
-                    <Checkbox defaultChecked={row.enabled} />
-                  </Grid>
-                  <Grid item>
-                    <IconButton size={'small'}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </TableCell>
-            </TableRow>
+          {patterns.map((pattern) => (
+            <Pattern key={pattern.id} pattern={pattern} onDelete={handlePatternDelete}/>
           ))}
         </TableBody>
       </Table>
     </TableContainer>
   );
+}));
+PatternList.propTypes = {
+  list: PropTypes.array,
+};
+
+const Pattern = React.memo(({pattern, onDelete}) => {
+  const handleDelete = React.useCallback((e) => {
+    e.preventDefault();
+    onDelete(pattern);
+  }, []);
+
+  const handleEnabledChange = React.useCallback((e) => {
+    pattern.enabled = e.target.checked;
+  }, []);
+
+  const handleNameChange = React.useCallback((e) => {
+    pattern.name = e.target.value;
+  }, []);
+
+  const handlePatternChange = React.useCallback((e) => {
+    pattern.pattern = e.target.value;
+  }, []);
+
+  const handleTypeChange = React.useCallback((e) => {
+    pattern.type = e.target.value;
+  }, []);
+
+  return (
+    <TableRow>
+      <TableCell size={'small'}>
+        <InputBase onChange={handleNameChange} defaultValue={pattern.name} fullWidth />
+      </TableCell>
+      <TableCell size={'small'}>
+        <InputBase onChange={handlePatternChange} defaultValue={pattern.pattern} fullWidth />
+      </TableCell>
+      <TableCell size={'small'}>
+        <Select
+          onChange={handleTypeChange}
+          defaultValue={pattern.type}
+          fullWidth
+          input={<InputBase />}
+          inputProps={{
+            underline: 'none',
+          }}
+        >
+          <MenuItem value={'wildcard'}>Wildcard</MenuItem>
+          <MenuItem value={'regexp'}>RegExp</MenuItem>
+        </Select>
+      </TableCell>
+      <TableCell size={'small'}>
+        <Grid container spacing={1} alignItems={'center'}>
+          <Grid item xs>
+            <Checkbox onChange={handleEnabledChange} defaultChecked={pattern.enabled} />
+          </Grid>
+          <Grid item>
+            <IconButton onClick={handleDelete} size={'small'}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Grid>
+        </Grid>
+      </TableCell>
+    </TableRow>
+  );
 });
+Pattern.propTypes = {
+  pattern: PropTypes.object,
+};
 
 export default Patterns;
