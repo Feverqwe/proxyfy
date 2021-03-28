@@ -18,7 +18,7 @@ const config = {
     path: outputPath,
     filename: '[name].js'
   },
-  devtool: isProduction ? undefined : 'inline-source-map',
+  devtool: false,// isProduction ? false : 'inline-source-map',
   module: {
     rules: [
       {

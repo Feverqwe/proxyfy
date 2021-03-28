@@ -1,24 +1,9 @@
 import * as React from "react";
 import {useEffect} from "react";
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControl,
-  Grid,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  makeStyles,
-  MenuItem,
-  Paper,
-  Select
-} from "@material-ui/core";
+import {Box, Button, Checkbox, FormControl, Grid, makeStyles, Paper, Select} from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
 import {Link} from "react-router-dom";
 import Header from "../Header";
-import AddIcon from '@material-ui/icons/Add';
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
@@ -26,6 +11,7 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import qs from "querystring-es3";
 import promisifyApi from "../../tools/promisifyApi";
 import ConfigStruct from "../../tools/ConfigStruct";
+import Menu from "./Menu";
 
 const useStyles = makeStyles(() => {
   return {
@@ -98,59 +84,50 @@ const Options = React.memo(() => {
   return (
     <>
       <Header title={'Options'}/>
-      <Box p={2}>
-        <Paper>
-          <Grid container>
-            <Grid item xs={3}>
-              <Box m={2}>
-                <List component="nav" disablePadding>
-                  <ListItem button component={Link} to={'/proxy'}>
-                    <ListItemIcon>
-                      <AddIcon/>
-                    </ListItemIcon>
-                    <ListItemText primary={'Add'}/>
-                  </ListItem>
-                </List>
-              </Box>
-            </Grid>
-            <Grid item xs>
-              <Box m={2} className={classes.mainBox}>
-                {/*<MySelectNoLabel defaultValue={"auto_detect"}>
-                  <MenuItem value="auto_detect">
-                    Use enabled proxies by patterns and order
-                  </MenuItem>
-                  <MenuItem value="system">
-                    Off (use Chrome settings)
-                  </MenuItem>
-                  {proxies.map((proxy) => {
-                    return (
-                      <MenuItem key={proxy.id} value={proxy.id}>
-                        {proxy.title}
-                      </MenuItem>
-                    );
-                  })}
-                </MySelectNoLabel>*/}
-                <Grid container direction={'column'}>
-                  {proxies.map((proxy) => {
-                    const isFirst = proxies.indexOf(proxy) === 0;
-                    const isLast = proxies.indexOf(proxy) === proxies.length - 1;
-
-                    return (
-                      <Grid item key={proxy.id}>
-                        <ProxyItem
-                          proxy={proxy} isFirst={isFirst} isLast={isLast}
-                          onDelete={handleProxyDelete}
-                          onMove={handleMove}
-                          onEnabledChange={handleEnabledChange}
-                        />
-                      </Grid>
-                    );
-                  })}
-                </Grid>
-              </Box>
-            </Grid>
+      <Box component={Paper} m={2}>
+        <Grid container>
+          <Grid item xs={3}>
+            <Box m={2}>
+              <Menu/>
+            </Box>
           </Grid>
-        </Paper>
+          <Grid item xs>
+            <Box m={2} className={classes.mainBox}>
+              {/*<MySelectNoLabel defaultValue={"auto_detect"}>
+                <MenuItem value="auto_detect">
+                  Use enabled proxies by patterns and order
+                </MenuItem>
+                <MenuItem value="system">
+                  Off (use Chrome settings)
+                </MenuItem>
+                {proxies.map((proxy) => {
+                  return (
+                    <MenuItem key={proxy.id} value={proxy.id}>
+                      {proxy.title}
+                    </MenuItem>
+                  );
+                })}
+              </MySelectNoLabel>*/}
+              <Grid container direction={'column'}>
+                {proxies.map((proxy) => {
+                  const isFirst = proxies.indexOf(proxy) === 0;
+                  const isLast = proxies.indexOf(proxy) === proxies.length - 1;
+
+                  return (
+                    <Grid item key={proxy.id}>
+                      <ProxyItem
+                        proxy={proxy} isFirst={isFirst} isLast={isLast}
+                        onDelete={handleProxyDelete}
+                        onMove={handleMove}
+                        onEnabledChange={handleEnabledChange}
+                      />
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Box>
+          </Grid>
+        </Grid>
       </Box>
     </>
   );

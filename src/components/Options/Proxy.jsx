@@ -35,8 +35,8 @@ const useStyles = makeStyles(() => {
     button: {
       margin: '8px',
     },
-    rightBox: {
-      minHeight: '432px',
+    hidden: {
+      visibility: 'hidden',
     }
   };
 });
@@ -204,99 +204,99 @@ const ProxyLoaded = React.memo(({proxy}) => {
     });
   }, []);
 
+  const isDirect = noProxyTypes.includes(type);
+
   return (
     <>
       <Header title={proxy.id ? 'Edit proxy' : 'Add Proxy'}/>
-      <Box p={2}>
-        <Paper>
-          <form ref={refForm} onSubmit={handleSubmit}>
-            <Grid container>
-              <Grid item xs={6}>
-                <Box m={2}>
-                  <MyInput
-                    label={'Title (optional)'}
-                    placeholder={'title'}
-                    defaultValue={proxy.title}
-                    name={'title'}
-                  />
-                  <MyColorInput
-                    label={'Color'}
-                    value={proxy.color}
-                    name={'color'}
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={6} className={classes.rightBox}>
-                <Box m={2}>
-                  <MySelect onChange={handleChangeType} name={'type'} label={'Proxy type'} defaultValue={proxy.type}>
-                    <MenuItem value="http">HTTP</MenuItem>
-                    <MenuItem value="https">HTTPS</MenuItem>
-                    <MenuItem value="socks4">SOCKS4</MenuItem>
-                    <MenuItem value="socks5">SOCKS5</MenuItem>
-                    <MenuItem value="direct">Direct (no proxy)</MenuItem>
-                  </MySelect>
-                  {!noProxyTypes.includes(type) && (
-                    <>
-                      <MyInput
-                        label="Proxy IP address or DNS name"
-                        placeholder="111.111.111.111, www.example.com"
-                        defaultValue={proxy.host}
-                        name={'host'}
-                        isError={!isValidHost}
-                      />
-                      <MyInput
-                        label="Port"
-                        placeholder={'3128'}
-                        defaultValue={String(proxy.port)}
-                        name={'port'}
-                        isError={!isValidPort}
-                      />
-                    </>
-                  )}
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <Box mx={2} mb={2} className={classes.actionBox}>
-                  <Button
-                    component={Link}
-                    to={'/'}
-                    variant="contained"
-                    className={classes.button}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSaveAndAddAnother}
-                    variant="contained"
-                    className={classes.button}
-                    color="secondary"
-                  >
-                    Save & Add another
-                  </Button>
-                  <Button
-                    onClick={handleSaveAndEditPatterns}
-                    variant="contained"
-                    className={classes.button}
-                    color="secondary"
-                  >
-                    Save & Edit patterns
-                  </Button>
-                  <Button onClick={handleSave} variant="contained" className={classes.button} color="primary">
-                    Save
-                  </Button>
-                </Box>
-              </Grid>
+      <Box component={Paper} m={2}>
+        <form ref={refForm} onSubmit={handleSubmit}>
+          <Grid container>
+            <Grid item xs={6}>
+              <Box m={2}>
+                <MyInput
+                  label={'Title (optional)'}
+                  placeholder={'title'}
+                  defaultValue={proxy.title}
+                  name={'title'}
+                />
+                <MyColorInput
+                  label={'Color'}
+                  value={proxy.color}
+                  name={'color'}
+                />
+              </Box>
             </Grid>
-          </form>
-        </Paper>
+            <Grid item xs={6}>
+              <Box m={2}>
+                <MySelect onChange={handleChangeType} name={'type'} label={'Proxy type'} defaultValue={proxy.type}>
+                  <MenuItem value="http">HTTP</MenuItem>
+                  <MenuItem value="https">HTTPS</MenuItem>
+                  <MenuItem value="socks4">SOCKS4</MenuItem>
+                  <MenuItem value="socks5">SOCKS5</MenuItem>
+                  <MenuItem value="direct">Direct (no proxy)</MenuItem>
+                </MySelect>
+                <MyInput
+                  label="Proxy IP address or DNS name"
+                  placeholder="111.111.111.111, www.example.com"
+                  defaultValue={proxy.host}
+                  name={'host'}
+                  isError={!isValidHost}
+                  hidden={isDirect}
+                />
+                <MyInput
+                  label="Port"
+                  placeholder={'3128'}
+                  defaultValue={String(proxy.port)}
+                  name={'port'}
+                  isError={!isValidPort}
+                  hidden={isDirect}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Box mx={2} mb={2} className={classes.actionBox}>
+                <Button
+                  component={Link}
+                  to={'/'}
+                  variant="contained"
+                  className={classes.button}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveAndAddAnother}
+                  variant="contained"
+                  className={classes.button}
+                  color="secondary"
+                >
+                  Save & Add another
+                </Button>
+                <Button
+                  onClick={handleSaveAndEditPatterns}
+                  variant="contained"
+                  className={classes.button}
+                  color="secondary"
+                >
+                  Save & Edit patterns
+                </Button>
+                <Button onClick={handleSave} variant="contained" className={classes.button} color="primary">
+                  Save
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </form>
       </Box>
     </>
   );
 });
 
-const MyInput = React.memo(({label, isError = false, ...props}) => {
+const MyInput = React.memo(({label, isError = false, hidden, ...props}) => {
+  const classes = useStyles();
+
   return (
-    <FormControl fullWidth margin={'dense'}>
+    <FormControl fullWidth margin={'dense'} className={hidden ? classes.hidden : ''}>
       <Typography variant={"subtitle1"}>
         {label}
       </Typography>

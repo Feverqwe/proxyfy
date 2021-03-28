@@ -157,65 +157,64 @@ const PatternsLoaded = React.memo(({proxy}) => {
   return (
     <>
       <Header title={'Edit patterns'}/>
-      <Box p={2}>
-        <Paper>
-          <Grid container>
-            <Grid item xs={12}>
-              <Box m={2}>
-                <Box my={2}>
-                  <Typography variant={'h5'}>
-                    White Patterns
-                  </Typography>
-                  <PatternList ref={refWhiteRules} list={proxy.whitePatterns}/>
-                  <Box my={2} className={classes.center}>
-                    Add whitelist pattern to match all URLs
-                    <Button onClick={handleWhitelistMatchAll} variant="contained" size={'small'} className={classes.button} color="secondary">
-                      Add
-                    </Button>
-                  </Box>
-                </Box>
-                <Typography variant={'h5'}>
-                  Black Patterns
-                </Typography>
-                <PatternList ref={refBlackRules} list={proxy.blackPatterns}/>
-                <Box my={2} className={classes.center}>
-                  Add black patterns to prevent this proxy being used for localhost & intranet/private IP addresses
-                  <Button onClick={handleBlacklistLocalhost} variant="contained" size={'small'} className={classes.button} color="secondary">
-                    Add
-                  </Button>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box mx={2} mb={2} className={classes.actionBox}>
-                <Button
-                  component={Link}
-                  to={'/'}
-                  variant="contained"
-                  className={classes.button}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleNewWhite} variant="contained" className={classes.button} color="secondary">
-                  New White
-                </Button>
-                <Button onClick={handleNewBlack} variant="contained" className={classes.button} color="secondary">
-                  New Black
-                </Button>
-                <Button onClick={handleSave} variant="contained" className={classes.button} color="primary">
-                  Save
+      <Box component={Paper} m={2}>
+        <Grid container>
+          <Grid item xs={12}>
+            <Box m={2}>
+              <Typography variant={'h5'}>
+                White Patterns
+              </Typography>
+              <PatternList ref={refWhiteRules} list={proxy.whitePatterns}/>
+              <Box my={2} className={classes.center}>
+                Add whitelist pattern to match all URLs
+                <Button onClick={handleWhitelistMatchAll} variant="contained" size={'small'}
+                        className={classes.button} color="secondary">
+                  Add
                 </Button>
               </Box>
-            </Grid>
+            </Box>
+            <Box m={2}>
+              <Typography variant={'h5'}>
+                Black Patterns
+              </Typography>
+              <PatternList ref={refBlackRules} list={proxy.blackPatterns}/>
+              <Box my={2} className={classes.center}>
+                Add black patterns to prevent this proxy being used for localhost & intranet/private IP addresses
+                <Button onClick={handleBlacklistLocalhost} variant="contained" size={'small'} className={classes.button}
+                        color="secondary">
+                  Add
+                </Button>
+              </Box>
+            </Box>
           </Grid>
-        </Paper>
+          <Grid item xs={12}>
+            <Box mx={2} mb={2} className={classes.actionBox}>
+              <Button
+                component={Link}
+                to={'/'}
+                variant="contained"
+                className={classes.button}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleNewWhite} variant="contained" className={classes.button} color="secondary">
+                New White
+              </Button>
+              <Button onClick={handleNewBlack} variant="contained" className={classes.button} color="secondary">
+                New Black
+              </Button>
+              <Button onClick={handleSave} variant="contained" className={classes.button} color="primary">
+                Save
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
       </Box>
     </>
   );
 });
 
 const PatternList = React.memo(React.forwardRef(({list}, ref) => {
-  const classes = useStyles();
   const [scope] = React.useState({});
   const [patterns, setPatterns] = React.useState(list);
 
