@@ -148,12 +148,16 @@ export class Background {
         };
         break;
       }
+      case "direct":
       case "fixed_servers": {
         const config = await getConfig();
-        const proxy = config.proxies.find(proxy => proxy.id === id);
+        let proxy = config.proxies.find(proxy => proxy.id === id);
+        if (!proxy && mode === 'direct') {
+          proxy = config.proxies.find(proxy => proxy.type === 'direct');
+        }
         if (proxy) {
           if (proxy.type === 'direct') {
-            await promisifyApi('chrome.storage.local.set')({lastDirectId: id});
+            await promisifyApi('chrome.storage.local.set')({lastDirectId: proxy.id});
             value = {
               mode: 'direct',
             };

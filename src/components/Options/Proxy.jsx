@@ -13,7 +13,7 @@ import {
   Typography
 } from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
-import {TwitterPicker} from "react-color";
+import {SliderPicker} from "react-color";
 import Header from "../Header";
 import {Redirect, useHistory, useLocation} from "react-router";
 import qs from "querystring-es3";
@@ -318,6 +318,10 @@ const MyColorInput = React.memo(({label, value, ...props}) => {
     setColor(hex);
   }, []);
 
+  const handleChange = React.useCallback((e) => {
+    setColor(e.target.value);
+  }, []);
+
   return (
     <>
       <FormControl fullWidth margin={'dense'}>
@@ -332,14 +336,14 @@ const MyColorInput = React.memo(({label, value, ...props}) => {
           }}
           onClick={handleClick}
           value={color}
-          disabled
+          onChange={handleChange}
           {...props}
         />
       </FormControl>
       {showPicker && (
-        <TwitterPicker
+        <SliderPicker
           color={color}
-          onChangeComplete={handleChangeColor}
+          onChange={handleChangeColor}
         />
       )}
     </>

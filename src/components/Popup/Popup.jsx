@@ -72,13 +72,13 @@ const Popup = React.memo(() => {
     <Box component={Paper} className={classes.box}>
       <List component="nav" disablePadding>
         {defaultItems.map((item, index) => {
-          const checked = state.mode === item.mode;
+          const checked = state && state.mode === item.mode;
           return (
             <ProxyItem key={index} item={item} checked={checked} mode={item.mode} onClick={handleClick}/>
           )
         })}
         {proxies.map((item) => {
-          const checked = state.id === item.id;
+          const checked = state && state.id === item.id;
           return (
             <ProxyItem key={'_' + item.id} item={item} checked={checked} mode={'fixed_servers'} onClick={handleClick}/>
           )
