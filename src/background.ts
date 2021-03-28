@@ -50,7 +50,7 @@ export class Background {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       switch (areaName) {
         case 'sync': {
-          if (changes.config) {
+          if (changes.proxies) {
             this.applyConfig().catch((err) => {
               console.error('applyConfig error: %O', err);
             });
@@ -126,9 +126,12 @@ export class Background {
 
   async applyConfig() {
     const state = await getCurrentState();
+    // console.log('applyConfig', state);
     if (!state) return;
 
     await this.setProxy(state.mode, state.id);
+
+    await this.syncUiState();
   }
 
   async setProxy(mode: string, id?: string) {
@@ -164,7 +167,7 @@ export class Background {
         }
         break;
       }
-      case "patterns": {
+      case "pac_script": {
         const config = await getConfig();
         value = {
           mode: 'pac_script',

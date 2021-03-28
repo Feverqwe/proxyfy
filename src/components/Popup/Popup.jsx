@@ -12,7 +12,7 @@ const useStyles = makeStyles(() => {
 });
 
 const defaultItems = [
-  {title: 'Use enabled proxies by patterns and order', mode: 'patterns', id: 'patterns'},
+  {title: 'Use enabled proxies by patterns and order', mode: 'pac_script', id: 'pac_script'},
   {title: 'Off (use Chrome settings)', mode: 'auto_detect', id: 'auto_detect'},
 ];
 
