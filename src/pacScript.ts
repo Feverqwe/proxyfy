@@ -8,11 +8,11 @@ FindProxyForURL = (function () {
 
   const rules = config.rules.map((rule) => {
     const type = rule.type;
-    let host;
-    let whitePatterns= rule.whitePatterns;
-    let blackPatterns= rule.blackPatterns;
+    let address;
+    const whitePatterns = rule.whitePatterns;
+    const blackPatterns = rule.blackPatterns;
     if (rule.type !== 'direct') {
-      host = rule.host;
+      address = [rule.host, rule.port].join(':');
     }
     const [whiteRe, blackRe] = [whitePatterns, blackPatterns].map((patterns) => {
       const wildcardPatterns: string[] = [];
@@ -42,7 +42,7 @@ FindProxyForURL = (function () {
       whiteRe,
       blackRe,
       type: type.toUpperCase(),
-      host,
+      address,
     };
   });
 
@@ -62,7 +62,7 @@ FindProxyForURL = (function () {
         if (currentRule.type === 'DIRECT') {
           return currentRule.type;
         } else {
-          return `${currentRule.type} ${currentRule.host!}`;
+          return `${currentRule.type} ${currentRule.address}`;
         }
       }
     }

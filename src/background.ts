@@ -16,6 +16,7 @@ export type PacScript = {
   rules: ({
     type: 'http' | 'https' | 'socks4' | 'socks5',
     host: string,
+    port: number,
     whitePatterns: PacScriptPattern[],
     blackPatterns: PacScriptPattern[],
   } | {
@@ -224,6 +225,7 @@ async function getPacScript(proxies: Config['proxies']) {
         return rules.push({
           type: proxy.type,
           host: proxy.host,
+          port: proxy.port,
           whitePatterns: getPatterns(proxy.whitePatterns),
           blackPatterns: getPatterns(proxy.blackPatterns),
         });
