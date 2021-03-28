@@ -1,9 +1,9 @@
 import * as React from "react";
-import {useEffect} from "react";
 import {Box, List, ListItem, ListItemText, makeStyles, Paper} from "@material-ui/core";
-import getConfig from "../../tools/getConfig";
 import promiseTry from "../../tools/promiseTry";
 import promisifyApi from "../../tools/promisifyApi";
+import useActualState from "../useActualState";
+import useActualProxies from "../useActualProxies";
 
 const useStyles = makeStyles(() => {
   return {
@@ -31,31 +31,14 @@ const defaultItems = [
 const Popup = React.memo(() => {
   const classes = useStyles();
 
-  const [proxies, setProxies] = React.useState(null);
-  const [state, setState] = React.useState({});
-
-  useEffect(() => {
-    promiseTry(async () => {
-      const [state, {proxies}] = await Promise.all([
-        getState(),
-        getConfig(),
-      ]);
-      setState(state);
-      setProxies(proxies);
-    }).catch((err) => {
-      console.error('getConfig error: %O', err);
-    });
-  }, []);
+  const state = useActualState();
+  const proxies = useActualProxies();
 
   const handleClick = React.useCallback((mode, id) => {
     return promiseTry(async () => {
       await promisifyApi('chrome.runtime.sendMessage')({
         action: 'set', mode, id
       });
-
-      const state = await getState();
-
-      setState(state);
     });
   }, []);
 

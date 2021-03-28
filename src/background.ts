@@ -114,6 +114,8 @@ export class Background {
     chrome.action.setIcon({
       imageData: icon
     });
+
+    chrome.runtime.sendMessage({action: 'stateChanges'});
   }
 
   async applyProxy(mode: string, id?: string) {
@@ -129,6 +131,8 @@ export class Background {
     if (!state) return;
 
     await this.setProxy(state.mode, state.id);
+
+    chrome.runtime.sendMessage({action: 'proxiesChanges'});
 
     await this.syncUiState();
   }
