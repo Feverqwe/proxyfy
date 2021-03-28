@@ -22,6 +22,7 @@ import ConfigStruct, {DefaultProxyStruct} from "../../tools/ConfigStruct";
 import promisifyApi from "../../tools/promisifyApi";
 import {Link} from "react-router-dom";
 import getId from "../../tools/getId";
+import getObjectId from "../../tools/getObjectId";
 
 const noProxyTypes = ['direct'];
 
@@ -74,6 +75,10 @@ const Proxy = React.memo(() => {
     }
   }, [location.search]);
 
+  const onReset = React.useCallback(() => {
+    setProxy(DefaultProxyStruct.create({}));
+  }, []);
+
   if (!proxy) return null;
 
   if (isRedirect) {
@@ -83,11 +88,11 @@ const Proxy = React.memo(() => {
   }
 
   return (
-    <ProxyLoaded key={proxy.id} proxy={proxy}/>
+    <ProxyLoaded key={getObjectId(proxy)} proxy={proxy} onReset={onReset}/>
   );
 });
 
-const ProxyLoaded = React.memo(({proxy}) => {
+const ProxyLoaded = React.memo(({proxy, onReset}) => {
   const history = useHistory();
   const classes = useStyles();
 
@@ -197,7 +202,7 @@ const ProxyLoaded = React.memo(({proxy}) => {
       if (proxy.id) {
         history.push('/proxy');
       } else {
-        location.reload();
+        onReset();
       }
     }).catch((err) => {
       console.error('Save error: %O', err);
