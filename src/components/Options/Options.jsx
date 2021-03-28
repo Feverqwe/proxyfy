@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useEffect} from "react";
-import {Box, Button, Checkbox, FormControl, Grid, makeStyles, Paper, Select} from "@material-ui/core";
+import {Box, Button, Checkbox, Grid, makeStyles, Paper} from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
 import {Link} from "react-router-dom";
 import Header from "../Header";
@@ -12,6 +12,7 @@ import qs from "querystring-es3";
 import promisifyApi from "../../tools/promisifyApi";
 import ConfigStruct from "../../tools/ConfigStruct";
 import Menu from "./Menu";
+import ProxySelect from "./ProxySelect";
 
 const useStyles = makeStyles(() => {
   return {
@@ -93,21 +94,7 @@ const Options = React.memo(() => {
           </Grid>
           <Grid item xs>
             <Box m={2} className={classes.mainBox}>
-              {/*<MySelectNoLabel defaultValue={"auto_detect"}>
-                <MenuItem value="auto_detect">
-                  Use enabled proxies by patterns and order
-                </MenuItem>
-                <MenuItem value="system">
-                  Off (use Chrome settings)
-                </MenuItem>
-                {proxies.map((proxy) => {
-                  return (
-                    <MenuItem key={proxy.id} value={proxy.id}>
-                      {proxy.title}
-                    </MenuItem>
-                  );
-                })}
-              </MySelectNoLabel>*/}
+              <ProxySelect />
               <Grid container direction={'column'}>
                 {proxies.map((proxy) => {
                   const isFirst = proxies.indexOf(proxy) === 0;
@@ -197,20 +184,6 @@ const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabl
         </IconButton>
       </Grid>
     </Grid>
-  );
-});
-
-const MySelectNoLabel = React.memo(({children, ...props}) => {
-  return (
-    <FormControl style={{width: '350px'}} margin={'dense'}>
-      <Select
-        variant="outlined"
-        size="small"
-        {...props}
-      >
-        {children}
-      </Select>
-    </FormControl>
   );
 });
 

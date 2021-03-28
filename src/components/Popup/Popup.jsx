@@ -1,6 +1,5 @@
 import * as React from "react";
-import {Box, List, ListItem, ListItemText, makeStyles, Paper} from "@material-ui/core";
-import promiseTry from "../../tools/promiseTry";
+import {Box, Divider, List, ListItem, ListItemText, makeStyles, Paper} from "@material-ui/core";
 import promisifyApi from "../../tools/promisifyApi";
 import useActualState from "../useActualState";
 import useActualProxies from "../useActualProxies";
@@ -35,10 +34,10 @@ const Popup = React.memo(() => {
   const proxies = useActualProxies();
 
   const handleClick = React.useCallback((mode, id) => {
-    return promiseTry(async () => {
-      await promisifyApi('chrome.runtime.sendMessage')({
-        action: 'set', mode, id
-      });
+    promisifyApi('chrome.runtime.sendMessage')({
+      action: 'set', mode, id
+    }).catch((err) => {
+      console.error('Set proxy error: %O', err);
     });
   }, []);
 
@@ -59,6 +58,7 @@ const Popup = React.memo(() => {
             <ProxyItem key={'_' + item.id} item={item} checked={checked} mode={'fixed_servers'} onClick={handleClick}/>
           )
         })}
+        <Divider />
         <ListItem
           button
           component={'a'}
@@ -92,14 +92,5 @@ const ProxyItem = React.memo(({item, mode, checked, onClick}) => {
     </ListItem>
   );
 });
-
-/**
- * @return {Promise<null | {mode: string, id?: string}>}
- */
-function getState() {
-  return promisifyApi('chrome.runtime.sendMessage')({
-    action: 'get'
-  });
-}
 
 export default Popup;
