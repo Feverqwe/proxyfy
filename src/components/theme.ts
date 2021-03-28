@@ -1,9 +1,9 @@
 import createMuiTheme from "@material-ui/core/styles/createMuiTheme";
 import {amber, blue} from "@material-ui/core/colors";
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
+import "@fontsource/roboto/latin-300.css";
+import "@fontsource/roboto/latin-400.css";
+import "@fontsource/roboto/latin-500.css";
+import "@fontsource/roboto/latin-700.css";
 
 const themeType = 'light';
 
