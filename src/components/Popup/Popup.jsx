@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useEffect} from "react";
-import {Box, List, ListItem, ListItemText, makeStyles} from "@material-ui/core";
+import {Box, List, ListItem, ListItemText, makeStyles, Paper} from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
 
 const useStyles = makeStyles(() => {
@@ -12,8 +12,8 @@ const useStyles = makeStyles(() => {
 });
 
 const defaultItems = [
-  {title: 'Use enabled proxies by patterns and order', mode: 'auto_detect', id: 'auto_detect'},
-  {title: 'Off (use Chrome settings)', mode: 'off', id: 'off'},
+  {title: 'Use enabled proxies by patterns and order', mode: 'patterns', id: 'patterns'},
+  {title: 'Off (use Chrome settings)', mode: 'auto_detect', id: 'auto_detect'},
 ];
 
 const Popup = React.memo(() => {
@@ -40,16 +40,16 @@ const Popup = React.memo(() => {
   }, []);
 
   return (
-    <Box className={classes.box}>
+    <Box component={Paper} m={1} className={classes.box}>
       <List component="nav" disablePadding>
-        {proxies.map((item) => {
-          return (
-            <ProxyItem key={'_' + item.id} item={item} isProxy={true}/>
-          )
-        })}
         {defaultItems.map((item) => {
           return (
-            <ProxyItem key={item.id} item={item}/>
+            <ProxyItem key={item.id} item={item} mode={item.mode}/>
+          )
+        })}
+        {proxies.map((item) => {
+          return (
+            <ProxyItem key={'_' + item.id} item={item} mode={'fixed_servers'}/>
           )
         })}
         <ListItem
@@ -65,9 +65,18 @@ const Popup = React.memo(() => {
   );
 });
 
-const ProxyItem = React.memo(({item, isProxy = false}) => {
+const ProxyItem = React.memo(({item, mode}) => {
+  const handleClick = React.useCallback((e) => {
+    e.preventDefault();
+    const id = item.id;
+    chrome.runtime.sendMessage({
+      action: 'set',
+      mode, id,
+    });
+  }, [item, mode]);
+
   return (
-    <ListItem button>
+    <ListItem onClick={handleClick} button>
       <ListItemText primary={item.title}/>
     </ListItem>
   );

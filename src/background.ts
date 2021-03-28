@@ -230,7 +230,7 @@ async function getPacScript(proxies: Config['proxies']) {
     .then(r => r.text())
     .then(t => t.replace(/[^\x00-\x7F]/g, ''));
 
-  return `let FindProxyForURL=null;\nlet Config=${JSON.stringify(config)};\n${pacScript};`;
+  return `var FindProxyForURL=null;\nvar Config=${JSON.stringify(config)};\n${pacScript};`;
 }
 
 function getPatterns(patterns: ProxyPattern[]): PacScriptPattern[] {
