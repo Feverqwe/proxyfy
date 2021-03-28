@@ -27,11 +27,7 @@ export type PacScript = {
 };
 
 export class Background {
-  defaultBadgeColor!: ColorArray;
-
   async init() {
-    this.defaultBadgeColor = await promisifyApi<ColorArray>('chrome.action.getBadgeBackgroundColor')({});
-
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       switch (message.action) {
         case 'set': {
@@ -76,7 +72,7 @@ export class Background {
   async syncUiState() {
     const state = await getCurrentState();
 
-    let badgeColor = this.defaultBadgeColor;
+    let badgeColor: ColorArray = [0,0,0,0];
     let badgeText = '';
     let icon = getExtensionIcon();
 
