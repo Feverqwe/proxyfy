@@ -13,16 +13,16 @@ import {
   Typography
 } from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
-import {Link} from "react-router-dom";
 import {TwitterPicker} from "react-color";
 import Header from "../Header";
-import {useHistory, useLocation} from "react-router";
+import {Redirect, useHistory, useLocation} from "react-router";
 import qs from "querystring-es3";
 import promiseTry from "../../tools/promiseTry";
-import ConfigStruct, {DefaultProxyStruct, ProxyStruct} from "../../tools/ConfigStruct";
+import ConfigStruct, {DefaultProxyStruct} from "../../tools/ConfigStruct";
 import promisifyApi from "../../tools/promisifyApi";
+import {Link} from "react-router-dom";
 
-const directTypes = ['system', 'direct'];
+const noProxyTypes = ['direct'];
 
 const useStyles = makeStyles(() => {
   return {
@@ -33,6 +33,9 @@ const useStyles = makeStyles(() => {
     },
     button: {
       margin: '8px',
+    },
+    rightBox: {
+      minHeight: '432px',
     }
   };
 });
@@ -40,21 +43,27 @@ const useStyles = makeStyles(() => {
 const Proxy = React.memo(() => {
   const location = useLocation();
   const [proxy, setProxy] = React.useState(null);
+  const [isRedirect, setRedirect] = React.useState(null);
 
   useEffect(() => {
     let isMounted = true;
 
     const query = qs.parse(location.search.substr(1));
     promiseTry(() => {
-      if (query.proxyId) {
+      if (query.id) {
         return getConfig().then(({proxies}) => {
-          return proxies.find(p => p.id === query.proxyId);
+          return proxies.find(p => p.id === query.id);
         });
       }
+      return null;
     }).then((proxy) => {
       if (!isMounted) return;
-      const currentProxy = DefaultProxyStruct.create(proxy || {});
-      setProxy(currentProxy);
+      if (proxy === undefined) {
+        setRedirect(true);
+      } else {
+        const currentProxy = DefaultProxyStruct.create(proxy || {});
+        setProxy(currentProxy);
+      }
     }).catch((err) => {
       console.error('getConfig error: %O', err);
     });
@@ -65,6 +74,12 @@ const Proxy = React.memo(() => {
   }, [location.search]);
 
   if (!proxy) return null;
+
+  if (isRedirect) {
+    return (
+      <Redirect to={'/'} />
+    );
+  }
 
   return (
     <ProxyLoaded key={proxy.id} proxy={proxy}/>
@@ -81,75 +96,74 @@ const ProxyLoaded = React.memo(({proxy}) => {
   const [type, setType] = React.useState(proxy.type);
 
   const save = React.useMemo(() => {
-    return () => {
-      return promiseTry(async () => {
-        const {
-          title: titleEl, color: colorEl,
-          type: typeEl, host: hostEl, port: portEl,
-          username: usernameEl, password: passwordEl
-        } = refForm.current.elements;
+    return async () => {
+      const {
+        title: titleEl, color: colorEl,
+        type: typeEl, host: hostEl, port: portEl,
+        username: usernameEl, password: passwordEl
+      } = refForm.current.elements;
 
-        const data = {};
-        [titleEl, typeEl, colorEl, hostEl, portEl, usernameEl, passwordEl].forEach((element) => {
-          if (!element) return;
-          const key = element.name;
-          let value = element.value;
-          if (['port'].includes(key)) {
-            value = parseInt(value, 10);
-          }
-          data[key] = value;
-        });
+      const data = {};
+      [titleEl, typeEl, colorEl, hostEl, portEl, usernameEl, passwordEl].forEach((element) => {
+        if (!element) return;
+        const key = element.name;
+        let value = element.value;
+        if (['port'].includes(key)) {
+          value = parseInt(value, 10);
+        }
+        data[key] = value;
+      });
 
-        if (directTypes.includes(data.type)) {
-          data.host = '';
-          data.port = 0;
-          setValidHost(true);
-          setValidPort(true);
+      if (noProxyTypes.includes(data.type)) {
+        setValidHost(true);
+        setValidPort(true);
+      } else {
+        let hasErrors = false;
+        if (!data.host) {
+          hasErrors = true;
+          setValidHost(false);
         } else {
-          let hasErrors = false;
-          if (!data.host) {
-            hasErrors = true;
-            setValidHost(false);
-          } else {
-            setValidHost(true);
-          }
-          if (!data.port) {
-            hasErrors = true;
-            setValidPort(false);
-          } else {
-            setValidPort(true);
-          }
-          if (hasErrors) return;
+          setValidHost(true);
         }
-
-        if (!data.username) {
-          delete data.password;
-          delete data.username;
+        if (!data.port) {
+          hasErrors = true;
+          setValidPort(false);
+        } else {
+          setValidPort(true);
         }
+        if (hasErrors) {
+          throw new Error('Incorrect data');
+        }
+      }
 
-        if (!data.title) {
+      if (!data.username) {
+        delete data.password;
+        delete data.username;
+      }
+
+      if (!data.title) {
+        if (data.type === 'direct') {
+          data.title = 'Direct';
+        } else {
           data.title = [data.host, data.port].join(':');
         }
+      }
 
-        const changedProxy = Object.assign({}, proxy, data);
-        ProxyStruct.assert(changedProxy);
+      const changedProxy = Object.assign({}, proxy, data);
 
-        const config = await getConfig();
-        const pos = config.proxies.indexOf(proxy);
-        if (pos !== -1) {
-          config.proxies.splice(pos, 1, changedProxy);
-        } else {
-          changedProxy.id = '' + Date.now();
-          config.proxies.push(changedProxy);
-        }
+      const config = await getConfig();
+      const existsProxy = config.proxies.find(p => p.id === proxy.id);
+      const pos = config.proxies.indexOf(existsProxy);
+      if (pos !== -1) {
+        config.proxies.splice(pos, 1, changedProxy);
+      } else {
+        changedProxy.id = '' + Date.now();
+        config.proxies.push(changedProxy);
+      }
+      ConfigStruct.assert(config);
+      await promisifyApi('chrome.storage.sync.set')(config);
 
-        await promisifyApi('chrome.storage.sync.set')(config);
-
-        return true;
-      }).catch((err) => {
-        console.error('Save error: %O', err);
-        return false;
-      });
+      return changedProxy.id;
     };
   }, []);
 
@@ -166,29 +180,30 @@ const ProxyLoaded = React.memo(({proxy}) => {
     e.preventDefault();
     save().then(() => {
       history.push('/');
+    }).catch((err) => {
+      console.error('Save error: %O', err);
     });
   }, []);
 
   const handleSaveAndEditPatterns = React.useCallback((e) => {
     e.preventDefault();
-    save().then(() => {
-      history.push('/patterns');
+    save().then((id) => {
+      history.push('/patterns?' + qs.stringify({id}));
+    }).catch((err) => {
+      console.error('Save error: %O', err);
     });
   }, []);
 
   const handleSaveAndAddAnother = React.useCallback((e) => {
     e.preventDefault();
-    save();
-  }, []);
-
-  const handleCancel = React.useCallback((e) => {
-    e.preventDefault();
-    history.push('/');
+    save().catch((err) => {
+      console.error('Save error: %O', err);
+    });
   }, []);
 
   return (
     <>
-      <Header title={'Add Proxy'}/>
+      <Header title={proxy.id ? 'Edit proxy' : 'Add Proxy'}/>
       <Box p={2}>
         <Paper>
           <form ref={refForm} onSubmit={handleSubmit}>
@@ -208,17 +223,16 @@ const ProxyLoaded = React.memo(({proxy}) => {
                   />
                 </Box>
               </Grid>
-              <Grid item xs={6}>
+              <Grid item xs={6} className={classes.rightBox}>
                 <Box m={2}>
                   <MySelect onChange={handleChangeType} name={'type'} label={'Proxy type'} defaultValue={proxy.type}>
                     <MenuItem value="http">HTTP</MenuItem>
                     <MenuItem value="https">HTTPS</MenuItem>
                     <MenuItem value="socks4">SOCKS4</MenuItem>
                     <MenuItem value="socks5">SOCKS5</MenuItem>
-                    <MenuItem value="system">System (use system settings)</MenuItem>
                     <MenuItem value="direct">Direct (no proxy)</MenuItem>
                   </MySelect>
-                  {!directTypes.includes(type) && (
+                  {!noProxyTypes.includes(type) && (
                     <>
                       <MyInput
                         label="Proxy IP address or DNS name"
@@ -254,7 +268,8 @@ const ProxyLoaded = React.memo(({proxy}) => {
               <Grid item xs={12}>
                 <Box mx={2} mb={2} className={classes.actionBox}>
                   <Button
-                    onClick={handleCancel}
+                    component={Link}
+                    to={'/'}
                     variant="contained"
                     className={classes.button}
                   >
@@ -268,16 +283,14 @@ const ProxyLoaded = React.memo(({proxy}) => {
                   >
                     Save & Add another
                   </Button>
-                  {!directTypes.includes(type) && (
-                    <Button
-                      onClick={handleSaveAndEditPatterns}
-                      variant="contained"
-                      className={classes.button}
-                      color="secondary"
-                    >
-                      Save & Edit patterns
-                    </Button>
-                  )}
+                  <Button
+                    onClick={handleSaveAndEditPatterns}
+                    variant="contained"
+                    className={classes.button}
+                    color="secondary"
+                  >
+                    Save & Edit patterns
+                  </Button>
                   <Button onClick={handleSave} variant="contained" className={classes.button} color="primary">
                     Save
                   </Button>

@@ -23,6 +23,9 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import qs from "querystring-es3";
+import promisifyApi from "../../tools/promisifyApi";
+import ConfigStruct from "../../tools/ConfigStruct";
 
 const useStyles = makeStyles(() => {
   return {
@@ -34,8 +37,10 @@ const useStyles = makeStyles(() => {
 
 const Options = React.memo(() => {
   const classes = useStyles();
-
+  const [scope] = React.useState({});
   const [proxies, setProxies] = React.useState([]);
+
+  scope.proxies = proxies;
 
   useEffect(() => {
     let isMounted = true;
@@ -48,6 +53,46 @@ const Options = React.memo(() => {
     return () => {
       isMounted = false;
     }
+  }, []);
+
+  const handleProxyDelete = React.useCallback((id) => {
+    const {proxies} = scope;
+    const proxy = proxies.find(p => p.id === id);
+    const pos = proxies.indexOf(proxy);
+    if (pos === -1) return;
+    proxies.splice(pos, 1);
+    ConfigStruct.assert({proxies});
+    return promisifyApi('chrome.storage.sync.set')({proxies}).then(() => {
+      setProxies(proxies.slice(0));
+    });
+  }, []);
+
+  const handleMove = React.useCallback((isUp, id) => {
+    const {proxies} = scope;
+    const proxy = proxies.find(p => p.id === id);
+    const pos = proxies.indexOf(proxy);
+    if (pos === -1) return;
+    proxies.splice(pos, 1);
+    if (isUp) {
+      proxies.splice(pos - 1, 0, proxy);
+    } else {
+      proxies.splice(pos + 1, 0, proxy);
+    }
+    ConfigStruct.assert({proxies});
+    return promisifyApi('chrome.storage.sync.set')({proxies}).then(() => {
+      setProxies(proxies.slice(0));
+    });
+  }, []);
+
+  const handleEnabledChange = React.useCallback((isEnabled, id) => {
+    const {proxies} = scope;
+    const proxy = proxies.find(p => p.id === id);
+    if (!proxy) return;
+    proxy.enabled = isEnabled;
+    ConfigStruct.assert({proxies});
+    return promisifyApi('chrome.storage.sync.set')({proxies}).then(() => {
+      setProxies(proxies.slice(0));
+    });
   }, []);
 
   return (
@@ -63,9 +108,7 @@ const Options = React.memo(() => {
                     <ListItemIcon>
                       <AddIcon/>
                     </ListItemIcon>
-                    <ListItemText
-                      primary={'Add'}
-                    />
+                    <ListItemText primary={'Add'}/>
                   </ListItem>
                 </List>
               </Box>
@@ -94,45 +137,12 @@ const Options = React.memo(() => {
 
                     return (
                       <Grid item key={proxy.id}>
-                        <Grid container direction="row" spacing={1} justify={'space-between'} alignItems="center">
-                          <Grid item>
-                            <Color color={proxy.color}/>
-                          </Grid>
-                          <Grid item xs>
-                            {proxy.title}
-                          </Grid>
-                          <Grid item xs>
-                            {proxy.host}
-                          </Grid>
-                          <Grid item>
-                            <Checkbox defaultChecked={proxy.enabled}/>
-                          </Grid>
-                          <Grid item>
-                            <Button variant="outlined" size={'small'} color="primary">
-                              Edit
-                            </Button>
-                          </Grid>
-                          <Grid item>
-                            <Button variant="outlined" size={'small'} color="primary">
-                              Patterns
-                            </Button>
-                          </Grid>
-                          <Grid item>
-                            <IconButton size={'small'}>
-                              <DeleteIcon fontSize="small"/>
-                            </IconButton>
-                          </Grid>
-                          <Grid item>
-                            <IconButton disabled={isFirst} size={'small'}>
-                              <ArrowUpwardIcon fontSize="small"/>
-                            </IconButton>
-                          </Grid>
-                          <Grid item>
-                            <IconButton disabled={isLast} size={'small'}>
-                              <ArrowDownwardIcon fontSize="small"/>
-                            </IconButton>
-                          </Grid>
-                        </Grid>
+                        <ProxyItem
+                          proxy={proxy} isFirst={isFirst} isLast={isLast}
+                          onDelete={handleProxyDelete}
+                          onMove={handleMove}
+                          onEnabledChange={handleEnabledChange}
+                        />
                       </Grid>
                     );
                   })}
@@ -143,6 +153,73 @@ const Options = React.memo(() => {
         </Paper>
       </Box>
     </>
+  );
+});
+
+const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabledChange}) => {
+  const handleDelete = React.useCallback((e) => {
+    e.preventDefault();
+    onDelete(proxy.id);
+  }, [proxy, onDelete]);
+
+  const handleMoveUp = React.useCallback((e) => {
+    e.preventDefault();
+    onMove(true, proxy.id);
+  }, [proxy, onMove]);
+
+  const handleMoveDown = React.useCallback((e) => {
+    e.preventDefault();
+    onMove(false, proxy.id);
+  }, [proxy, onMove]);
+
+  const handleEnabledChange = React.useCallback((e) => {
+    onEnabledChange(e.target.checked, proxy.id);
+  }, [proxy, onEnabledChange]);
+
+  return (
+    <Grid container direction="row" spacing={1} justify={'space-between'} alignItems="center">
+      <Grid item>
+        <Color color={proxy.color}/>
+      </Grid>
+      <Grid item xs>
+        {proxy.title}
+      </Grid>
+      <Grid item xs>
+        {proxy.host}
+      </Grid>
+      <Grid item>
+        <Checkbox defaultChecked={proxy.enabled} onChange={handleEnabledChange}/>
+      </Grid>
+      <Grid item>
+        <Button component={Link} to={'/proxy?' + qs.stringify({
+          id: proxy.id,
+        })} variant="outlined" size={'small'} color="primary">
+          Edit
+        </Button>
+      </Grid>
+      <Grid item>
+        <Button component={Link} to={'/patterns?' + qs.stringify({
+          id: proxy.id,
+        })} variant="outlined" size={'small'} color="primary">
+          Patterns
+        </Button>
+      </Grid>
+      <Grid item>
+        <IconButton onClick={handleDelete} size={'small'}>
+          <DeleteIcon fontSize="small"/>
+        </IconButton>
+      </Grid>
+      <Grid item>
+        <IconButton onClick={handleMoveUp} disabled={isFirst} size={'small'}>
+          <ArrowUpwardIcon fontSize="small"/>
+        </IconButton>
+      </Grid>
+      <Grid item>
+        <IconButton onClick={handleMoveDown} disabled={isLast} size={'small'}>
+          <ArrowDownwardIcon fontSize="small"/>
+        </IconButton>
+      </Grid>
+    </Grid>
   );
 });
 

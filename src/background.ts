@@ -10,15 +10,19 @@ import ColorArray = chrome.action.ColorArray;
 
 type ProxyPattern = Infer<typeof ProxyPatternStruct>;
 
-type PacScriptPattern = Pick<ProxyPattern, 'type' | 'pattern'>; //  | 'protocol'
+export type PacScriptPattern = Pick<ProxyPattern, 'type' | 'pattern'>; //  | 'protocol'
 
 export type PacScript = {
-  rules: {
+  rules: ({
     type: 'http' | 'https' | 'socks4' | 'socks5',
     host: string,
     whitePatterns: PacScriptPattern[],
     blackPatterns: PacScriptPattern[],
-  }[],
+  } | {
+    type: 'direct',
+    whitePatterns: PacScriptPattern[],
+    blackPatterns: PacScriptPattern[],
+  })[],
 };
 
 export class Background {
@@ -125,33 +129,30 @@ export class Background {
         };
         break;
       }
-      case "system": {
-        value = {
-          mode: 'system',
-        };
-        break;
-      }
-      case "direct": {
-        value = {
-          mode: 'direct',
-        };
-        break;
-      }
       case "fixed_servers": {
         const config = await getConfig();
         const proxy = config.proxies.find(proxy => proxy.id === id);
         if (proxy) {
-          value = {
-            mode: 'fixed_servers',
-            rules: {
-              singleProxy: {
-                scheme: proxy.type,
-                host: proxy.host,
-                port: proxy.port,
+          if (proxy.type === 'direct') {
+            value = {
+              mode: 'direct',
+              rules: {
+                bypassList: [encodeURIComponent(proxy.id) + '.proxyfy.localhost'],
               },
-              bypassList: [encodeURIComponent(proxy.id) + '.proxyfy.localhost'],
-            },
-          };
+            };
+          } else {
+            value = {
+              mode: 'fixed_servers',
+              rules: {
+                singleProxy: {
+                  scheme: proxy.type,
+                  host: proxy.host,
+                  port: proxy.port,
+                },
+                bypassList: [encodeURIComponent(proxy.id) + '.proxyfy.localhost'],
+              },
+            };
+          }
         }
         break;
       }
@@ -204,12 +205,23 @@ async function getPacScript(proxies: Config['proxies']) {
   proxies.forEach((proxy) => {
     if (!proxy.enabled) return;
 
-    return {
-      type: proxy.type,
-      host: proxy.host,
-      whitePatterns: getPatterns(proxy.whitePatterns),
-      blackPatterns: getPatterns(proxy.blackPatterns),
-    };
+    switch (proxy.type) {
+      case "direct": {
+        return rules.push({
+          type: proxy.type,
+          whitePatterns: getPatterns(proxy.whitePatterns),
+          blackPatterns: getPatterns(proxy.blackPatterns),
+        });
+      }
+      default: {
+        return rules.push({
+          type: proxy.type,
+          host: proxy.host,
+          whitePatterns: getPatterns(proxy.whitePatterns),
+          blackPatterns: getPatterns(proxy.blackPatterns),
+        });
+      }
+    }
   });
 
   const config: PacScript = {rules};

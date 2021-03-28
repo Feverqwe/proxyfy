@@ -22,6 +22,10 @@ import getConfig from "../../tools/getConfig";
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Header from "../Header";
+import {Redirect, useLocation} from "react-router";
+import qs from "querystring-es3";
+import promiseTry from "../../tools/promiseTry";
+import {Link} from "react-router-dom";
 
 const useStyles = makeStyles(() => {
   return {
@@ -40,34 +44,52 @@ const useStyles = makeStyles(() => {
 });
 
 const Patterns = React.memo(() => {
-  const classes = useStyles();
-
-  const [proxies, setProxies] = React.useState([]);
+  const location = useLocation();
+  const [proxy, setProxy] = React.useState(null);
+  const [isRedirect, setRedirect] = React.useState(null);
 
   useEffect(() => {
     let isMounted = true;
-    getConfig().then(({proxies}) => {
+
+    const query = qs.parse(location.search.substr(1));
+    promiseTry(() => {
+      if (query.id) {
+        return getConfig().then(({proxies}) => {
+          return proxies.find(p => p.id === query.id);
+        });
+      }
+      return null;
+    }).then((proxy) => {
       if (!isMounted) return;
-      setProxies(proxies.map((proxy) => {
-        return {
-          id: proxy.id,
-          title: proxy.title,
-        };
-      }));
-    }, (err) => {
+      if (!proxy) {
+        setRedirect(true);
+      } else {
+        setProxy(proxy);
+      }
+    }).catch((err) => {
       console.error('getConfig error: %O', err);
     });
+
     return () => {
       isMounted = false;
     }
-  }, []);
+  }, [location.search]);
 
-  const list = [{
-    name: 'all URLs',
-    pattern: '*',
-    type: 'wildcard',
-    enabled: true,
-  }];
+  if (!proxy) return null;
+
+  if (isRedirect) {
+    return (
+      <Redirect to={'/'} />
+    );
+  }
+
+  return (
+    <PatternsLoaded key={proxy.id} proxy={proxy}/>
+  );
+});
+
+const PatternsLoaded = React.memo(({proxy}) => {
+  const classes = useStyles();
 
   return (
     <>
@@ -81,7 +103,7 @@ const Patterns = React.memo(() => {
                   <Typography variant={'h5'}>
                     White Patterns
                   </Typography>
-                  <PatternList list={list}/>
+                  <PatternList list={proxy.whitePatterns}/>
                   <Box my={2} className={classes.center}>
                     Add whitelist pattern to match all URLs
                     <Button variant="contained" size={'small'} className={classes.button} color="secondary">
@@ -92,7 +114,7 @@ const Patterns = React.memo(() => {
                 <Typography variant={'h5'}>
                   Black Patterns
                 </Typography>
-                <PatternList list={[]}/>
+                <PatternList list={proxy.blackPatterns}/>
                 <Box my={2} className={classes.center}>
                   Add black patterns to prevent this proxy being used for localhost & intranet/private IP addresses
                   <Button variant="contained" size={'small'} className={classes.button} color="secondary">
@@ -103,7 +125,12 @@ const Patterns = React.memo(() => {
             </Grid>
             <Grid item xs={12}>
               <Box mx={2} mb={2} className={classes.actionBox}>
-                <Button variant="contained" className={classes.button}>
+                <Button
+                  component={Link}
+                  to={'/'}
+                  variant="contained"
+                  className={classes.button}
+                >
                   Cancel
                 </Button>
                 <Button variant="contained" className={classes.button} color="secondary">
