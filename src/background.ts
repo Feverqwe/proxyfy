@@ -137,6 +137,12 @@ export class Background {
   async setProxy(mode: string, id?: string) {
     let value = null;
     switch (mode) {
+      case "system": {
+        value = {
+          mode: 'system',
+        };
+        break;
+      }
       case "auto_detect": {
         value = {
           mode: 'auto_detect',

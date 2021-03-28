@@ -12,8 +12,9 @@ const useStyles = makeStyles(() => {
 });
 
 const defaultItems = [
-  {title: 'Use enabled proxies by patterns and order', mode: 'pac_script', id: 'pac_script'},
-  {title: 'Off (use Chrome settings)', mode: 'auto_detect', id: 'auto_detect'},
+  {title: 'Use enabled proxies by patterns and order', mode: 'pac_script'},
+  {title: 'Off (use auto detect)', mode: 'auto_detect'},
+  {title: 'Off (use system settings)', mode: 'system'},
 ];
 
 const Popup = React.memo(() => {
@@ -42,9 +43,9 @@ const Popup = React.memo(() => {
   return (
     <Box component={Paper} m={1} className={classes.box}>
       <List component="nav" disablePadding>
-        {defaultItems.map((item) => {
+        {defaultItems.map((item, index) => {
           return (
-            <ProxyItem key={item.id} item={item} mode={item.mode}/>
+            <ProxyItem key={index} item={item} mode={item.mode}/>
           )
         })}
         {proxies.map((item) => {
