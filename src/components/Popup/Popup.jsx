@@ -9,6 +9,7 @@ const useStyles = makeStyles(() => {
   return {
     box: {
       minWidth: '350px',
+      borderRadius: 0,
     },
     active: {
       color: '#fff',
