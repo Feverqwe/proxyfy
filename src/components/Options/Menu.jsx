@@ -31,7 +31,7 @@ const Menu = React.memo(() => {
         console.error('Import settings error: %O', err);
       });
     });
-  });
+  }, []);
 
   const handleExportSettings = React.useCallback((e) => {
     e.preventDefault();
