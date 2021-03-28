@@ -298,6 +298,7 @@ const MyInput = React.memo(({label, isError = false, ...props}) => {
         variant="outlined"
         size="small"
         error={isError}
+        autoComplete={'off'}
         {...props}
       />
     </FormControl>
@@ -337,6 +338,7 @@ const MyColorInput = React.memo(({label, value, ...props}) => {
           onClick={handleClick}
           value={color}
           onChange={handleChange}
+          autoComplete={'off'}
           {...props}
         />
       </FormControl>

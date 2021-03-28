@@ -297,10 +297,10 @@ const Pattern = React.memo(({pattern, onDelete}) => {
   return (
     <TableRow>
       <TableCell size={'small'}>
-        <InputBase onChange={handleNameChange} defaultValue={pattern.name} fullWidth />
+        <InputBase onChange={handleNameChange} defaultValue={pattern.name} fullWidth autoComplete={'off'} />
       </TableCell>
       <TableCell size={'small'}>
-        <InputBase onChange={handlePatternChange} defaultValue={pattern.pattern} fullWidth />
+        <InputBase onChange={handlePatternChange} defaultValue={pattern.pattern} fullWidth autoComplete={'off'} />
       </TableCell>
       <TableCell size={'small'}>
         <Select
