@@ -115,12 +115,12 @@ export class Background {
       }
     }
 
-    chrome.action.setBadgeText({
-      text: badgeText
-    });
-    chrome.action.setBadgeBackgroundColor({
-      color: badgeColor,
-    });
+    // chrome.action.setBadgeText({
+    //   text: badgeText
+    // });
+    // chrome.action.setBadgeBackgroundColor({
+    //   color: badgeColor,
+    // });
     chrome.action.setIcon({
       imageData: icon
     });
