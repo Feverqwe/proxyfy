@@ -36,7 +36,9 @@ export class Background {
       switch (message.action) {
         case 'set': {
           const {mode, id} = message;
-          this.setProxy(mode, id);
+          this.applyProxy(mode, id).catch((err) => {
+            console.error('applyProxy error: %O', err);
+          });
           break;
         }
         case 'get': {
@@ -82,7 +84,11 @@ export class Background {
       switch (state.mode) {
         case 'direct': {
           const config = await getConfig();
-          const proxy = config.proxies.find((p) => p.type === 'direct');
+          const {lastDirectId} = await promisifyApi<{lastDirectId?: string}>('chrome.storage.local.get')('lastDirectId');
+          let proxy = config.proxies.find((p) => p.id === lastDirectId);
+          if (!proxy) {
+            proxy = config.proxies.find((p) => p.type === 'direct');
+          }
           if (proxy) {
             badgeText = proxy.title;
             if (proxy.badgeColor) {
@@ -124,6 +130,13 @@ export class Background {
     });
   }
 
+  async applyProxy(mode: string, id?: string) {
+    // console.log('applyProxy', state);
+    await this.setProxy(mode, id);
+
+    await this.syncUiState();
+  }
+
   async applyConfig() {
     const state = await getCurrentState();
     // console.log('applyConfig', state);
@@ -154,6 +167,7 @@ export class Background {
         const proxy = config.proxies.find(proxy => proxy.id === id);
         if (proxy) {
           if (proxy.type === 'direct') {
+            await promisifyApi('chrome.storage.local.set')({lastDirectId: id});
             value = {
               mode: 'direct',
             };
