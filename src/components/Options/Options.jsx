@@ -115,7 +115,7 @@ const Options = React.memo(() => {
             </Grid>
             <Grid item xs>
               <Box m={2} className={classes.mainBox}>
-                <MySelectNoLabel defaultValue={"auto_detect"}>
+                {/*<MySelectNoLabel defaultValue={"auto_detect"}>
                   <MenuItem value="auto_detect">
                     Use enabled proxies by patterns and order
                   </MenuItem>
@@ -129,7 +129,7 @@ const Options = React.memo(() => {
                       </MenuItem>
                     );
                   })}
-                </MySelectNoLabel>
+                </MySelectNoLabel>*/}
                 <Grid container direction={'column'}>
                   {proxies.map((proxy) => {
                     const isFirst = proxies.indexOf(proxy) === 0;
