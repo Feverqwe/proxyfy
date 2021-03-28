@@ -68,6 +68,12 @@ export class Background {
         console.error('Sync state error: %O', err);
       });
     });
+    chrome.runtime.onStartup.addListener(() => {
+      // pass
+    });
+    chrome.runtime.onInstalled.addListener(() => {
+      // pass
+    });
 
     await this.syncUiState();
   }
