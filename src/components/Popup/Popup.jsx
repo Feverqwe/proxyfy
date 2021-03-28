@@ -13,7 +13,7 @@ const useStyles = makeStyles(() => {
 
 const defaultItems = [
   {title: 'Use enabled proxies by patterns and order', mode: 'pac_script'},
-  {title: 'Off (use auto detect)', mode: 'auto_detect'},
+  /*{title: 'Off (use auto detect)', mode: 'auto_detect'},*/
   {title: 'Off (use system settings)', mode: 'system'},
 ];
 
