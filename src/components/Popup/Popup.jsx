@@ -31,28 +31,20 @@ const defaultItems = [
 const Popup = React.memo(() => {
   const classes = useStyles();
 
-  const [proxies, setProxies] = React.useState([]);
+  const [proxies, setProxies] = React.useState(null);
   const [state, setState] = React.useState({});
 
   useEffect(() => {
-    let isMounted = true;
     promiseTry(async () => {
       const [state, {proxies}] = await Promise.all([
-        promisifyApi('chrome.runtime.sendMessage')({
-          action: 'get'
-        }),
+        getState(),
         getConfig(),
       ]);
-      if (!isMounted) return;
       setState(state);
       setProxies(proxies);
     }).catch((err) => {
       console.error('getConfig error: %O', err);
     });
-
-    return () => {
-      isMounted = false;
-    }
   }, []);
 
   const handleClick = React.useCallback((mode, id) => {
@@ -61,13 +53,13 @@ const Popup = React.memo(() => {
         action: 'set', mode, id
       });
 
-      const state = await promisifyApi('chrome.runtime.sendMessage')({
-        action: 'get'
-      });
+      const state = await getState();
 
       setState(state);
     });
   }, []);
+
+  if (!proxies) return null;
 
   return (
     <Box component={Paper} className={classes.box}>
@@ -117,5 +109,14 @@ const ProxyItem = React.memo(({item, mode, checked, onClick}) => {
     </ListItem>
   );
 });
+
+/**
+ * @return {Promise<null | {mode: string, id?: string}>}
+ */
+function getState() {
+  return promisifyApi('chrome.runtime.sendMessage')({
+    action: 'get'
+  });
+}
 
 export default Popup;
