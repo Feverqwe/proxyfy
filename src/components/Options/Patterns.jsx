@@ -356,18 +356,16 @@ const Pattern = React.memo(({pattern, onDelete}) => {
         </Select>
       </TableCell>
       <TableCell padding="none" className="enabled-cell">
-        <Box px={1}>
-          <Grid container spacing={1} alignItems={'center'}>
-            <Grid item xs>
-              <Checkbox className="small-checkbox" onChange={handleEnabledChange} defaultChecked={pattern.enabled} />
-            </Grid>
-            <Grid item>
-              <IconButton onClick={handleDelete} size={'small'}>
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Grid>
+        <Grid container alignItems={'center'}>
+          <Grid item xs>
+            <Checkbox className="small-checkbox" onChange={handleEnabledChange} defaultChecked={pattern.enabled} />
           </Grid>
-        </Box>
+          <Grid item>
+            <IconButton onClick={handleDelete} size={'small'}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Grid>
+        </Grid>
       </TableCell>
     </TableRow>
   );
