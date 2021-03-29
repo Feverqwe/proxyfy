@@ -83,9 +83,9 @@ export class Background {
   async syncUiState() {
     const state = await getCurrentState();
 
-    let badgeColor: ColorArray = [0,0,0,0];
+    let badgeColor = [0,0,0,0];
     let badgeText = '';
-    let icon = getExtensionIcon();
+    let iconColor;
 
     if (state) {
       switch (state.mode) {
@@ -98,30 +98,42 @@ export class Background {
             proxy = config.proxies.find((p) => p.type === 'direct');
           }
           if (proxy) {
-            badgeText = proxy.title;
-            if (proxy.badgeColor) {
-              badgeColor = proxy.badgeColor;
+            iconColor = proxy.color;
+            if (proxy.badgeText) {
+              badgeText = proxy.badgeText;
             }
-            icon = getExtensionIcon(proxy.color);
+            if (proxy.badgeColor) {
+              const m = /rgba\((\d+),(\d+),(\d+),(\d+)\)/.exec(proxy.badgeColor);
+              if (m) {
+                const [, rS, gS, bS, aS] = m;
+                const [r, g, b, aF] = [rS, gS, bS, aS].map(parseFloat);
+                const a = Math.round(aF * 255);
+                badgeColor = [r, g, b, a].map((v) => {
+                  if (!Number.isFinite(v) || v < 0 || v > 255) {
+                    v = 0;
+                  }
+                  return v;
+                });
+              }
+            }
           }
           break;
         }
         case 'pac_script': {
-          badgeText = 'pattern';
-          icon = getExtensionIcon('#0a77e5');
+          iconColor = '#0a77e5';
           break;
         }
       }
     }
 
-    // chrome.action.setBadgeText({
-    //   text: badgeText
-    // });
-    // chrome.action.setBadgeBackgroundColor({
-    //   color: badgeColor,
-    // });
+    chrome.action.setBadgeText({
+      text: badgeText,
+    });
+    chrome.action.setBadgeBackgroundColor({
+      color: badgeColor as ColorArray,
+    });
     chrome.action.setIcon({
-      imageData: icon
+      imageData: getExtensionIcon(iconColor),
     });
 
     chrome.runtime.sendMessage({action: 'stateChanges'});

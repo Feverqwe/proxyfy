@@ -16,7 +16,6 @@ import {
   Typography
 } from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
-import {SliderPicker} from "react-color";
 import Header from "../Header";
 import {Redirect, useHistory, useLocation} from "react-router";
 import qs from "querystring-es3";
@@ -27,6 +26,7 @@ import {Link} from "react-router-dom";
 import getId from "../../tools/getId";
 import getObjectId from "../../tools/getObjectId";
 import {localhostPresets, matchAllPresets} from "./Patterns";
+import MyColorInput from "./MyColorInput";
 
 const noProxyTypes = ['direct'];
 
@@ -111,11 +111,12 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
       const {
         title: titleEl, color: colorEl,
         type: typeEl, host: hostEl, port: portEl,
-        enabled: enabledEl, useMatchAllPreset: useMatchAllPresetEl, useLocalhostPreset: useLocalhostPresetEl
+        enabled: enabledEl, useMatchAllPreset: useMatchAllPresetEl, useLocalhostPreset: useLocalhostPresetEl,
+        badgeText: badgeTextEl, badgeColor: badgeColorEl,
       } = refForm.current.elements;
 
       const data = {};
-      [titleEl, typeEl, colorEl, hostEl, portEl].forEach((element) => {
+      [titleEl, typeEl, colorEl, hostEl, portEl, badgeTextEl, badgeColorEl].forEach((element) => {
         if (!element) return;
         const key = element.name;
         let value = element.value;
@@ -267,9 +268,21 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
                   name={'title'}
                 />
                 <MyColorInput
-                  label={'Color'}
+                  label={'Icon color'}
                   value={proxy.color}
                   name={'color'}
+                  iconType={'logo'}
+                />
+                <MyInput
+                  label={'Badge text'}
+                  defaultValue={proxy.badgeText || ''}
+                  name={'badgeText'}
+                />
+                <MyColorInput
+                  label={'Badge color'}
+                  value={proxy.badgeColor || ''}
+                  name={'badgeColor'}
+                  format={'rgba'}
                 />
                 {isNew && (
                   <FormControl fullWidth margin={'dense'}>
@@ -378,53 +391,6 @@ const MyInput = React.memo(({label, isError = false, hidden, ...props}) => {
         {...props}
       />
     </FormControl>
-  );
-});
-
-const MyColorInput = React.memo(({label, value, ...props}) => {
-  const [color, setColor] = React.useState(value);
-  const [showPicker, setShowPicker] = React.useState(false);
-
-  const handleClick = React.useCallback((e) => {
-    e.preventDefault();
-    setShowPicker(r => !r);
-  }, []);
-
-  const handleChangeColor = React.useCallback((color) => {
-    const hex = color.hex;
-    setColor(hex);
-  }, []);
-
-  const handleChange = React.useCallback((e) => {
-    setColor(e.target.value);
-  }, []);
-
-  return (
-    <>
-      <FormControl fullWidth margin={'dense'}>
-        <Typography variant={"subtitle1"}>
-          {label}
-        </Typography>
-        <TextField
-          variant="outlined"
-          size="small"
-          style={{
-            backgroundColor: color,
-          }}
-          onClick={handleClick}
-          value={color}
-          onChange={handleChange}
-          autoComplete={'off'}
-          {...props}
-        />
-      </FormControl>
-      {showPicker && (
-        <SliderPicker
-          color={color}
-          onChange={handleChangeColor}
-        />
-      )}
-    </>
   );
 });
 
