@@ -1,85 +1,38 @@
 const {DefinePlugin} = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
+const isProduction = process.argv[process.argv.indexOf('--mode') + 1] !== 'development';
 
-const isWatch = process.argv.some(function (arg) {
-  return arg === '--watch';
-});
-
-const outputPath = path.resolve('./dist/');
-
-const env = {
-  targets: {
-    browsers: ['Chrome >= 36']
-  }
-};
-
-if (isWatch) {
-  env.targets.browsers = ['Chrome >= 65'];
-}
+const outputPath = path.resolve('./dist/chrome/');
 
 const config = {
   entry: {
-    pacScript: './src/js/pacScript',
-    bg: './src/js/bg',
-    popup: './src/js/popup',
-    options: './src/js/options'
+    pacScript: './src/pacScript',
+    background: './src/background',
+    popup: './src/popup',
+    options: './src/options'
   },
   output: {
     path: outputPath,
-    filename: 'js/[name].js'
+    filename: '[name].js'
   },
-  devtool: 'source-map',
-  optimization: {
-    splitChunks: {
-      cacheGroups: {
-        commons: {
-          name: "commons",
-          chunks: chunk => ['bg', 'popup', 'options'].indexOf(chunk.name) !== -1,
-          minChunks: 3,
-          priority: -10
-        },
-        commonsRender: {
-          name: "commonsRender",
-          chunks: chunk => ['popup', 'options'].indexOf(chunk.name) !== -1,
-          minChunks: 2,
-          priority: -20
-        },
-      }
-    }
-  },
+  devtool: false,// isProduction ? false : 'inline-source-map',
   module: {
     rules: [
       {
-        test: /.jsx?$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            plugins: [
-              ["@babel/plugin-proposal-decorators", { "legacy": true }],
-            ],
-            presets: [
-              '@babel/preset-react',
-              ['@babel/preset-env', env]
-            ]
-          }
-        }
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.(css|less)$/,
-        use: [{
-          loader: "style-loader"
-        }, {
-          loader: "css-loader"
-        }, {
-          loader: "clean-css-loader"
-        }, {
-          loader: "less-loader"
-        }]
+        test: /\.(woff|woff2)$/,
+        use: ['file-loader']
+      },
+      {
+        test: /\.[jt]sx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
       },
       {
         test: /\.(png|svg)$/,
@@ -93,23 +46,24 @@ const config = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
   plugins: [
-    new CleanWebpackPlugin(outputPath),
-    new CopyWebpackPlugin([
-      {from: './src/manifest.json',},
-      {from: './src/icons', to: './icons'},
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        {from: './src/assets/manifest.json',},
+        {from: './src/assets/icons', to: './icons'},
+      ],
+    }),
     new HtmlWebpackPlugin({
       filename: 'popup.html',
-      template: './src/popup.html',
-      chunks: ['commonsRender', 'commons', 'popup']
+      template: './src/assets/popup.html',
+      chunks: ['popup']
     }),
     new HtmlWebpackPlugin({
       filename: 'options.html',
-      template: './src/options.html',
-      chunks: ['commonsRender', 'commons', 'options']
+      template: './src/assets/options.html',
+      chunks: ['options']
     }),
     new DefinePlugin({
       'process.env': {
@@ -118,31 +72,5 @@ const config = {
     }),
   ]
 };
-
-if (!isWatch) {
-  config.devtool = 'none';
-  Object.keys(config.entry).forEach(entryName => {
-    let value = config.entry[entryName];
-    if (!Array.isArray(value)) {
-      value = [value];
-    }
-    if (entryName === 'pacScript') {
-      // value.unshift();
-    } else
-    if (entryName === 'bg') {
-      value.unshift(
-        'whatwg-fetch',
-        'core-js/fn/map',
-        'core-js/fn/object/assign',
-      );
-    } else {
-      value.unshift(
-        'babel-polyfill',
-      );
-    }
-
-    config.entry[entryName] = value;
-  });
-}
 
 module.exports = config;

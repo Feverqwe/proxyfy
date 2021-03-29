@@ -222,7 +222,7 @@ const storeModel = types.model('store', {
 
     this.editor = null;
   }
-  componentWillMount() {
+  componentDidMount() {
     document.addEventListener('keydown', this.handleKeyDown);
   }
   componentWillUnmount() {

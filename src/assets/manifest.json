@@ -1,7 +1,6 @@
 {
-    "manifest_version": 2,
-    "minimum_chrome_version": "36",
-    "browser_action": {
+    "manifest_version": 3,
+    "action": {
         "default_icon": {
             "19": "icons/icon_19.png",
             "38": "icons/icon_38.png"
@@ -15,11 +14,11 @@
         "16": "icons/icon_16.png"
     },
     "options_page": "options.html",
-    "permissions": ["storage", "proxy", "webRequest", "webRequestBlocking", "<all_urls>"],
+    "permissions": ["storage", "proxy"],
     "background": {
-        "scripts": ["js/commons.js", "js/bg.js"]
+        "service_worker": "background.js"
     },
     "name": "Proxyfy",
     "description": "Tiny proxy switcher",
-    "version": "1.9.7"
+    "version": "2.0.2"
 }
