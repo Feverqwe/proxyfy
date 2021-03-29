@@ -99,7 +99,7 @@ const MyColorInput = React.memo(({label, value, iconType = 'circle', format = 'h
         />
       </FormControl>
       <Popper open={showPicker} anchorEl={anchorEl}>
-        <Box ref={refPickerBody} component={Paper} p={2}>
+        <Box ref={refPickerBody} component={Paper} elevation={3} p={2}>
           <CirclePicker
             color={color}
             onChange={handleChangeColor}
