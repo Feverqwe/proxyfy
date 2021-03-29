@@ -13,6 +13,7 @@ import promisifyApi from "../../tools/promisifyApi";
 import ConfigStruct from "../../tools/ConfigStruct";
 import Menu from "./Menu";
 import ProxySelect from "./ProxySelect";
+import getExtensionIcon from "../../tools/getExtensionIcon";
 
 const useStyles = makeStyles(() => {
   return {
@@ -143,7 +144,7 @@ const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabl
   return (
     <Grid container direction="row" spacing={1} justify={'space-between'} alignItems="center">
       <Grid item>
-        <Color color={proxy.color}/>
+        <ColorIcon color={proxy.color}/>
       </Grid>
       <Grid item xs>
         {proxy.title}
@@ -187,16 +188,26 @@ const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabl
   );
 });
 
-const Color = React.memo(({color}) => {
+const colorIconStyle = {
+  display: 'inline-block',
+  width: '24px',
+  height: '24px',
+  verticalAlign: 'middle',
+};
+const ColorIcon = React.memo(({color}) => {
+  const refColorIcon = React.useRef();
+
+  React.useEffect(() => {
+    const canvas = refColorIcon.current;
+    const imageData = getExtensionIcon(color, 24);
+    const context = canvas.getContext('2d');
+    context.putImageData(imageData, 0, 0);
+  }, [color]);
+
   return (
-    <div style={{
-      display: 'inline-block',
-      width: '44px',
-      height: '22px',
-      backgroundColor: color,
-      verticalAlign: 'middle',
-      borderRadius: '4px',
-    }}/>
+    <div style={colorIconStyle}>
+      <canvas ref={refColorIcon} width={24} height={24} />
+    </div>
   );
 });
 
