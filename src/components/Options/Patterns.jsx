@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme) => {
       '& .small-checkbox': {
         padding: 0,
       },
-      '& tr:nth-of-type(odd)': {
+      '& tbody tr:nth-of-type(odd)': {
         backgroundColor: theme.palette.action.hover,
       },
       '& .name-cell': {
