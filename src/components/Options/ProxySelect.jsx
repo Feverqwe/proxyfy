@@ -75,9 +75,10 @@ const ProxySelect = React.memo(() => {
   );
 });
 
+const mySelectNoLabelStyle = {width: '350px'};
 const MySelectNoLabel = React.memo(({children, ...props}) => {
   return (
-    <FormControl style={{width: '350px'}} margin={'dense'}>
+    <FormControl style={mySelectNoLabelStyle} margin={'dense'}>
       <Select
         variant="outlined"
         size="small"

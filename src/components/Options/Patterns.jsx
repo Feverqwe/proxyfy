@@ -287,6 +287,9 @@ PatternList.propTypes = {
   list: PropTypes.array,
 };
 
+const selectInputProps = {
+  underline: 'none',
+};
 const Pattern = React.memo(({pattern, onDelete}) => {
   const handleDelete = React.useCallback((e) => {
     e.preventDefault();
@@ -323,9 +326,7 @@ const Pattern = React.memo(({pattern, onDelete}) => {
           defaultValue={pattern.type}
           fullWidth
           input={<InputBase />}
-          inputProps={{
-            underline: 'none',
-          }}
+          inputProps={selectInputProps}
         >
           <MenuItem value={'wildcard'}>Wildcard</MenuItem>
           <MenuItem value={'regexp'}>RegExp</MenuItem>
