@@ -37,7 +37,7 @@ const Menu = React.memo(() => {
     e.preventDefault();
     promisifyApi('chrome.storage.sync.get')().then((storage) => {
       const blob = new Blob([JSON.stringify(storage, null, 2)]);
-      downloadBlob(blob, 'settings.json');
+      downloadBlob(blob, 'proxyfy.json');
     }).catch((err) => {
       console.error('Export settings error: %O', err);
     });
