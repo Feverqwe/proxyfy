@@ -57,6 +57,7 @@ const useStyles = makeStyles((theme) => {
       '& .pattern-cell': {
         paddingLeft: '6px',
         paddingRight: '6px',
+        minWidth: '240px',
       },
       '& .type-cell': {
         width: '120px',
