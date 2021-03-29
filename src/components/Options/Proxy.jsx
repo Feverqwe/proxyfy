@@ -343,6 +343,7 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
                   name={'port'}
                   isError={!isValidPort}
                   hidden={isDirect}
+                  type={'number'}
                 />
               </Box>
             </Grid>

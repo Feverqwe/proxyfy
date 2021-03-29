@@ -43,6 +43,14 @@ const useStyles = makeStyles(() => {
     },
     center: {
       textAlign: 'center',
+    },
+    micro: {
+      '& .small-checkbox': {
+        padding: 0,
+      },
+      '& td': {
+        padding: 0,
+      }
     }
   };
 });
@@ -231,6 +239,7 @@ const PatternsLoaded = React.memo(({proxy}) => {
 });
 
 const PatternList = React.memo(React.forwardRef(({list}, ref) => {
+  const classes = useStyles();
   const [scope] = React.useState({});
   const [patterns, setPatterns] = React.useState(list);
 
@@ -264,14 +273,14 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
   }, []);
 
   return (
-    <TableContainer>
-      <Table>
+    <TableContainer className={classes.micro}>
+      <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell size={'small'}>Name</TableCell>
-            <TableCell size={'small'}>Pattern</TableCell>
-            <TableCell size={'small'}>Type</TableCell>
-            <TableCell size={'small'}>Enabled</TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Pattern</TableCell>
+            <TableCell>Type</TableCell>
+            <TableCell>Enabled</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -314,28 +323,28 @@ const Pattern = React.memo(({pattern, onDelete}) => {
 
   return (
     <TableRow>
-      <TableCell size={'small'}>
-        <InputBase onChange={handleNameChange} defaultValue={pattern.name} fullWidth autoComplete={'off'} />
+      <TableCell>
+        <InputBase size="small" onChange={handleNameChange} defaultValue={pattern.name} fullWidth autoComplete={'off'} />
       </TableCell>
-      <TableCell size={'small'}>
-        <InputBase onChange={handlePatternChange} defaultValue={pattern.pattern} fullWidth autoComplete={'off'} />
+      <TableCell>
+        <InputBase size="small" onChange={handlePatternChange} defaultValue={pattern.pattern} fullWidth autoComplete={'off'} />
       </TableCell>
-      <TableCell size={'small'}>
+      <TableCell>
         <Select
           onChange={handleTypeChange}
           defaultValue={pattern.type}
           fullWidth
-          input={<InputBase />}
+          input={<InputBase size="small" />}
           inputProps={selectInputProps}
         >
           <MenuItem value={'wildcard'}>Wildcard</MenuItem>
           <MenuItem value={'regexp'}>RegExp</MenuItem>
         </Select>
       </TableCell>
-      <TableCell size={'small'}>
+      <TableCell>
         <Grid container spacing={1} alignItems={'center'}>
           <Grid item xs>
-            <Checkbox onChange={handleEnabledChange} defaultChecked={pattern.enabled} />
+            <Checkbox className="small-checkbox" onChange={handleEnabledChange} defaultChecked={pattern.enabled} />
           </Grid>
           <Grid item>
             <IconButton onClick={handleDelete} size={'small'}>
