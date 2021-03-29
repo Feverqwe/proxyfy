@@ -31,7 +31,7 @@ import ConfigStruct from "../../tools/ConfigStruct";
 import promisifyApi from "../../tools/promisifyApi";
 import getId from "../../tools/getId";
 
-const useStyles = makeStyles(() => {
+const useStyles = makeStyles((theme) => {
   return {
     actionBox: {
       display: 'flex',
@@ -48,9 +48,24 @@ const useStyles = makeStyles(() => {
       '& .small-checkbox': {
         padding: 0,
       },
-      '& td': {
-        padding: 0,
-      }
+      '& tr:nth-of-type(odd)': {
+        backgroundColor: theme.palette.action.hover,
+      },
+      '& input[type="text"]': {
+        fontSize: '14px',
+      },
+      '& .MuiSelect-selectMenu': {
+        fontSize: '14px',
+      },
+      '& .name-cell': {
+        width: '240px',
+      },
+      '& .type-cell': {
+        width: '120px',
+      },
+      '& .enabled-cell': {
+        width: '120px',
+      },
     }
   };
 });
@@ -277,10 +292,10 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Pattern</TableCell>
-            <TableCell>Type</TableCell>
-            <TableCell>Enabled</TableCell>
+            <TableCell className="name-cell">Name</TableCell>
+            <TableCell className="pattern-cell">Pattern</TableCell>
+            <TableCell className="type-cell">Type</TableCell>
+            <TableCell className="enabled-cell">Enabled</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -323,13 +338,13 @@ const Pattern = React.memo(({pattern, onDelete}) => {
 
   return (
     <TableRow>
-      <TableCell>
+      <TableCell padding="none" className="name-cell">
         <InputBase size="small" onChange={handleNameChange} defaultValue={pattern.name} fullWidth autoComplete={'off'} />
       </TableCell>
-      <TableCell>
+      <TableCell padding="none" className="pattern-cell">
         <InputBase size="small" onChange={handlePatternChange} defaultValue={pattern.pattern} fullWidth autoComplete={'off'} />
       </TableCell>
-      <TableCell>
+      <TableCell padding="none" className="type-cell">
         <Select
           onChange={handleTypeChange}
           defaultValue={pattern.type}
@@ -341,17 +356,19 @@ const Pattern = React.memo(({pattern, onDelete}) => {
           <MenuItem value={'regexp'}>RegExp</MenuItem>
         </Select>
       </TableCell>
-      <TableCell>
-        <Grid container spacing={1} alignItems={'center'}>
-          <Grid item xs>
-            <Checkbox className="small-checkbox" onChange={handleEnabledChange} defaultChecked={pattern.enabled} />
+      <TableCell padding="none" className="enabled-cell">
+        <Box px={1}>
+          <Grid container spacing={1} alignItems={'center'}>
+            <Grid item xs>
+              <Checkbox className="small-checkbox" onChange={handleEnabledChange} defaultChecked={pattern.enabled} />
+            </Grid>
+            <Grid item>
+              <IconButton onClick={handleDelete} size={'small'}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Grid>
           </Grid>
-          <Grid item>
-            <IconButton onClick={handleDelete} size={'small'}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Grid>
-        </Grid>
+        </Box>
       </TableCell>
     </TableRow>
   );
