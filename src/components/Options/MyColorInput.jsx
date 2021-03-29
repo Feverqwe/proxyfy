@@ -3,7 +3,7 @@ import getExtensionIcon from "../../tools/getExtensionIcon";
 import {Box, FormControl, InputAdornment, Paper, Popper, TextField, Typography} from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import ColorizeIcon from "@material-ui/icons/Colorize";
-import {CirclePicker} from "react-color";
+import {ChromePicker} from "react-color";
 import getCircleIcon from "../../tools/getCircleIcon";
 
 const MyColorInput = React.memo(({label, value, iconType = 'circle', format = 'hex', ...props}) => {
@@ -53,9 +53,9 @@ const MyColorInput = React.memo(({label, value, iconType = 'circle', format = 'h
     const canvas = refColorIcon.current;
     let imageData;
     if (iconType === 'logo') {
-      imageData = getExtensionIcon(color);
+      imageData = getExtensionIcon(color, 24);
     } else {
-      imageData = getCircleIcon(color);
+      imageData = getCircleIcon(color, 24);
     }
     const context = canvas.getContext('2d');
     context.putImageData(imageData, 0, 0);
@@ -99,10 +99,11 @@ const MyColorInput = React.memo(({label, value, iconType = 'circle', format = 'h
         />
       </FormControl>
       <Popper open={showPicker} anchorEl={anchorEl}>
-        <Box ref={refPickerBody} component={Paper} elevation={3} p={2}>
-          <CirclePicker
+        <Box ref={refPickerBody}>
+          <ChromePicker
             color={color}
             onChange={handleChangeColor}
+            disableAlpha={format === 'hex'}
           />
         </Box>
       </Popper>
