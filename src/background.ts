@@ -133,7 +133,11 @@ export class Background {
       color: badgeColor as ColorArray,
     });
     chrome.action.setIcon({
-      imageData: getExtensionIcon(iconColor),
+      imageData: {
+        16: getExtensionIcon(iconColor, 16),
+        24: getExtensionIcon(iconColor, 24),
+        32: getExtensionIcon(iconColor, 32),
+      },
     });
 
     chrome.runtime.sendMessage({action: 'stateChanges'});
