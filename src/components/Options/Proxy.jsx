@@ -27,8 +27,14 @@ import getId from "../../tools/getId";
 import getObjectId from "../../tools/getObjectId";
 import {localhostPresets, matchAllPresets} from "./Patterns";
 import MyColorInput from "./MyColorInput";
+import getRandomInt from "../../tools/getRandomInt";
 
 const noProxyTypes = ['direct'];
+const badgeColors = [
+  "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3",
+  "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39",
+  "#ffeb3b", "#ffc107", "#ff9800", "#ff5722", "#795548", "#607d8b"
+];
 
 const useStyles = makeStyles(() => {
   return {
@@ -68,6 +74,9 @@ const Proxy = React.memo(() => {
         setRedirect(true);
       } else {
         const currentProxy = DefaultProxyStruct.create(proxy || {});
+        if (!proxy) {
+          currentProxy.color = badgeColors[getRandomInt(0, badgeColors.length)];
+        }
         setProxy(currentProxy);
       }
     }).catch((err) => {

@@ -53,6 +53,8 @@ const DefaultProxyStruct = s.defaulted(ProxyStruct, {
   enabled: true,
   title: '',
   color: '#66cc66',
+  badgeText: '',
+  badgeColor: 'rgba(96,125,139,1)',
   type: 'http',
   host: '',
   port: 3128,
