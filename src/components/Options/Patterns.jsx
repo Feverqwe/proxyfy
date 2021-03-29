@@ -51,12 +51,6 @@ const useStyles = makeStyles((theme) => {
       '& tr:nth-of-type(odd)': {
         backgroundColor: theme.palette.action.hover,
       },
-      '& input[type="text"]': {
-        fontSize: '14px',
-      },
-      '& .MuiSelect-selectMenu': {
-        fontSize: '14px',
-      },
       '& .name-cell': {
         width: '240px',
       },
