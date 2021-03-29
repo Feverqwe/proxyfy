@@ -65,6 +65,9 @@ const useStyles = makeStyles((theme) => {
       '& .enabled-cell': {
         width: '120px',
       },
+      '& .MuiInputBase-root.Mui-error': {
+        boxShadow: 'inset 0 0 2px #ff0000',
+      }
     }
   };
 });
@@ -314,6 +317,13 @@ const selectInputProps = {
   underline: 'none',
 };
 const Pattern = React.memo(({pattern, onDelete}) => {
+  const [isValid, setValid] = React.useState(true);
+  const origPattern = React.useMemo(() => Object.assign({}, pattern), []);
+
+  React.useEffect(() => {
+    setValid(isValidPattern(pattern.pattern, pattern.type));
+  }, []);
+
   const handleDelete = React.useCallback((e) => {
     e.preventDefault();
     onDelete(pattern);
@@ -329,24 +339,39 @@ const Pattern = React.memo(({pattern, onDelete}) => {
 
   const handlePatternChange = React.useCallback((e) => {
     pattern.pattern = e.target.value;
+    setValid(isValidPattern(pattern.pattern, pattern.type));
   }, []);
 
   const handleTypeChange = React.useCallback((e) => {
     pattern.type = e.target.value;
+    setValid(isValidPattern(pattern.pattern, pattern.type));
   }, []);
 
   return (
     <TableRow>
       <TableCell padding="none" className="name-cell">
-        <InputBase size="small" onChange={handleNameChange} defaultValue={pattern.name} fullWidth autoComplete={'off'} />
+        <InputBase
+          size="small"
+          onChange={handleNameChange}
+          defaultValue={origPattern.name}
+          fullWidth
+          autoComplete={'off'}
+        />
       </TableCell>
       <TableCell padding="none" className="pattern-cell">
-        <InputBase size="small" onChange={handlePatternChange} defaultValue={pattern.pattern} fullWidth autoComplete={'off'} />
+        <InputBase
+          size="small"
+          onChange={handlePatternChange}
+          defaultValue={origPattern.pattern}
+          fullWidth
+          autoComplete={'off'}
+          error={!isValid}
+        />
       </TableCell>
       <TableCell padding="none" className="type-cell">
         <Select
           onChange={handleTypeChange}
-          defaultValue={pattern.type}
+          defaultValue={origPattern.type}
           fullWidth
           input={<InputBase size="small" />}
           inputProps={selectInputProps}
@@ -358,7 +383,7 @@ const Pattern = React.memo(({pattern, onDelete}) => {
       <TableCell padding="none" className="enabled-cell">
         <Grid container alignItems={'center'}>
           <Grid item xs>
-            <Checkbox className="small-checkbox" onChange={handleEnabledChange} defaultChecked={pattern.enabled} />
+            <Checkbox className="small-checkbox" onChange={handleEnabledChange} defaultChecked={origPattern.enabled} />
           </Grid>
           <Grid item>
             <IconButton onClick={handleDelete} size={'small'}>
@@ -373,5 +398,16 @@ const Pattern = React.memo(({pattern, onDelete}) => {
 Pattern.propTypes = {
   pattern: PropTypes.object,
 };
+
+function isValidPattern(value, type) {
+  if (type === 'wildcard') return true;
+  let result = true;
+  try {
+    new RegExp(`(?:${value})`);
+  } catch (err) {
+    result = false;
+  }
+  return result;
+}
 
 export default Patterns;
