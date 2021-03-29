@@ -29,7 +29,7 @@ FindProxyForURL = (function () {
 
       wildcardPatterns.forEach((pattern) => {
         const re = escapeStringRegexp(pattern).replace(/\\([*?])/g, '.$1');
-        regexpPatterns.push(re);
+        regexpPatterns.push(`^${re}$`);
       });
 
       let re = null;
