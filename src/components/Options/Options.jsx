@@ -18,7 +18,16 @@ const useStyles = makeStyles(() => {
   return {
     mainBox: {
       minHeight: '400px',
-    }
+    },
+    menu: {
+      width: '250px',
+    },
+    colorCell: {
+      width: '32px',
+    },
+    enabledCell: {
+      width: '300px',
+    },
   };
 });
 
@@ -84,7 +93,7 @@ const Options = React.memo(() => {
       <Header title={'Options'}/>
       <Box component={Paper} m={2}>
         <Grid container>
-          <Grid item xs={3}>
+          <Grid item className={classes.menu}>
             <Box m={2}>
               <Menu/>
             </Box>
@@ -117,6 +126,8 @@ const Options = React.memo(() => {
 });
 
 const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabledChange}) => {
+  const classes = useStyles();
+
   const handleDelete = React.useCallback((e) => {
     e.preventDefault();
     onDelete(proxy.id);
@@ -138,7 +149,7 @@ const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabl
 
   return (
     <Grid container direction="row" spacing={1} justify={'space-between'} alignItems="center">
-      <Grid item>
+      <Grid item className={classes.colorCell}>
         <ColorIcon color={proxy.color}/>
       </Grid>
       <Grid item xs>
@@ -147,37 +158,41 @@ const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabl
       <Grid item xs>
         {proxy.host}
       </Grid>
-      <Grid item>
-        <Checkbox defaultChecked={proxy.enabled} onChange={handleEnabledChange}/>
-      </Grid>
-      <Grid item>
-        <Button component={Link} to={'/proxy?' + qs.stringify({
-          id: proxy.id,
-        })} variant="outlined" size={'small'} color="primary">
-          Edit
-        </Button>
-      </Grid>
-      <Grid item>
-        <Button component={Link} to={'/patterns?' + qs.stringify({
-          id: proxy.id,
-        })} variant="outlined" size={'small'} color="primary">
-          Patterns
-        </Button>
-      </Grid>
-      <Grid item>
-        <IconButton onClick={handleDelete} size={'small'}>
-          <DeleteIcon fontSize="small"/>
-        </IconButton>
-      </Grid>
-      <Grid item>
-        <IconButton onClick={handleMoveUp} disabled={isFirst} size={'small'}>
-          <ArrowUpwardIcon fontSize="small"/>
-        </IconButton>
-      </Grid>
-      <Grid item>
-        <IconButton onClick={handleMoveDown} disabled={isLast} size={'small'}>
-          <ArrowDownwardIcon fontSize="small"/>
-        </IconButton>
+      <Grid item className={classes.enabledCell}>
+        <Grid container alignItems={'center'} justify="space-around">
+          <Grid item>
+            <Checkbox defaultChecked={proxy.enabled} onChange={handleEnabledChange}/>
+          </Grid>
+          <Grid item>
+            <Button component={Link} to={'/proxy?' + qs.stringify({
+              id: proxy.id,
+            })} variant="outlined" size={'small'} color="primary">
+              Edit
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button component={Link} to={'/patterns?' + qs.stringify({
+              id: proxy.id,
+            })} variant="outlined" size={'small'} color="primary">
+              Patterns
+            </Button>
+          </Grid>
+          <Grid item>
+            <IconButton onClick={handleDelete} size={'small'}>
+              <DeleteIcon fontSize="small"/>
+            </IconButton>
+          </Grid>
+          <Grid item>
+            <IconButton onClick={handleMoveUp} disabled={isFirst} size={'small'}>
+              <ArrowUpwardIcon fontSize="small"/>
+            </IconButton>
+          </Grid>
+          <Grid item>
+            <IconButton onClick={handleMoveDown} disabled={isLast} size={'small'}>
+              <ArrowDownwardIcon fontSize="small"/>
+            </IconButton>
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   );
