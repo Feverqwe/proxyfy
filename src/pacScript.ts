@@ -19,11 +19,12 @@ FindProxyForURL = (function () {
       const wildcardPatterns: string[] = [];
       const regexpPatterns: string[] = [];
       patterns.forEach(({pattern, type}) => {
+        const singlePatterns = pattern.split(/[,\r?\n]/).map(v => v.trim()).filter(v => v.length);
         if (type === 'wildcard') {
-          wildcardPatterns.push(pattern);
+          wildcardPatterns.push(...singlePatterns);
         } else
         if (type === 'regexp') {
-          regexpPatterns.push(pattern);
+          regexpPatterns.push(...singlePatterns);
         }
       });
 

@@ -50,10 +50,13 @@ const useStyles = makeStyles((theme) => {
     },
     micro: {
       '& .small-checkbox': {
-        padding: 0,
+        padding: '4px',
       },
       '& tbody tr:hover': {
         backgroundColor: theme.palette.action.hover,
+      },
+      '& tbody td': {
+        verticalAlign: 'top'
       },
       '& .name-cell': {
         width: '250px',
@@ -67,7 +70,7 @@ const useStyles = makeStyles((theme) => {
         width: '120px',
       },
       '& .enabled-cell': {
-        width: '130px',
+        width: '140px',
       },
       '& .MuiInputBase-root.Mui-error': {
         boxShadow: 'inset 0 0 2px #ff0000',
@@ -329,6 +332,9 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
   const helpTooltip = React.useMemo(() => {
     return (
       <Box>
+        <Typography variant="body2">
+          Use newline or comma for splitting patterns
+        </Typography>
         <Typography variant="h6">Wildcard</Typography>
         <Typography variant="body2">
           <b>*</b> - all domains <br/>
@@ -445,6 +451,7 @@ const Pattern = React.memo(({pattern, isFirst, isLast, onDelete, onCopy, onMove}
     <TableRow>
       <TableCell padding="none" className="name-cell">
         <InputBase
+          multiline
           size="small"
           onChange={handleNameChange}
           defaultValue={origPattern.name}
@@ -454,6 +461,7 @@ const Pattern = React.memo(({pattern, isFirst, isLast, onDelete, onCopy, onMove}
       </TableCell>
       <TableCell padding="none" className="pattern-cell">
         <InputBase
+          multiline
           size="small"
           onChange={handlePatternChange}
           defaultValue={origPattern.pattern}
@@ -512,7 +520,7 @@ function isValidPattern(value, type) {
   if (type === 'wildcard') return true;
   let result = true;
   try {
-    new RegExp(`(?:${value})`);
+    value.split(/[,\r?\n]/).forEach(v => new RegExp(`(?:${v})`));
   } catch (err) {
     result = false;
   }
