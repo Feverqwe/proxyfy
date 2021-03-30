@@ -31,6 +31,7 @@ import ConfigStruct from "../../tools/ConfigStruct";
 import promisifyApi from "../../tools/promisifyApi";
 import getId from "../../tools/getId";
 import InfoIcon from '@material-ui/icons/Info';
+import CopyIcon from "./CopyIcon";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -303,6 +304,16 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
     setPatterns(patterns.slice(0));
   }, []);
 
+  const handlePatternCopy = React.useCallback((pattern) => {
+    const {patterns} = scope;
+    const pos = patterns.indexOf(pattern);
+    if (pos === -1) return;
+    const clone = JSON.parse(JSON.stringify(pattern));
+    clone.id = getId();
+    patterns.splice(pos + 1, 0, clone);
+    setPatterns(patterns.slice(0));
+  }, []);
+
   return (
     <TableContainer className={classes.micro}>
       <Table size="small">
@@ -316,7 +327,7 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
         </TableHead>
         <TableBody>
           {patterns.map((pattern) => (
-            <Pattern key={pattern.id} pattern={pattern} onDelete={handlePatternDelete}/>
+            <Pattern key={pattern.id} pattern={pattern} onCopy={handlePatternCopy} onDelete={handlePatternDelete}/>
           ))}
         </TableBody>
       </Table>
@@ -330,7 +341,7 @@ PatternList.propTypes = {
 const selectInputProps = {
   underline: 'none',
 };
-const Pattern = React.memo(({pattern, onDelete}) => {
+const Pattern = React.memo(({pattern, onDelete, onCopy}) => {
   const classes = useStyles();
   const [isValid, setValid] = React.useState(true);
   const [type, setType] = React.useState(pattern.type);
@@ -343,6 +354,11 @@ const Pattern = React.memo(({pattern, onDelete}) => {
   const handleDelete = React.useCallback((e) => {
     e.preventDefault();
     onDelete(pattern);
+  }, []);
+
+  const handleCopy = React.useCallback((e) => {
+    e.preventDefault();
+    onCopy(pattern);
   }, []);
 
   const handleEnabledChange = React.useCallback((e) => {
@@ -430,6 +446,11 @@ const Pattern = React.memo(({pattern, onDelete}) => {
         <Grid container alignItems={'center'}>
           <Grid item xs>
             <Checkbox className="small-checkbox" onChange={handleEnabledChange} defaultChecked={origPattern.enabled} />
+          </Grid>
+          <Grid item>
+            <IconButton onClick={handleCopy} size={'small'}>
+              <CopyIcon fontSize="small" />
+            </IconButton>
           </Grid>
           <Grid item>
             <IconButton onClick={handleDelete} size={'small'}>
