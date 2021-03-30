@@ -32,6 +32,8 @@ import promisifyApi from "../../tools/promisifyApi";
 import getId from "../../tools/getId";
 import InfoIcon from '@material-ui/icons/Info';
 import CopyIcon from "./CopyIcon";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -50,11 +52,11 @@ const useStyles = makeStyles((theme) => {
       '& .small-checkbox': {
         padding: 0,
       },
-      '& tbody tr:nth-of-type(odd)': {
+      '& tbody tr:hover': {
         backgroundColor: theme.palette.action.hover,
       },
       '& .name-cell': {
-        width: '240px',
+        width: '250px',
       },
       '& .pattern-cell': {
         paddingLeft: '6px',
@@ -65,7 +67,7 @@ const useStyles = makeStyles((theme) => {
         width: '120px',
       },
       '& .enabled-cell': {
-        width: '120px',
+        width: '130px',
       },
       '& .MuiInputBase-root.Mui-error': {
         boxShadow: 'inset 0 0 2px #ff0000',
@@ -314,6 +316,35 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
     setPatterns(patterns.slice(0));
   }, []);
 
+  const handlePatternMove = React.useCallback((pattern, offset) => {
+    const {patterns} = scope;
+    const pos = patterns.indexOf(pattern);
+    if (pos === -1) return;
+    patterns.splice(pos, 1);
+
+    patterns.splice(pos + offset, 0, pattern);
+    setPatterns(patterns.slice(0));
+  }, []);
+
+  const helpTooltip = React.useMemo(() => {
+    return (
+      <Box>
+        <Typography variant="h6">Wildcard</Typography>
+        <Typography variant="body2">
+          <b>*</b> - all domains <br/>
+          <b>*.bbc.co.uk</b> - exact domain and all subdomains <br/>
+          <b>**.bbc.co.uk</b> - subdomains only (not bbc.co.uk) <br/>
+          <b>bbc.co.uk</b> - exact domain only <br/>
+          <b>http://bbc.co.uk</b> - exact http protocol <br/>
+        </Typography>
+        <Typography variant="h6">RegExp</Typography>
+        <Typography variant="body2">
+          Input url looks like <b>scheme://host:port</b> credentials, path, query are ignored
+        </Typography>
+      </Box>
+    );
+  }, []);
+
   return (
     <TableContainer className={classes.micro}>
       <Table size="small">
@@ -321,14 +352,37 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
           <TableRow>
             <TableCell className="name-cell">Name</TableCell>
             <TableCell className="pattern-cell">Pattern</TableCell>
-            <TableCell className="type-cell">Type</TableCell>
+            <TableCell className="type-cell">
+              <Grid container alignItems={'center'}>
+                <Grid item xs>
+                  Type
+                </Grid>
+                <Grid item>
+                  <Tooltip interactive placement={'left-start'} title={helpTooltip} className={classes.vCenter}>
+                    <InfoIcon color="primary"/>
+                  </Tooltip>
+                </Grid>
+              </Grid>
+            </TableCell>
             <TableCell className="enabled-cell">Enabled</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {patterns.map((pattern) => (
-            <Pattern key={pattern.id} pattern={pattern} onCopy={handlePatternCopy} onDelete={handlePatternDelete}/>
-          ))}
+          {patterns.map((pattern, index) => {
+            const isFirst = index === 0;
+            const isLast = index === patterns.length - 1;
+            return (
+              <Pattern
+                key={pattern.id}
+                pattern={pattern}
+                onMove={handlePatternMove}
+                onCopy={handlePatternCopy}
+                onDelete={handlePatternDelete}
+                isFirst={isFirst}
+                isLast={isLast}
+              />
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>
@@ -341,10 +395,8 @@ PatternList.propTypes = {
 const selectInputProps = {
   underline: 'none',
 };
-const Pattern = React.memo(({pattern, onDelete, onCopy}) => {
-  const classes = useStyles();
+const Pattern = React.memo(({pattern, isFirst, isLast, onDelete, onCopy, onMove}) => {
   const [isValid, setValid] = React.useState(true);
-  const [type, setType] = React.useState(pattern.type);
   const origPattern = React.useMemo(() => Object.assign({}, pattern), []);
 
   React.useEffect(() => {
@@ -359,6 +411,16 @@ const Pattern = React.memo(({pattern, onDelete, onCopy}) => {
   const handleCopy = React.useCallback((e) => {
     e.preventDefault();
     onCopy(pattern);
+  }, []);
+
+  const handleMoveUp = React.useCallback((e) => {
+    e.preventDefault();
+    onMove(pattern, -1);
+  }, []);
+
+  const handleMoveDown = React.useCallback((e) => {
+    e.preventDefault();
+    onMove(pattern, 1);
   }, []);
 
   const handleEnabledChange = React.useCallback((e) => {
@@ -376,29 +438,8 @@ const Pattern = React.memo(({pattern, onDelete, onCopy}) => {
 
   const handleTypeChange = React.useCallback((e) => {
     pattern.type = e.target.value;
-    setType(pattern.type);
     setValid(isValidPattern(pattern.pattern, pattern.type));
   }, []);
-
-  const helpTooltip = React.useMemo(() => {
-    if (type === 'wildcard') {
-      return (
-        <Box component={Typography} variant="body2">
-          <b>*</b> - all domains <br/>
-          <b>*.bbc.co.uk</b> - exact domain and all subdomains <br/>
-          <b>**.bbc.co.uk</b> - subdomains only (not bbc.co.uk) <br/>
-          <b>bbc.co.uk</b> - exact domain only <br/>
-          <b>http://bbc.co.uk</b> - exact http protocol <br/>
-        </Box>
-      );
-    } else {
-      return (
-        <Box component={Typography} variant="body2">
-          Input url looks like <b>scheme://host:port</b> credentials, paths, query are ignored
-        </Box>
-      );
-    }
-  }, [type]);
 
   return (
     <TableRow>
@@ -422,30 +463,31 @@ const Pattern = React.memo(({pattern, onDelete, onCopy}) => {
         />
       </TableCell>
       <TableCell padding="none" className="type-cell">
-        <Grid container alignItems={'center'}>
-          <Grid item xs>
-            <Select
-              onChange={handleTypeChange}
-              defaultValue={origPattern.type}
-              fullWidth
-              input={<InputBase size="small" />}
-              inputProps={selectInputProps}
-            >
-              <MenuItem value={'wildcard'}>Wildcard</MenuItem>
-              <MenuItem value={'regexp'}>RegExp</MenuItem>
-            </Select>
-          </Grid>
-          <Grid item>
-            <Tooltip interactive placement={'left-start'} title={helpTooltip} className={classes.vCenter}>
-              <InfoIcon color="primary"/>
-            </Tooltip>
-          </Grid>
-        </Grid>
+        <Select
+          onChange={handleTypeChange}
+          defaultValue={origPattern.type}
+          fullWidth
+          input={<InputBase size="small" />}
+          inputProps={selectInputProps}
+        >
+          <MenuItem value={'wildcard'}>Wildcard</MenuItem>
+          <MenuItem value={'regexp'}>RegExp</MenuItem>
+        </Select>
       </TableCell>
       <TableCell padding="none" className="enabled-cell">
         <Grid container alignItems={'center'}>
-          <Grid item xs>
+          <Grid item>
             <Checkbox className="small-checkbox" onChange={handleEnabledChange} defaultChecked={origPattern.enabled} />
+          </Grid>
+          <Grid item>
+            <IconButton onClick={handleMoveUp} disabled={isFirst} size={'small'}>
+              <ArrowUpwardIcon fontSize="small"/>
+            </IconButton>
+          </Grid>
+          <Grid item>
+            <IconButton onClick={handleMoveDown} disabled={isLast} size={'small'}>
+              <ArrowDownwardIcon fontSize="small"/>
+            </IconButton>
           </Grid>
           <Grid item>
             <IconButton onClick={handleCopy} size={'small'}>

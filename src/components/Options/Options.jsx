@@ -54,17 +54,14 @@ const Options = React.memo(() => {
     });
   }, []);
 
-  const handleMove = React.useCallback((isUp, id) => {
+  const handleMove = React.useCallback((id, offset) => {
     const {proxies} = scope;
     const proxy = proxies.find(p => p.id === id);
     const pos = proxies.indexOf(proxy);
     if (pos === -1) return;
     proxies.splice(pos, 1);
-    if (isUp) {
-      proxies.splice(pos - 1, 0, proxy);
-    } else {
-      proxies.splice(pos + 1, 0, proxy);
-    }
+
+    proxies.splice(pos + offset, 0, proxy);
     ConfigStruct.assert({proxies});
     return promisifyApi('chrome.storage.sync.set')({proxies}).then(() => {
       setProxies(proxies.slice(0));
@@ -96,10 +93,9 @@ const Options = React.memo(() => {
             <Box m={2} className={classes.mainBox}>
               <ProxySelect />
               <Grid container direction={'column'}>
-                {proxies.map((proxy) => {
-                  const isFirst = proxies.indexOf(proxy) === 0;
-                  const isLast = proxies.indexOf(proxy) === proxies.length - 1;
-
+                {proxies.map((proxy, index) => {
+                  const isFirst = index === 0;
+                  const isLast = index === proxies.length - 1;
                   return (
                     <Grid item key={proxy.id}>
                       <ProxyItem
@@ -128,12 +124,12 @@ const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabl
 
   const handleMoveUp = React.useCallback((e) => {
     e.preventDefault();
-    onMove(true, proxy.id);
+    onMove(proxy.id, -1);
   }, [proxy, onMove]);
 
   const handleMoveDown = React.useCallback((e) => {
     e.preventDefault();
-    onMove(false, proxy.id);
+    onMove(proxy.id, 1);
   }, [proxy, onMove]);
 
   const handleEnabledChange = React.useCallback((e) => {
