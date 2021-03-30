@@ -520,7 +520,7 @@ function isValidPattern(value, type) {
   if (type === 'wildcard') return true;
   let result = true;
   try {
-    value.split(/[,\n]/).forEach(v => new RegExp(`(?:${v})`));
+    value.split(/[,\n]/).forEach(v => new RegExp(`(?:${v.trim()})`));
   } catch (err) {
     result = false;
   }
