@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`wildcardToRegexpStr a 1`] = `
+Array [
+  "^.*\\\\.test\\\\.com$",
+  "^test\\\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr b 1`] = `
+Array [
+  "^.*://.*\\\\.test\\\\.com$",
+  "^.*://test\\\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr c 1`] = `
+Array [
+  "^.*://.*test\\\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr d 1`] = `
+Array [
+  "^.*test\\\\.com$",
+]
+`;

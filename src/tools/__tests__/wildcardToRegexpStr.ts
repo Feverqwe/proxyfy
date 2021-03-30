@@ -1,6 +1,6 @@
 import wildcardToRegexpStr from "../wildcardToRegexpStr";
 
-describe('normalizeWildcard', () => {
+describe('wildcardToRegexpStr', () => {
   test('a', () => {
     const result = wildcardToRegexpStr('*.test.com');
 
