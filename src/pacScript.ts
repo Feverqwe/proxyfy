@@ -19,7 +19,7 @@ FindProxyForURL = (function () {
       const wildcardPatterns: string[] = [];
       const regexpPatterns: string[] = [];
       patterns.forEach(({pattern, type}) => {
-        const singlePatterns = pattern.split(/[,\r?\n]/).map(v => v.trim()).filter(v => v.length);
+        const singlePatterns = pattern.split(/[,\n]/).map(v => v.trim()).filter(v => v.length);
         if (type === 'wildcard') {
           wildcardPatterns.push(...singlePatterns);
         } else
