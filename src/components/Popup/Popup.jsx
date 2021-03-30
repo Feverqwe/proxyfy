@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import {Box, Divider, List, ListItem, ListItemText, makeStyles, Paper} from "@material-ui/core";
 import promisifyApi from "../../tools/promisifyApi";
 import useActualState from "../useActualState";

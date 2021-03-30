@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import useActualState from "../useActualState";
 import useActualProxies from "../useActualProxies";
 import {FormControl, MenuItem, Select} from "@material-ui/core";

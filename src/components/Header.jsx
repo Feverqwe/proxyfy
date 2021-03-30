@@ -1,6 +1,6 @@
 import {Box, Grid, makeStyles, Paper, Typography} from "@material-ui/core";
-import * as React from "react";
-import * as PropTypes from "prop-types";
+import React from "react";
+import PropTypes from "prop-types";
 import getExtensionIcon from "../tools/getExtensionIcon";
 
 const useStyles = makeStyles(() => {

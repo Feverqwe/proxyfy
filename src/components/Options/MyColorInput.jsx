@@ -1,6 +1,6 @@
-import * as React from "react";
+import React from "react";
 import getExtensionIcon from "../../tools/getExtensionIcon";
-import {Box, FormControl, InputAdornment, Paper, Popper, TextField, Typography} from "@material-ui/core";
+import {Box, FormControl, InputAdornment, Popper, TextField, Typography} from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import ColorizeIcon from "@material-ui/icons/Colorize";
 import {ChromePicker} from "react-color";

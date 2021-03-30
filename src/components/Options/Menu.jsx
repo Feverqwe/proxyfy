@@ -1,7 +1,7 @@
 import {List, ListItem, ListItemIcon, ListItemText} from "@material-ui/core";
 import {Link} from "react-router-dom";
 import AddIcon from "@material-ui/icons/Add";
-import * as React from "react";
+import React from "react";
 import promisifyApi from "../../tools/promisifyApi";
 import downloadBlob from "../../tools/downloadBlob";
 import fileReaderReady from "../../tools/fileReaderPromise";

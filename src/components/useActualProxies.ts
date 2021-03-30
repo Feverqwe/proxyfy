@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import getConfig from "../tools/getConfig";
 import {Proxy} from "../tools/ConfigStruct";
 
