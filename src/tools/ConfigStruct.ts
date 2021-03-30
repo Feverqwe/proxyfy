@@ -1,4 +1,5 @@
-import s, {Infer} from "superstruct";
+import * as s from "superstruct";
+import {Infer} from "superstruct";
 
 const ProxyPatternStruct = s.type({
   id: s.string(),
