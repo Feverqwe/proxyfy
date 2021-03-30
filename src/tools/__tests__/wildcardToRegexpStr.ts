@@ -1,35 +1,84 @@
 import wildcardToRegexpStr from "../wildcardToRegexpStr";
 
 describe('wildcardToRegexpStr', () => {
-  test('a', () => {
-    const result = wildcardToRegexpStr('*.test.com');
+  test('all', () => {
+    const results = wildcardToRegexpStr('*');
 
-    console.log(result);
+    console.log(results);
 
-    expect(result).toMatchSnapshot();
+    expect(results).toMatchSnapshot();
+    expect(new RegExp(results.join('|')).test('http://test.com')).toBe(true);
+    expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
   });
 
-  test('b', () => {
-    const result = wildcardToRegexpStr('*://*.test.com');
+  test('subdomain and domain', () => {
+    const results = wildcardToRegexpStr('*.test.com');
 
-    console.log(result);
+    console.log(results);
 
-    expect(result).toMatchSnapshot();
+    expect(results).toMatchSnapshot();
+    expect(new RegExp(results.join('|')).test('http://test.com')).toBe(true);
+    expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
   });
 
-  test('c', () => {
-    const result = wildcardToRegexpStr('*://*test.com');
+  test('domain only', () => {
+    const results = wildcardToRegexpStr('test.com');
 
-    console.log(result);
+    console.log(results);
 
-    expect(result).toMatchSnapshot();
+    expect(results).toMatchSnapshot();
+    expect(new RegExp(results.join('|')).test('http://test.com')).toBe(true);
+    expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(false);
   });
 
-  test('d', () => {
-    const result = wildcardToRegexpStr('*test.com');
+  test('subdomain only', () => {
+    const results = wildcardToRegexpStr('**.test.com');
 
-    console.log(result);
+    console.log(results);
 
-    expect(result).toMatchSnapshot();
+    expect(results).toMatchSnapshot();
+    expect(new RegExp(results.join('|')).test('http://test.com')).toBe(false);
+    expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
+  });
+
+
+  test('protocol subdomain and domain', () => {
+    const results = wildcardToRegexpStr('*://*.test.com');
+
+    console.log(results);
+
+    expect(results).toMatchSnapshot();
+    expect(new RegExp(results.join('|')).test('http://test.com')).toBe(true);
+    expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
+  });
+
+  test('protocol domain only', () => {
+    const results = wildcardToRegexpStr('*://test.com');
+
+    console.log(results);
+
+    expect(results).toMatchSnapshot();
+    expect(new RegExp(results.join('|')).test('http://test.com')).toBe(true);
+    expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(false);
+  });
+
+  test('protocol subdomain only', () => {
+    const results = wildcardToRegexpStr('*://**.test.com');
+
+    console.log(results);
+
+    expect(results).toMatchSnapshot();
+    expect(new RegExp(results.join('|')).test('http://test.com')).toBe(false);
+    expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
+  });
+
+  test('http protocol only', () => {
+    const results = wildcardToRegexpStr('http://test.com');
+
+    console.log(results);
+
+    expect(results).toMatchSnapshot();
+    expect(new RegExp(results.join('|')).test('http://test.com')).toBe(true);
+    expect(new RegExp(results.join('|')).test('ws://test.com')).toBe(false);
   });
 });

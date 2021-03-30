@@ -15,6 +15,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography
 } from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
@@ -29,6 +30,7 @@ import PropTypes from "prop-types";
 import ConfigStruct from "../../tools/ConfigStruct";
 import promisifyApi from "../../tools/promisifyApi";
 import getId from "../../tools/getId";
+import InfoIcon from '@material-ui/icons/Info';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -67,7 +69,10 @@ const useStyles = makeStyles((theme) => {
       '& .MuiInputBase-root.Mui-error': {
         boxShadow: 'inset 0 0 2px #ff0000',
       }
-    }
+    },
+    vCenter: {
+      verticalAlign: 'middle'
+    },
   };
 });
 
@@ -207,8 +212,13 @@ const PatternsLoaded = React.memo(({proxy}) => {
               <PatternList ref={refWhiteRules} list={proxy.whitePatterns}/>
               <Box my={2} className={classes.center}>
                 Add whitelist pattern to match all URLs
-                <Button onClick={handleWhitelistMatchAll} variant="contained" size={'small'}
-                        className={classes.button} color="secondary">
+                <Button
+                  onClick={handleWhitelistMatchAll}
+                  variant="contained"
+                  size={'small'}
+                  className={classes.button}
+                  color={"secondary"}
+                >
                   Add
                 </Button>
               </Box>
@@ -220,8 +230,13 @@ const PatternsLoaded = React.memo(({proxy}) => {
               <PatternList ref={refBlackRules} list={proxy.blackPatterns}/>
               <Box my={2} className={classes.center}>
                 Add black patterns to prevent this proxy being used for localhost & intranet/private IP addresses
-                <Button onClick={handleBlacklistLocalhost} variant="contained" size={'small'} className={classes.button}
-                        color="secondary">
+                <Button
+                  onClick={handleBlacklistLocalhost}
+                  variant="contained"
+                  size={'small'}
+                  className={classes.button}
+                  color={"secondary"}
+                >
                   Add
                 </Button>
               </Box>
@@ -316,7 +331,9 @@ const selectInputProps = {
   underline: 'none',
 };
 const Pattern = React.memo(({pattern, onDelete}) => {
+  const classes = useStyles();
   const [isValid, setValid] = React.useState(true);
+  const [type, setType] = React.useState(pattern.type);
   const origPattern = React.useMemo(() => Object.assign({}, pattern), []);
 
   React.useEffect(() => {
@@ -343,8 +360,29 @@ const Pattern = React.memo(({pattern, onDelete}) => {
 
   const handleTypeChange = React.useCallback((e) => {
     pattern.type = e.target.value;
+    setType(pattern.type);
     setValid(isValidPattern(pattern.pattern, pattern.type));
   }, []);
+
+  const helpTooltip = React.useMemo(() => {
+    if (type === 'wildcard') {
+      return (
+        <Box component={Typography} variant="body2">
+          <b>*</b> - all domains <br/>
+          <b>*.bbc.co.uk</b> - exact domain and all subdomains <br/>
+          <b>**.bbc.co.uk</b> - subdomains only (not bbc.co.uk) <br/>
+          <b>bbc.co.uk</b> - exact domain only <br/>
+          <b>http://bbc.co.uk</b> - exact http protocol <br/>
+        </Box>
+      );
+    } else {
+      return (
+        <Box component={Typography} variant="body2">
+          Input url looks like <b>scheme://host:port</b> credentials, paths, query are ignored
+        </Box>
+      );
+    }
+  }, [type]);
 
   return (
     <TableRow>
@@ -368,16 +406,25 @@ const Pattern = React.memo(({pattern, onDelete}) => {
         />
       </TableCell>
       <TableCell padding="none" className="type-cell">
-        <Select
-          onChange={handleTypeChange}
-          defaultValue={origPattern.type}
-          fullWidth
-          input={<InputBase size="small" />}
-          inputProps={selectInputProps}
-        >
-          <MenuItem value={'wildcard'}>Wildcard</MenuItem>
-          <MenuItem value={'regexp'}>RegExp</MenuItem>
-        </Select>
+        <Grid container alignItems={'center'}>
+          <Grid item xs>
+            <Select
+              onChange={handleTypeChange}
+              defaultValue={origPattern.type}
+              fullWidth
+              input={<InputBase size="small" />}
+              inputProps={selectInputProps}
+            >
+              <MenuItem value={'wildcard'}>Wildcard</MenuItem>
+              <MenuItem value={'regexp'}>RegExp</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item>
+            <Tooltip interactive placement={'left-start'} title={helpTooltip} className={classes.vCenter}>
+              <InfoIcon color="primary"/>
+            </Tooltip>
+          </Grid>
+        </Grid>
       </TableCell>
       <TableCell padding="none" className="enabled-cell">
         <Grid container alignItems={'center'}>

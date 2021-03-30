@@ -1,27 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`wildcardToRegexpStr a 1`] = `
+exports[`wildcardToRegexpStr all 1`] = `
 Array [
-  "^.*\\\\.test\\\\.com$",
-  "^test\\\\.com$",
+  "^.*://.*$",
 ]
 `;
 
-exports[`wildcardToRegexpStr b 1`] = `
+exports[`wildcardToRegexpStr domain only 1`] = `
+Array [
+  "^.*://test\\\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr http protocol only 1`] = `
+Array [
+  "^http://test\\\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr protocol domain only 1`] = `
+Array [
+  "^.*://test\\\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr protocol subdomain and domain 1`] = `
 Array [
   "^.*://.*\\\\.test\\\\.com$",
   "^.*://test\\\\.com$",
 ]
 `;
 
-exports[`wildcardToRegexpStr c 1`] = `
+exports[`wildcardToRegexpStr protocol subdomain only 1`] = `
 Array [
-  "^.*://.*test\\\\.com$",
+  "^.*://.*\\\\.test\\\\.com$",
 ]
 `;
 
-exports[`wildcardToRegexpStr d 1`] = `
+exports[`wildcardToRegexpStr subdomain and domain 1`] = `
 Array [
-  "^.*test\\\\.com$",
+  "^.*://.*\\\\.test\\\\.com$",
+  "^.*://test\\\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr subdomain only 1`] = `
+Array [
+  "^.*://.*\\\\.test\\\\.com$",
 ]
 `;

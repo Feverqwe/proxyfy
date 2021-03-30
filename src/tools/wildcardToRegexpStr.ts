@@ -4,12 +4,17 @@ function wildcardToRegexpStr(pattern: string) {
   let patterns = [];
   const m = /^(.+\/)?([^\/]+)$/.exec(pattern);
   if (m) {
-    const scheme = m[1] || '';
+    const scheme = m[1] || '*://';
     const hostname = m[2];
 
-    patterns.push(scheme + hostname);
+    if (/^\*\*\./.test(hostname)) {
+      patterns.push(scheme + hostname.substr(1));
+    } else
     if (/^\*\./.test(hostname)) {
+      patterns.push(scheme + hostname);
       patterns.push(scheme + hostname.substr(2));
+    } else {
+      patterns.push(scheme + hostname);
     }
   } else {
     patterns.push(pattern);
