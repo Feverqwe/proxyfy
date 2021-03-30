@@ -9,6 +9,7 @@
     "jsx": "react",
     "moduleResolution": "Node",
     "skipLibCheck": true,
-    "outDir": "./dist/"
+    "outDir": "./dist/",
+    "esModuleInterop": true
   }
 }

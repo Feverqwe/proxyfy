@@ -1,5 +1,5 @@
 import {PacScript} from "./background";
-import * as escapeStringRegexp from "escape-string-regexp";
+import wildcardToRegexpStr from "./tools/wildcardToRegexpStr";
 
 declare let FindProxyForURL: (url: string) => string;
 declare let Config: PacScript | null;
@@ -28,8 +28,9 @@ FindProxyForURL = (function () {
       });
 
       wildcardPatterns.forEach((pattern) => {
-        const re = escapeStringRegexp(pattern).replace(/\\([*?])/g, '.$1');
-        regexpPatterns.push(`^${re}$`);
+        wildcardToRegexpStr(pattern).forEach((reStr) => {
+          regexpPatterns.push(reStr);
+        });
       });
 
       let re = null;
