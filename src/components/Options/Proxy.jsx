@@ -1,7 +1,6 @@
 import React, {useEffect} from "react";
 import {
   Box,
-  Button,
   Checkbox,
   FormControl,
   FormControlLabel,
@@ -10,8 +9,6 @@ import {
   makeStyles,
   MenuItem,
   Paper,
-  Select,
-  TextField,
   Typography
 } from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
@@ -27,6 +24,10 @@ import getObjectId from "../../tools/getObjectId";
 import {localhostPresets, matchAllPresets} from "./Patterns";
 import MyColorInput from "./MyColorInput";
 import getRandomInt from "../../tools/getRandomInt";
+import Notification from "./Notification";
+import MySelect from "./MySelect";
+import MyInput from "./MyInput";
+import MyButton from "./MyButton";
 
 const noProxyTypes = ['direct'];
 const badgeColors = [
@@ -45,9 +46,6 @@ const useStyles = makeStyles(() => {
     button: {
       margin: '8px',
     },
-    hidden: {
-      visibility: 'hidden',
-    }
   };
 });
 
@@ -112,6 +110,8 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
   const [isValidHost, setValidHost] = React.useState(true);
   const [isValidPort, setValidPort] = React.useState(true);
   const [type, setType] = React.useState(proxy.type);
+  const [notify, setNotify] = React.useState(null);
+
   const isNew = React.useMemo(() => !proxy.id, []);
 
   const save = React.useMemo(() => {
@@ -219,6 +219,28 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
     };
   }, []);
 
+  React.useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    function handleKeyDown(e) {
+      if (e.ctrlKey || e.metaKey) {
+        const keyCode = e.keyCode;
+        switch (keyCode) {
+          case 83:
+            e.preventDefault();
+            save().then(() => {
+              setNotify({text: 'Saved'});
+            }, (err) => {
+              console.error('Save error: %O', err);
+            });
+            break;
+        }
+      }
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [save]);
+
   const handleChangeType = React.useCallback((e) => {
     const value = e.target.value;
     setType(value);
@@ -232,7 +254,7 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
     e.preventDefault();
     save().then(() => {
       history.push('/');
-    }).catch((err) => {
+    }, (err) => {
       console.error('Save error: %O', err);
     });
   }, []);
@@ -348,75 +370,42 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
             </Grid>
             <Grid item xs={12}>
               <Box mx={2} mb={2} className={classes.actionBox}>
-                <Button
+                <MyButton
                   component={Link}
                   to={'/'}
                   variant="contained"
                   className={classes.button}
                 >
                   Cancel
-                </Button>
-                <Button
+                </MyButton>
+                <MyButton
                   onClick={handleSaveAndAddAnother}
                   variant="contained"
                   className={classes.button}
                   color="secondary"
                 >
                   Save & Add another
-                </Button>
-                <Button
+                </MyButton>
+                <MyButton
                   onClick={handleSaveAndEditPatterns}
                   variant="contained"
                   className={classes.button}
                   color="secondary"
                 >
                   Save & Edit patterns
-                </Button>
-                <Button onClick={handleSave} variant="contained" className={classes.button} color="primary">
+                </MyButton>
+                <MyButton onClick={handleSave} variant="contained" className={classes.button} color="primary">
                   Save
-                </Button>
+                </MyButton>
               </Box>
             </Grid>
           </Grid>
         </form>
       </Box>
+      {notify && (
+        <Notification key={getObjectId(notify)} notify={notify}/>
+      )}
     </>
-  );
-});
-
-const MyInput = React.memo(({label, isError = false, hidden, ...props}) => {
-  const classes = useStyles();
-
-  return (
-    <FormControl fullWidth margin={'dense'} className={hidden ? classes.hidden : ''}>
-      <Typography variant={"subtitle1"}>
-        {label}
-      </Typography>
-      <TextField
-        variant="outlined"
-        size="small"
-        error={isError}
-        autoComplete={'off'}
-        {...props}
-      />
-    </FormControl>
-  );
-});
-
-const MySelect = React.memo(({label, children, ...props}) => {
-  return (
-    <FormControl fullWidth margin={'dense'}>
-      <Typography variant={"subtitle1"}>
-        {label}
-      </Typography>
-      <Select
-        variant="outlined"
-        size="small"
-        {...props}
-      >
-        {children}
-      </Select>
-    </FormControl>
   );
 });
 

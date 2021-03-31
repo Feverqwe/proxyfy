@@ -1,7 +1,6 @@
 import React, {useEffect} from "react";
 import {
   Box,
-  Button,
   Checkbox,
   Grid,
   InputBase,
@@ -16,8 +15,7 @@ import {
   TableHead,
   TableRow,
   Tooltip,
-  Typography,
-  Zoom
+  Typography
 } from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
 import IconButton from '@material-ui/core/IconButton';
@@ -37,6 +35,8 @@ import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import splitMultiPattern from "../../tools/splitMultiPattern";
 import getObjectId from "../../tools/getObjectId";
+import Notification from "./Notification";
+import MyButton from "./MyButton";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -82,12 +82,6 @@ const useStyles = makeStyles((theme) => {
     vCenter: {
       verticalAlign: 'middle'
     },
-    notify: {
-      position: 'fixed',
-      top: '30px',
-      right: '30px',
-      backgroundColor: theme.palette.primary.light,
-    }
   };
 });
 
@@ -252,7 +246,7 @@ const PatternsLoaded = React.memo(({proxy}) => {
               <PatternList ref={refWhiteRules} list={proxy.whitePatterns}/>
               <Box my={2} className={classes.center}>
                 Add whitelist pattern to match all URLs
-                <Button
+                <MyButton
                   onClick={handleWhitelistMatchAll}
                   variant="contained"
                   size={'small'}
@@ -260,7 +254,7 @@ const PatternsLoaded = React.memo(({proxy}) => {
                   color={"secondary"}
                 >
                   Add
-                </Button>
+                </MyButton>
               </Box>
             </Box>
             <Box m={2}>
@@ -270,7 +264,7 @@ const PatternsLoaded = React.memo(({proxy}) => {
               <PatternList ref={refBlackRules} list={proxy.blackPatterns}/>
               <Box my={2} className={classes.center}>
                 Add black patterns to prevent this proxy being used for localhost & intranet/private IP addresses
-                <Button
+                <MyButton
                   onClick={handleBlacklistLocalhost}
                   variant="contained"
                   size={'small'}
@@ -278,29 +272,29 @@ const PatternsLoaded = React.memo(({proxy}) => {
                   color={"secondary"}
                 >
                   Add
-                </Button>
+                </MyButton>
               </Box>
             </Box>
           </Grid>
           <Grid item xs={12}>
             <Box mx={2} mb={2} className={classes.actionBox}>
-              <Button
+              <MyButton
                 component={Link}
                 to={'/'}
                 variant="contained"
                 className={classes.button}
               >
                 Cancel
-              </Button>
-              <Button onClick={handleNewWhite} variant="contained" className={classes.button} color="secondary">
+              </MyButton>
+              <MyButton onClick={handleNewWhite} variant="contained" className={classes.button} color="secondary">
                 New White
-              </Button>
-              <Button onClick={handleNewBlack} variant="contained" className={classes.button} color="secondary">
+              </MyButton>
+              <MyButton onClick={handleNewBlack} variant="contained" className={classes.button} color="secondary">
                 New Black
-              </Button>
-              <Button onClick={handleSave} variant="contained" className={classes.button} color="primary">
+              </MyButton>
+              <MyButton onClick={handleSave} variant="contained" className={classes.button} color="primary">
                 Save
-              </Button>
+              </MyButton>
             </Box>
           </Grid>
         </Grid>
@@ -553,30 +547,6 @@ const Pattern = React.memo(({pattern, isFirst, isLast, onDelete, onCopy, onMove}
 Pattern.propTypes = {
   pattern: PropTypes.object,
 };
-
-const Notification = React.memo(({notify}) => {
-  const classes = useStyles();
-  const [show, setShow] = React.useState(true);
-
-  React.useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setShow(false);
-    }, 3 * 1000);
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  if (!show) return null;
-
-  return (
-    <Zoom in={show}>
-      <Box component={Paper} p={1} elevation={3} className={classes.notify}>
-        {notify.text}
-      </Box>
-    </Zoom>
-  );
-});
 
 function isValidPattern(value, type) {
   if (type === 'wildcard') return true;

@@ -12,7 +12,7 @@ import promisifyApi from "../../tools/promisifyApi";
 import ConfigStruct from "../../tools/ConfigStruct";
 import Menu from "./Menu";
 import ProxySelect from "./ProxySelect";
-import getExtensionIcon from "../../tools/getExtensionIcon";
+import ColorIcon from "./ColorIcon";
 
 const useStyles = makeStyles(() => {
   return {
@@ -161,7 +161,7 @@ const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabl
       <Grid item className={classes.enabledCell}>
         <Grid container alignItems={'center'} justify="space-around">
           <Grid item>
-            <Checkbox defaultChecked={proxy.enabled} onChange={handleEnabledChange}/>
+            <Checkbox color="primary" defaultChecked={proxy.enabled} onChange={handleEnabledChange}/>
           </Grid>
           <Grid item>
             <Button component={Link} to={'/proxy?' + qs.stringify({
@@ -195,29 +195,6 @@ const ProxyItem = React.memo(({proxy, isFirst, isLast, onDelete, onMove, onEnabl
         </Grid>
       </Grid>
     </Grid>
-  );
-});
-
-const colorIconStyle = {
-  display: 'inline-block',
-  width: '24px',
-  height: '24px',
-  verticalAlign: 'middle',
-};
-const ColorIcon = React.memo(({color}) => {
-  const refColorIcon = React.useRef();
-
-  React.useEffect(() => {
-    const canvas = refColorIcon.current;
-    const imageData = getExtensionIcon(color, 24);
-    const context = canvas.getContext('2d');
-    context.putImageData(imageData, 0, 0);
-  }, [color]);
-
-  return (
-    <div style={colorIconStyle}>
-      <canvas ref={refColorIcon} width={24} height={24} />
-    </div>
   );
 });
 
