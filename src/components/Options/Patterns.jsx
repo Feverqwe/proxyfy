@@ -192,6 +192,24 @@ const PatternsLoaded = React.memo(({proxy}) => {
     });
   }, [proxy]);
 
+  React.useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    function handleKeyDown(e) {
+      if (e.ctrlKey || e.metaKey) {
+        const keyCode = e.keyCode;
+        switch (keyCode) {
+          case 83:
+            e.preventDefault();
+            handleSave(e);
+            break;
+        }
+      }
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleSave]);
+
   const handleWhitelistMatchAll = React.useCallback((e) => {
     e.preventDefault();
     matchAllPresets.forEach(({name, pattern, type}) => {
