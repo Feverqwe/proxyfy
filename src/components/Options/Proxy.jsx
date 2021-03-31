@@ -149,8 +149,8 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
       if (noProxyTypes.includes(data.type)) {
         setValidHost(true);
         setValidPort(true);
-        delete data.host;
-        delete data.port;
+        data.host = undefined;
+        data.port = undefined;
       } else {
         let hasErrors = false;
         if (!data.host) {
