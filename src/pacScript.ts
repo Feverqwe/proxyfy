@@ -1,5 +1,6 @@
 import {PacScript} from "./background";
 import wildcardToRegexpStr from "./tools/wildcardToRegexpStr";
+import splitMultiPattern from "./tools/splitMultiPattern";
 
 declare let FindProxyForURL: (url: string) => string;
 declare let Config: PacScript | null;
@@ -19,7 +20,7 @@ FindProxyForURL = (function () {
       const wildcardPatterns: string[] = [];
       const regexpPatterns: string[] = [];
       patterns.forEach(({pattern, type}) => {
-        const singlePatterns = pattern.split(/[,\n]/).map(v => v.trim()).filter(v => v.length);
+        const singlePatterns = splitMultiPattern(pattern);
         if (type === 'wildcard') {
           wildcardPatterns.push(...singlePatterns);
         } else

@@ -34,6 +34,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import CopyIcon from "./CopyIcon";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
+import splitMultiPattern from "../../tools/splitMultiPattern";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -333,7 +334,8 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
     return (
       <Box>
         <Typography variant="body2">
-          Use newline or comma for splitting patterns
+          Use newline or comma `,` for splitting patterns <br/>
+          If line starts from pound sign `#` it will ignored
         </Typography>
         <Typography variant="h6">Wildcard</Typography>
         <Typography variant="body2">
@@ -520,7 +522,7 @@ function isValidPattern(value, type) {
   if (type === 'wildcard') return true;
   let result = true;
   try {
-    value.split(/[,\n]/).forEach(v => new RegExp(`(?:${v.trim()})`));
+    splitMultiPattern(value).forEach(v => new RegExp(`(?:${v})`));
   } catch (err) {
     result = false;
   }
