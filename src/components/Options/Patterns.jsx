@@ -16,7 +16,8 @@ import {
   TableHead,
   TableRow,
   Tooltip,
-  Typography
+  Typography,
+  Zoom
 } from "@material-ui/core";
 import getConfig from "../../tools/getConfig";
 import IconButton from '@material-ui/core/IconButton';
@@ -35,6 +36,7 @@ import CopyIcon from "./CopyIcon";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import splitMultiPattern from "../../tools/splitMultiPattern";
+import getObjectId from "../../tools/getObjectId";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -80,6 +82,12 @@ const useStyles = makeStyles((theme) => {
     vCenter: {
       verticalAlign: 'middle'
     },
+    notify: {
+      position: 'fixed',
+      top: '30px',
+      right: '30px',
+      backgroundColor: theme.palette.primary.light,
+    }
   };
 });
 
@@ -159,6 +167,7 @@ const PatternsLoaded = React.memo(({proxy}) => {
   const classes = useStyles();
   const refWhiteRules = React.useRef();
   const refBlackRules = React.useRef();
+  const [notify, setNotify] = React.useState(null);
 
   const handleNewWhite = React.useCallback((e) => {
     e.preventDefault();
@@ -170,7 +179,7 @@ const PatternsLoaded = React.memo(({proxy}) => {
     refBlackRules.current.addRule();
   }, []);
 
-  const handleSave = React.useCallback((e) => {
+  const handleSave = React.useCallback((e, noRedirect = false) => {
     e.preventDefault();
     const whitePatterns = refWhiteRules.current.getPatterns();
     const blackPatterns = refBlackRules.current.getPatterns();
@@ -186,9 +195,13 @@ const PatternsLoaded = React.memo(({proxy}) => {
       ConfigStruct.assert(config);
       await promisifyApi('chrome.storage.sync.set')(config);
     }).then(() => {
-      history.push('/');
+      if (!noRedirect) {
+        history.push('/');
+      }
+      return true;
     }, (err) => {
       console.error('Save proxy error: %O', err);
+      return false;
     });
   }, [proxy]);
 
@@ -200,7 +213,9 @@ const PatternsLoaded = React.memo(({proxy}) => {
         switch (keyCode) {
           case 83:
             e.preventDefault();
-            handleSave(e);
+            handleSave(e, true).then((isSaved) => {
+              isSaved && setNotify({text: 'Saved'});
+            });
             break;
         }
       }
@@ -290,6 +305,9 @@ const PatternsLoaded = React.memo(({proxy}) => {
           </Grid>
         </Grid>
       </Box>
+      {notify && (
+        <Notification key={getObjectId(notify)} notify={notify}/>
+      )}
     </>
   );
 });
@@ -535,6 +553,30 @@ const Pattern = React.memo(({pattern, isFirst, isLast, onDelete, onCopy, onMove}
 Pattern.propTypes = {
   pattern: PropTypes.object,
 };
+
+const Notification = React.memo(({notify}) => {
+  const classes = useStyles();
+  const [show, setShow] = React.useState(true);
+
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setShow(false);
+    }, 3 * 1000);
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <Zoom in={show}>
+      <Box component={Paper} p={1} elevation={3} className={classes.notify}>
+        {notify.text}
+      </Box>
+    </Zoom>
+  );
+});
 
 function isValidPattern(value, type) {
   if (type === 'wildcard') return true;
