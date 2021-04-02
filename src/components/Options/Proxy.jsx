@@ -119,12 +119,13 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
       const {
         title: titleEl, color: colorEl,
         type: typeEl, host: hostEl, port: portEl,
+        username: usernameEl, password: passwordEl,
         enabled: enabledEl, useMatchAllPreset: useMatchAllPresetEl, useLocalhostPreset: useLocalhostPresetEl,
         badgeText: badgeTextEl, badgeColor: badgeColorEl,
       } = refForm.current.elements;
 
       const data = {};
-      [titleEl, typeEl, colorEl, hostEl, portEl, badgeTextEl, badgeColorEl].forEach((element) => {
+      [titleEl, typeEl, colorEl, hostEl, portEl, usernameEl, passwordEl, badgeTextEl, badgeColorEl].forEach((element) => {
         if (!element) return;
         const key = element.name;
         let value = element.value;
@@ -151,6 +152,8 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
         setValidPort(true);
         data.host = undefined;
         data.port = undefined;
+        data.password = undefined;
+        data.username = undefined;
       } else {
         let hasErrors = false;
         if (!data.host) {
@@ -167,6 +170,11 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
         }
         if (hasErrors) {
           throw new Error('Incorrect data');
+        }
+
+        if (!data.username) {
+          data.password = undefined;
+          data.username = undefined;
         }
       }
 
@@ -365,6 +373,19 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
                   isError={!isValidPort}
                   hidden={isDirect}
                   type={'number'}
+                />
+                <MyInput
+                  label="Username (optional)"
+                  placeholder="username"
+                  defaultValue={proxy.username || ''}
+                  name={'username'}
+                />
+                <MyInput
+                  label="Password (optional)"
+                  placeholder="*****"
+                  type={"password"}
+                  defaultValue={proxy.password || ''}
+                  name={'password'}
                 />
               </Box>
             </Grid>
