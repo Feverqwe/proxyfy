@@ -37,6 +37,7 @@ import splitMultiPattern from "../../tools/splitMultiPattern";
 import getObjectId from "../../tools/getObjectId";
 import Notification from "./Notification";
 import MyButton from "./MyButton";
+import Alert from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -239,6 +240,9 @@ const PatternsLoaded = React.memo(({proxy}) => {
       <Box component={Paper} m={2}>
         <Grid container>
           <Grid item xs={12}>
+            <Alert severity="info">
+              Proxyfy ignores everything on this page unless set to "Use enabled proxies by patterns and order"
+            </Alert>
             <Box m={2}>
               <Typography variant={'h5'}>
                 White Patterns
