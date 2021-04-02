@@ -130,8 +130,8 @@ export class Background {
         }
         case 'pac_script': {
           iconColor = '#0a77e5';
-          const config = await getConfig();
           if (AUTH_SUPPORTED) {
+            const config = await getConfig();
             authListener = new AuthListener(config.proxies);
           }
           break;
