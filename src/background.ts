@@ -3,15 +3,17 @@ import promisifyApi from "./tools/promisifyApi";
 import getExtensionIcon from "./tools/getExtensionIcon";
 import {Config, ProxyPatternStruct} from "./tools/ConfigStruct";
 import getConfig from "./tools/getConfig";
+import AuthListener from "./tools/authListener";
 import ChromeSettingGetResultDetails = chrome.types.ChromeSettingGetResultDetails;
 import ChromeSettingClearDetails = chrome.types.ChromeSettingClearDetails;
 import ChromeSettingSetDetails = chrome.types.ChromeSettingSetDetails;
 import ColorArray = chrome.action.ColorArray;
-import AuthListener from "./tools/authListener";
 
 type ProxyPattern = Infer<typeof ProxyPatternStruct>;
 
 export type PacScriptPattern = Pick<ProxyPattern, 'type' | 'pattern'>; //  | 'protocol'
+
+const AUTH_SUPPORTED = false;
 
 export type PacScript = {
   rules: ({
@@ -120,28 +122,30 @@ export class Background {
                 });
               }
             }
-            authListener = new AuthListener([proxy]);
+            if (AUTH_SUPPORTED) {
+              authListener = new AuthListener([proxy]);
+            }
           }
           break;
         }
         case 'pac_script': {
           iconColor = '#0a77e5';
           const config = await getConfig();
-          authListener = new AuthListener(config.proxies);
+          if (AUTH_SUPPORTED) {
+            authListener = new AuthListener(config.proxies);
+          }
           break;
         }
       }
     }
 
-    if (authListener) {
-      if (this.authListener) {
-        this.authListener.destroy();
-        this.authListener = null;
-      }
-      if (authListener.isRequired) {
-        this.authListener = authListener;
-        this.authListener.enable();
-      }
+    if (this.authListener) {
+      this.authListener.destroy();
+      this.authListener = null;
+    }
+    if (authListener && authListener.isRequired) {
+      this.authListener = authListener;
+      this.authListener.enable();
     }
 
     chrome.action.setBadgeText({

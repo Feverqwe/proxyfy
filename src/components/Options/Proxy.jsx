@@ -29,6 +29,7 @@ import MySelect from "./MySelect";
 import MyInput from "./MyInput";
 import MyButton from "./MyButton";
 
+const AUTH_SUPPORTED = false;
 const noProxyTypes = ['direct'];
 const badgeColors = [
   "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3",
@@ -374,19 +375,23 @@ const ProxyLoaded = React.memo(({proxy, onReset}) => {
                   hidden={isDirect}
                   type={'number'}
                 />
-                <MyInput
-                  label="Username (optional)"
-                  placeholder="username"
-                  defaultValue={proxy.username || ''}
-                  name={'username'}
-                />
-                <MyInput
-                  label="Password (optional)"
-                  placeholder="*****"
-                  type={"password"}
-                  defaultValue={proxy.password || ''}
-                  name={'password'}
-                />
+                {AUTH_SUPPORTED && (
+                  <>
+                    <MyInput
+                      label="Username (optional)"
+                      placeholder="username"
+                      defaultValue={proxy.username || ''}
+                      name={'username'}
+                    />
+                    <MyInput
+                      label="Password (optional)"
+                      placeholder="*****"
+                      type={"password"}
+                      defaultValue={proxy.password || ''}
+                      name={'password'}
+                    />
+                  </>
+                )}
               </Box>
             </Grid>
             <Grid item xs={12}>
