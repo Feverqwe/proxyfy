@@ -2,7 +2,6 @@ import * as s from "superstruct";
 import {Infer} from "superstruct";
 
 const ProxyPatternStruct = s.type({
-  id: s.string(),
   enabled: s.boolean(),
   name: s.string(),
   type: s.union([s.literal('wildcard'), s.literal('regexp')]),

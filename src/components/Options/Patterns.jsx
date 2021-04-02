@@ -28,7 +28,6 @@ import {Link} from "react-router-dom";
 import PropTypes from "prop-types";
 import ConfigStruct from "../../tools/ConfigStruct";
 import promisifyApi from "../../tools/promisifyApi";
-import getId from "../../tools/getId";
 import InfoIcon from '@material-ui/icons/Info';
 import CopyIcon from "./CopyIcon";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
@@ -322,7 +321,6 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
       addRule(name = '', pattern = '', type = 'wildcard') {
         const {patterns} = scope;
         patterns.push({
-          id: getId(),
           enabled: true,
           name,
           type,
@@ -349,7 +347,6 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
     const pos = patterns.indexOf(pattern);
     if (pos === -1) return;
     const clone = JSON.parse(JSON.stringify(pattern));
-    clone.id = getId();
     patterns.splice(pos + 1, 0, clone);
     setPatterns(patterns.slice(0));
   }, []);
@@ -415,7 +412,7 @@ const PatternList = React.memo(React.forwardRef(({list}, ref) => {
             const isLast = index === patterns.length - 1;
             return (
               <Pattern
-                key={pattern.id}
+                key={getObjectId(pattern)}
                 pattern={pattern}
                 onMove={handlePatternMove}
                 onCopy={handlePatternCopy}
