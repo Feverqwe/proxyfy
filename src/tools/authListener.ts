@@ -10,7 +10,7 @@ class AuthListener {
     this.isRequired = !!this.proxies.length;
   }
 
-  handleAuthRequired = (details: { isProxy: boolean, url: string, challenger: {host: string, port: number} }) => {
+  handleAuthRequired = (details: { isProxy: boolean, challenger: {host: string, port: number} }) => {
     const result: { authCredentials?: { username: string, password: string } } = {};
     if (details.isProxy && details.challenger) {
       const proxy = this.proxies.find((proxy) => {
