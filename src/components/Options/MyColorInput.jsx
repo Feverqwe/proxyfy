@@ -6,6 +6,9 @@ import ColorizeIcon from "@material-ui/icons/Colorize";
 import {ChromePicker} from "react-color";
 import getCircleIcon from "../../tools/getCircleIcon";
 
+const canvasStyle = {width: '24px', height: '24px'};
+const canvasDprSize = 24 * window.devicePixelRatio;
+
 const MyColorInput = React.memo(({label, value, iconType = 'circle', format = 'hex', ...props}) => {
   const [color, setColor] = React.useState(value);
   const [showPicker, setShowPicker] = React.useState(false);
@@ -51,11 +54,13 @@ const MyColorInput = React.memo(({label, value, iconType = 'circle', format = 'h
 
   React.useEffect(() => {
     const canvas = refColorIcon.current;
+    canvas.width = canvasDprSize;
+    canvas.height = canvasDprSize;
     let imageData;
     if (iconType === 'logo') {
-      imageData = getExtensionIcon(color, 24);
+      imageData = getExtensionIcon(color, canvasDprSize);
     } else {
-      imageData = getCircleIcon(color, 24);
+      imageData = getCircleIcon(color, canvasDprSize);
     }
     const context = canvas.getContext('2d');
     context.putImageData(imageData, 0, 0);
@@ -76,7 +81,7 @@ const MyColorInput = React.memo(({label, value, iconType = 'circle', format = 'h
       ),
       startAdornment: (
         <InputAdornment position="start">
-          <canvas ref={refColorIcon} width={24} height={24} />
+          <canvas ref={refColorIcon} style={canvasStyle} />
         </InputAdornment>
       ),
     };

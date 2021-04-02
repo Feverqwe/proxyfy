@@ -1,5 +1,6 @@
 import React from "react";
 import getExtensionIcon from "../../tools/getExtensionIcon";
+import getUrlFromImageData from "../../tools/getUrlFromImageData";
 
 const colorIconStyle = {
   display: 'inline-block',
@@ -9,18 +10,11 @@ const colorIconStyle = {
 };
 
 const ColorIcon = React.memo(({color}) => {
-  const refColorIcon = React.useRef();
-
-  React.useEffect(() => {
-    const canvas = refColorIcon.current;
-    const imageData = getExtensionIcon(color, 24);
-    const context = canvas.getContext('2d');
-    context.putImageData(imageData, 0, 0);
-  }, [color]);
+  const iconUrl = React.useMemo(() => getUrlFromImageData(color, 24, getExtensionIcon), [color]);
 
   return (
     <div style={colorIconStyle}>
-      <canvas ref={refColorIcon} width={24} height={24} />
+      <img src={iconUrl} width={24} height={24} alt={'color'} />
     </div>
   );
 });
