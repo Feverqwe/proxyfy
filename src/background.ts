@@ -234,7 +234,7 @@ export class Background {
           mode: 'pac_script',
           pacScript: {
             data: await getPacScript(config.proxies),
-            mandatory: false,
+            mandatory: true,
           }
         };
         break;
