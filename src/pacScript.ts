@@ -42,10 +42,15 @@ FindProxyForURL = (function () {
       return re;
     });
 
+    let chType = type.toUpperCase();
+    if (chType === 'HTTP') {
+      chType = 'PROXY';
+    }
+
     return {
       whiteRe,
       blackRe,
-      type: type.toUpperCase(),
+      type: chType,
       address,
     };
   });
