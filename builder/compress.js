@@ -1,15 +1,14 @@
 const Fs = require('fs');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const archiver = require('archiver');
 
 const compress = (source, target) => {
   const zipFolder = (srcFolder, zipFilePath, callback) => {
     const output = Fs.createWriteStream(zipFilePath);
     const zipArchive = archiver('zip', {
-      zlib: {level: 9},
+      zlib: { level: 9 }
     });
 
-    output.on('close', () => {
+    output.on('close', function() {
       callback();
     });
 
@@ -17,17 +16,17 @@ const compress = (source, target) => {
 
     zipArchive.directory(srcFolder, false);
 
-    zipArchive.finalize((err, bytes) => {
-      if (err) {
+    zipArchive.finalize(function(err, bytes) {
+      if(err) {
         callback(err);
       }
     });
   };
 
-  return new Promise<void>((resolve, reject) => {
-    zipFolder(source, target, (err) => {
+  return new Promise((resolve, reject) => {
+    zipFolder(source, target, err => {
       err ? reject(err) : resolve();
-    });
+    })
   });
 };
 

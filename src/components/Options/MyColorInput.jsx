@@ -1,70 +1,46 @@
-import React, {FC} from 'react';
-import {
-  Box,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  Popper,
-  TextField,
-  Typography,
-} from '@mui/material';
-import ColorizeIcon from '@mui/icons-material/Colorize';
-import {ChromePicker} from 'react-color';
-import getExtensionIcon from '../../tools/getExtensionIcon';
-import getCircleIcon from '../../tools/getCircleIcon';
+import React from "react";
+import getExtensionIcon from "../../tools/getExtensionIcon";
+import {Box, FormControl, InputAdornment, Popper, TextField, Typography} from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
+import ColorizeIcon from "@material-ui/icons/Colorize";
+import {ChromePicker} from "react-color";
+import getCircleIcon from "../../tools/getCircleIcon";
 
 const canvasStyle = {width: '24px', height: '24px'};
 const canvasDprSize = 24 * window.devicePixelRatio;
 
-type MyColorInputProps = {
-  label: string;
-  value: string;
-  iconType?: string;
-  format?: string;
-  name: string;
-};
-
-const MyColorInput: FC<MyColorInputProps> = ({
-  label,
-  value,
-  iconType = 'circle',
-  format = 'hex',
-  name,
-}) => {
+const MyColorInput = React.memo(({label, value, iconType = 'circle', format = 'hex', ...props}) => {
   const [color, setColor] = React.useState(value);
   const [showPicker, setShowPicker] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const refPickerBody = React.useRef<HTMLDivElement | null>(null);
-  const refPickerBtn = React.useRef<HTMLButtonElement | null>(null);
-  const refColorIcon = React.useRef<HTMLCanvasElement | null>(null);
+  const refPickerBody = React.useRef();
+  const refPickerBtn = React.useRef();
+  const refColorIcon = React.useRef();
 
-  const handleChangeColor = React.useCallback(
-    (color) => {
-      if (format === 'rgba') {
-        const {r, g, b, a} = color.rgb;
-        const colorStr = `rgba(${r},${g},${b},${a})`;
-        setColor(colorStr);
-      } else {
-        setColor(color.hex);
-      }
-    },
-    [format],
-  );
+  const handleChangeColor = React.useCallback((color) => {
+    if (format === 'rgba') {
+      const {r,g,b,a} = color.rgb;
+      const colorStr = `rgba(${r},${g},${b},${a})`;
+      setColor(colorStr);
+    } else {
+      setColor(color.hex);
+    }
+  }, []);
 
   const handleChange = React.useCallback((e) => {
     setColor(e.target.value);
   }, []);
 
   const handleClickPick = React.useCallback((e) => {
-    setAnchorEl(e.currentTarget);
-    setShowPicker((r) => !r);
+    setAnchorEl(e.currentTarget)
+    setShowPicker(r => !r);
   }, []);
 
   React.useEffect(() => {
     if (!showPicker) return;
     document.addEventListener('click', listener);
-    function listener(e: MouseEvent) {
-      const target = e.target as HTMLElement;
+    function listener(e) {
+      const target = e.target;
       const body = refPickerBody.current;
       const btn = refPickerBtn.current;
       if (!body || !btn) return;
@@ -78,7 +54,6 @@ const MyColorInput: FC<MyColorInputProps> = ({
 
   React.useEffect(() => {
     const canvas = refColorIcon.current;
-    if (!canvas) return;
     canvas.width = canvasDprSize;
     canvas.height = canvasDprSize;
     let imageData;
@@ -88,15 +63,18 @@ const MyColorInput: FC<MyColorInputProps> = ({
       imageData = getCircleIcon(color, canvasDprSize);
     }
     const context = canvas.getContext('2d');
-    if (!context) return;
     context.putImageData(imageData, 0, 0);
-  }, [color, iconType]);
+  }, [color]);
 
   const inputProps = React.useMemo(() => {
     return {
       endAdornment: (
         <InputAdornment position="end">
-          <IconButton ref={refPickerBtn} onClick={handleClickPick} edge="end">
+          <IconButton
+            ref={refPickerBtn}
+            onClick={handleClickPick}
+            edge="end"
+          >
             <ColorizeIcon />
           </IconButton>
         </InputAdornment>
@@ -111,16 +89,18 @@ const MyColorInput: FC<MyColorInputProps> = ({
 
   return (
     <>
-      <FormControl fullWidth margin="dense">
-        <Typography variant="subtitle1">{label}</Typography>
+      <FormControl fullWidth margin={'dense'}>
+        <Typography variant={"subtitle1"}>
+          {label}
+        </Typography>
         <TextField
           variant="outlined"
           size="small"
           value={color}
           onChange={handleChange}
-          autoComplete="off"
+          autoComplete={'off'}
           InputProps={inputProps}
-          name={name}
+          {...props}
         />
       </FormControl>
       <Popper open={showPicker} anchorEl={anchorEl}>
@@ -134,6 +114,6 @@ const MyColorInput: FC<MyColorInputProps> = ({
       </Popper>
     </>
   );
-};
+});
 
 export default MyColorInput;
