@@ -1,10 +1,9 @@
-import React from "react";
-import {Button} from "@material-ui/core";
+import {Button, ButtonProps} from '@mui/material';
+import React, {FC} from 'react';
 
-const MyButton = React.memo(({ ...props}) => {
-  return (
-    <Button disableElevation {...props}/>
-  );
-});
+const MyButton: FC<ButtonProps> = (props) => {
+  // @ts-ignore
+  return <Button disableElevation {...props} />;
+};
 
-export default MyButton;
+export default MyButton as typeof Button;

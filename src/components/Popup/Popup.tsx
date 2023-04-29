@@ -1,40 +1,43 @@
-import React from "react";
-import {Box, Divider, List, ListItem, ListItemText, makeStyles, Paper} from "@material-ui/core";
-import promisifyApi from "../../tools/promisifyApi";
-import useActualState from "../useActualState";
-import useActualProxies from "../useActualProxies";
+import React, {FC} from 'react';
+import {Box, Divider, List, ListItem, ListItemButton, ListItemText, Paper} from '@mui/material';
+import {styled} from '@mui/system';
+import promisifyApi from '../../tools/promisifyApi';
+import useActualState from '../useActualState';
+import useActualProxies from '../useActualProxies';
+import {ConfigProxy} from '../../tools/ConfigStruct';
 
-const useStyles = makeStyles(() => {
-  return {
-    box: {
-      minWidth: '350px',
-    },
-    active: {
+const MyListItemButton = styled(ListItemButton)({
+  '&.active': {
+    color: '#fff',
+    backgroundColor: '#007bff',
+    '&:hover': {
       color: '#fff',
       backgroundColor: '#007bff',
-      '&:hover': {
-        color: '#fff',
-        backgroundColor: '#007bff',
-      }
-    }
-  };
+    },
+  },
 });
+
+interface Item {
+  id?: string;
+  title: string;
+  mode: string;
+}
 
 const defaultItems = [
   {title: 'Use enabled proxies by patterns and order', mode: 'pac_script'},
-  /*{title: 'Off (use auto detect)', mode: 'auto_detect'},*/
+  /* {title: 'Off (use auto detect)', mode: 'auto_detect'}, */
   {title: 'Off (use system settings)', mode: 'system'},
 ];
 
 const Popup = React.memo(() => {
-  const classes = useStyles();
-
   const state = useActualState();
   const proxies = useActualProxies();
 
   const handleClick = React.useCallback((mode, id) => {
     promisifyApi('chrome.runtime.sendMessage')({
-      action: 'set', mode, id
+      action: 'set',
+      mode,
+      id,
     }).catch((err) => {
       console.error('Set proxy error: %O', err);
     });
@@ -43,53 +46,68 @@ const Popup = React.memo(() => {
   if (!proxies) return null;
 
   return (
-    <Box component={Paper} elevation={0} square className={classes.box}>
+    <Box component={Paper} elevation={0} square minWidth={350}>
       <List component="nav" disablePadding>
         {defaultItems.map((item, index) => {
-          const checked = state && state.mode === item.mode;
+          const checked = Boolean(state?.mode === item.mode);
           return (
-            <ProxyItem key={index} item={item} checked={checked} mode={item.mode} onClick={handleClick}/>
-          )
+            <ProxyItem
+              key={index}
+              item={item}
+              checked={checked}
+              mode={item.mode}
+              onClick={handleClick}
+            />
+          );
         })}
         {proxies.map((item) => {
-          const checked = state && state.id === item.id;
+          const checked = Boolean(state?.id === item.id);
           return (
-            <ProxyItem key={'_' + item.id} item={item} checked={checked} mode={'fixed_servers'} onClick={handleClick}/>
-          )
+            <ProxyItem
+              key={`_${item.id}`}
+              item={item}
+              checked={checked}
+              mode="fixed_servers"
+              onClick={handleClick}
+            />
+          );
         })}
         <Divider />
-        <ListItem
-          button
-          component={'a'}
-          href={'./options.html'}
-          target={'_blank'}
-        >
-          <ListItemText primary={'Options'}/>
+        <ListItem button component="a" href="./options.html" target="_blank">
+          <ListItemText primary="Options" />
         </ListItem>
       </List>
     </Box>
   );
 });
 
-const ProxyItem = React.memo(({item, mode, checked, onClick}) => {
-  const classes = useStyles();
+interface ProxyItemProps {
+  item: Item | ConfigProxy;
+  mode: string;
+  checked: boolean;
+  onClick: (mode: string, id?: string) => void;
+}
 
-  const handleClick = React.useCallback((e) => {
-    e.preventDefault();
-    const id = item.id;
-    onClick(mode, id);
-  }, [item, mode]);
+const ProxyItem: FC<ProxyItemProps> = ({item, mode, checked, onClick}) => {
+  const handleClick = React.useCallback(
+    (e) => {
+      e.preventDefault();
+      const {id} = item;
+      onClick(mode, id);
+    },
+    [item, mode, onClick],
+  );
 
   const classNames = [];
   if (checked) {
-    classNames.push(classes.active);
+    classNames.push('active');
   }
 
   return (
-    <ListItem onClick={handleClick} className={classNames.join(' ')} button>
-      <ListItemText primary={item.title}/>
-    </ListItem>
+    <MyListItemButton onClick={handleClick} className={classNames.join(' ')}>
+      <ListItemText primary={item.title} />
+    </MyListItemButton>
   );
-});
+};
 
 export default Popup;

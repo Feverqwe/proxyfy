@@ -1,24 +1,26 @@
-const {DefinePlugin} = require('webpack');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const path = require('path');
-
-const isProduction = process.argv[process.argv.indexOf('--mode') + 1] !== 'development';
+/* eslint-disable import/no-extraneous-dependencies */
+import {DefinePlugin} from 'webpack';
+import * as path from 'path';
+// @ts-ignore
+import CopyPlugin from 'copy-webpack-plugin';
+// @ts-ignore
+import HtmlPlugin from 'html-webpack-plugin';
+import {CallableOption} from 'webpack-cli/lib/types';
 
 const outputPath = path.resolve('./dist/chrome/');
 
-const config = {
+const getOptions: CallableOption = (env, argv) => ({
   entry: {
     pacScript: './src/pacScript',
     background: './src/background',
     popup: './src/popup',
-    options: './src/options'
+    options: './src/options',
   },
   output: {
     path: outputPath,
-    filename: '[name].js'
+    filename: '[name].js',
   },
-  devtool: false,// isProduction ? false : 'inline-source-map',
+  devtool: argv.mode === 'production' ? false : 'inline-source-map',
   module: {
     rules: [
       {
@@ -26,51 +28,35 @@ const config = {
         use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.(woff|woff2)$/,
-        use: ['file-loader']
-      },
-      {
         test: /\.[jt]sx?$/,
         use: 'ts-loader',
         exclude: /node_modules/,
       },
-      {
-        test: /\.(png|svg)$/,
-        use: [{
-          loader: 'url-loader',
-          options: {
-            limit: 8192
-          }
-        }]
-      }
-    ]
+    ],
   },
   resolve: {
     extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
   plugins: [
-    new CopyWebpackPlugin({
-      patterns: [
-        {from: './src/assets/manifest.json',},
-        {from: './src/assets/icons', to: './icons'},
-      ],
+    new CopyPlugin({
+      patterns: [{from: './src/assets/manifest.json'}, {from: './src/assets/icons', to: './icons'}],
     }),
-    new HtmlWebpackPlugin({
+    new HtmlPlugin({
       filename: 'popup.html',
       template: './src/assets/popup.html',
-      chunks: ['popup']
+      chunks: ['popup'],
     }),
-    new HtmlWebpackPlugin({
+    new HtmlPlugin({
       filename: 'options.html',
       template: './src/assets/options.html',
-      chunks: ['options']
+      chunks: ['options'],
     }),
     new DefinePlugin({
       'process.env': {
-        'DEBUG': JSON.stringify('*')
-      }
+        DEBUG: JSON.stringify('*'),
+      },
     }),
-  ]
-};
+  ],
+});
 
-module.exports = config;
+export default getOptions;

@@ -1,31 +1,19 @@
-import React from "react";
-import {FormControl, makeStyles, TextField, Typography} from "@material-ui/core";
+import React, {FC, ReactNode} from 'react';
+import {FormControl, TextField, TextFieldProps, Typography} from '@mui/material';
 
-const useStyles = makeStyles(() => {
-  return {
-    hidden: {
-      visibility: 'hidden',
-    }
-  };
-});
+type MyInputProps = {
+  label: ReactNode;
+  isError?: boolean;
+  hidden?: boolean;
+} & TextFieldProps;
 
-const MyInput = React.memo(({label, isError = false, hidden, ...props}) => {
-  const classes = useStyles();
-
+const MyInput: FC<MyInputProps> = ({label, isError = false, hidden, ...props}) => {
   return (
-    <FormControl fullWidth margin={'dense'} className={hidden ? classes.hidden : ''}>
-      <Typography variant={"subtitle1"}>
-        {label}
-      </Typography>
-      <TextField
-        variant="outlined"
-        size="small"
-        error={isError}
-        autoComplete={'off'}
-        {...props}
-      />
+    <FormControl fullWidth margin="dense" style={{visibility: hidden ? 'hidden' : undefined}}>
+      <Typography variant="subtitle1">{label}</Typography>
+      <TextField variant="outlined" size="small" error={isError} autoComplete="off" {...props} />
     </FormControl>
   );
-});
+};
 
 export default MyInput;

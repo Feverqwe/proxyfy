@@ -1,19 +1,21 @@
-import React from "react";
-import {Box, makeStyles, Paper, Zoom} from "@material-ui/core";
+import React, {FC, ReactNode} from 'react';
+import {Box, Paper, Zoom} from '@mui/material';
+import {styled} from '@mui/system';
 
-const useStyles = makeStyles((theme) => {
+const NotifyBox = styled(Box)(({theme}) => {
   return {
-    notify: {
-      position: 'fixed',
-      top: '30px',
-      right: '30px',
-      backgroundColor: theme.palette.primary.light,
-    }
+    position: 'fixed',
+    top: '30px',
+    right: '30px',
+    backgroundColor: theme.palette.primary.light,
   };
 });
 
-const Notification = React.memo(({notify}) => {
-  const classes = useStyles();
+interface NotificationProps {
+  notify: {text: ReactNode};
+}
+
+const Notification: FC<NotificationProps> = ({notify}) => {
   const [show, setShow] = React.useState(true);
 
   React.useEffect(() => {
@@ -29,11 +31,11 @@ const Notification = React.memo(({notify}) => {
 
   return (
     <Zoom in={show}>
-      <Box component={Paper} p={1} elevation={3} className={classes.notify}>
-        {notify.text}
-      </Box>
+      <NotifyBox p={1}>
+        <Paper elevation={3}>{notify.text}</Paper>
+      </NotifyBox>
     </Zoom>
   );
-});
+};
 
 export default Notification;
