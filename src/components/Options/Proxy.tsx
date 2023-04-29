@@ -10,7 +10,7 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
-import {Redirect, useHistory, useLocation} from 'react-router';
+import {useNavigate, useLocation} from 'react-router';
 import {Link} from 'react-router-dom';
 import getConfig from '../../tools/getConfig';
 import Header from '../Header';
@@ -58,8 +58,8 @@ const badgeColors = [
 
 const Proxy = React.memo(() => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [proxy, setProxy] = React.useState<ConfigProxy | null>(null);
-  const [isRedirect, setRedirect] = React.useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -76,7 +76,7 @@ const Proxy = React.memo(() => {
 
         if (!isMounted) return;
         if (proxy === undefined) {
-          setRedirect(true);
+          navigate('/');
         } else {
           const currentProxy = DefaultProxyStruct.create(proxy || {}) as ConfigProxy;
           if (!proxy) {
@@ -92,17 +92,13 @@ const Proxy = React.memo(() => {
     return () => {
       isMounted = false;
     };
-  }, [location.search]);
+  }, [location.search, navigate]);
 
   const onReset = React.useCallback(() => {
     setProxy(DefaultProxyStruct.create({}) as ConfigProxy);
   }, []);
 
   if (!proxy) return null;
-
-  if (isRedirect) {
-    return <Redirect to="/" />;
-  }
 
   return <ProxyLoaded key={getObjectId(proxy)} proxy={proxy} onReset={onReset} />;
 });
@@ -118,7 +114,7 @@ interface ProxyLoadedProps {
 }
 
 const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const refForm = React.useRef<
     (HTMLFormElement & {elements: Record<string, HTMLInputElement>}) | null
@@ -306,14 +302,14 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
       e.preventDefault();
       save().then(
         () => {
-          history.push('/');
+          navigate('/');
         },
         (err) => {
           console.error('Save error: %O', err);
         },
       );
     },
-    [history, save],
+    [navigate, save],
   );
 
   const handleSaveAndEditPatterns = React.useCallback(
@@ -321,13 +317,13 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
       e.preventDefault();
       save()
         .then((id) => {
-          history.push(`/patterns?${qs.stringify({id})}`);
+          navigate(`/patterns?${qs.stringify({id})}`);
         })
         .catch((err) => {
           console.error('Save error: %O', err);
         });
     },
-    [history, save],
+    [navigate, save],
   );
 
   const handleSaveAndAddAnother = React.useCallback(
@@ -338,14 +334,14 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
           if (isNew) {
             onReset();
           } else {
-            history.push('/proxy');
+            navigate('/proxy');
           }
         })
         .catch((err) => {
           console.error('Save error: %O', err);
         });
     },
-    [history, isNew, onReset, save],
+    [navigate, isNew, onReset, save],
   );
 
   const isDirect = noProxyTypes.includes(type);

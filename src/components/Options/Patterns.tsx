@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {Redirect, useHistory, useLocation} from 'react-router';
+import {useNavigate, useLocation} from 'react-router';
 import {Link} from 'react-router-dom';
 import InfoIcon from '@mui/icons-material/Info';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
@@ -71,8 +71,8 @@ const TableContainerS = styled(TableContainer)(({theme}) => {
 
 const Patterns = React.memo(() => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [proxy, setProxy] = React.useState<ConfigProxy>();
-  const [isRedirect, setRedirect] = React.useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -88,7 +88,7 @@ const Patterns = React.memo(() => {
 
         if (!isMounted) return;
         if (!proxy) {
-          setRedirect(true);
+          navigate('/');
         } else {
           setProxy(proxy);
         }
@@ -100,13 +100,9 @@ const Patterns = React.memo(() => {
     return () => {
       isMounted = false;
     };
-  }, [location.search]);
+  }, [location.search, navigate]);
 
   if (!proxy) return null;
-
-  if (isRedirect) {
-    return <Redirect to="/" />;
-  }
 
   return <PatternsLoaded key={proxy.id} proxy={proxy} />;
 });
@@ -143,7 +139,7 @@ interface PatternsLoadedProps {
 }
 
 const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const refWhiteRules = React.useRef<PatternListHandler | null>(null);
   const refBlackRules = React.useRef<PatternListHandler | null>(null);
   const [notify, setNotify] = React.useState<{text: string} | null>(null);
@@ -177,7 +173,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         await promisifyApi('chrome.storage.sync.set')(config);
 
         if (!noRedirect) {
-          history.push('/');
+          navigate('/');
         }
         return true;
       } catch (err) {
@@ -185,7 +181,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         return false;
       }
     },
-    [proxy, history],
+    [proxy, navigate],
   );
 
   React.useEffect(() => {
