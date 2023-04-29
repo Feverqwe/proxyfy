@@ -1,15 +1,22 @@
 {
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  },
   "compilerOptions": {
-    "experimentalDecorators": true,
     "allowJs": true,
     "strict": true,
     "noEmit": false,
     "target": "ES6",
     "module": "ES2020",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "moduleResolution": "Node",
     "skipLibCheck": true,
     "outDir": "./dist/",
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true
+  },
+  "include": ["src"]
 }

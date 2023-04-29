@@ -1,32 +1,38 @@
-import {Infer} from "superstruct";
-import promisifyApi from "./tools/promisifyApi";
-import getExtensionIcon from "./tools/getExtensionIcon";
-import {Config, ProxyPatternStruct} from "./tools/ConfigStruct";
-import getConfig from "./tools/getConfig";
-import AuthListener from "./tools/authListener";
+import promisifyApi from './tools/promisifyApi';
+import getExtensionIcon from './tools/getExtensionIcon';
+import {
+  Config,
+  DirectProxyType,
+  GenericProxy,
+  GenericProxyType,
+  ProxyPattern,
+} from './tools/ConfigStruct';
+import getConfig from './tools/getConfig';
+import AuthListener from './tools/authListener';
 import ChromeSettingGetResultDetails = chrome.types.ChromeSettingGetResultDetails;
 import ChromeSettingClearDetails = chrome.types.ChromeSettingClearDetails;
 import ChromeSettingSetDetails = chrome.types.ChromeSettingSetDetails;
 import ColorArray = chrome.action.ColorArray;
-
-type ProxyPattern = Infer<typeof ProxyPatternStruct>;
 
 export type PacScriptPattern = Pick<ProxyPattern, 'type' | 'pattern'>; //  | 'protocol'
 
 const AUTH_SUPPORTED = false;
 
 export type PacScript = {
-  rules: ({
-    type: 'http' | 'https' | 'socks4' | 'socks5' | 'quic',
-    host: string,
-    port: number,
-    whitePatterns: PacScriptPattern[],
-    blackPatterns: PacScriptPattern[],
-  } | {
-    type: 'direct',
-    whitePatterns: PacScriptPattern[],
-    blackPatterns: PacScriptPattern[],
-  })[],
+  rules: (
+    | {
+        type: GenericProxyType;
+        host: string;
+        port: number;
+        whitePatterns: PacScriptPattern[];
+        blackPatterns: PacScriptPattern[];
+      }
+    | {
+        type: DirectProxyType;
+        whitePatterns: PacScriptPattern[];
+        blackPatterns: PacScriptPattern[];
+      }
+  )[];
 };
 
 export class Background {
@@ -37,11 +43,13 @@ export class Background {
       switch (message.action) {
         case 'set': {
           const {mode, id} = message;
-          this.applyProxy(mode, id).catch((err) => {
-            console.error('applyProxy error: %O', err);
-          }).then(() => {
-            sendResponse();
-          });
+          this.applyProxy(mode, id)
+            .catch((err) => {
+              console.error('applyProxy error: %O', err);
+            })
+            .then(() => {
+              sendResponse();
+            });
           return true;
         }
         case 'get': {
@@ -79,16 +87,14 @@ export class Background {
     chrome.runtime.onInstalled.addListener(() => {
       // pass
     });
-
-    this.syncUiState().catch((err) => {
+    this.syncUiState({init: true}).catch((err) => {
       console.error('Sync state on run error: %O', err);
     });
   }
 
-  async syncUiState() {
+  async syncUiState({init = false}: {init?: boolean} = {}) {
     const state = await getCurrentState();
-
-    let badgeColor = [0,0,0,0];
+    let badgeColor = [0, 0, 0, 0];
     let badgeText = '';
     let iconColor;
     let authListener: AuthListener | null = null;
@@ -97,9 +103,9 @@ export class Background {
       switch (state.mode) {
         case 'direct':
         case 'fixed_servers': {
-          const id = state.id;
+          const {id} = state;
           const config = await getConfig();
-          let proxy = config.proxies.find(p => p.id === id);
+          let proxy = config.proxies.find((p) => p.id === id);
           if (!proxy && state.mode === 'direct') {
             proxy = config.proxies.find((p) => p.type === 'direct');
           }
@@ -161,8 +167,9 @@ export class Background {
         32: getExtensionIcon(iconColor, 32),
       },
     });
-
-    chrome.runtime.sendMessage({action: 'stateChanges'});
+    if (!init) {
+      chrome.runtime.sendMessage({action: 'stateChanges'});
+    }
   }
 
   async applyProxy(mode: string, id?: string) {
@@ -187,24 +194,24 @@ export class Background {
   async setProxy(mode: string, id?: string) {
     let value = null;
     switch (mode) {
-      case "system": {
+      case 'system': {
         value = {
           mode: 'system',
         };
         break;
       }
-      case "auto_detect": {
+      case 'auto_detect': {
         value = {
           mode: 'auto_detect',
         };
         break;
       }
-      case "direct":
-      case "fixed_servers": {
+      case 'direct':
+      case 'fixed_servers': {
         const config = await getConfig();
-        let proxy = config.proxies.find(proxy => proxy.id === id);
+        let proxy = config.proxies.find((proxy) => proxy.id === id);
         if (!proxy && mode === 'direct') {
-          proxy = config.proxies.find(proxy => proxy.type === 'direct');
+          proxy = config.proxies.find((proxy) => proxy.type === 'direct');
         }
         if (proxy) {
           if (proxy.type === 'direct') {
@@ -218,51 +225,59 @@ export class Background {
               rules: {
                 singleProxy: {
                   scheme: proxy.type,
-                  host: proxy.host,
-                  port: proxy.port,
+                  host: (proxy as GenericProxy).host,
+                  port: (proxy as GenericProxy).port,
                 },
-                bypassList: [encodeURIComponent(proxy.id) + '.proxyfy.localhost'],
+                bypassList: [`${encodeURIComponent(proxy.id)}.proxyfy.localhost`],
               },
             };
           }
         }
         break;
       }
-      case "pac_script": {
+      case 'pac_script': {
         const config = await getConfig();
         value = {
           mode: 'pac_script',
           pacScript: {
             data: await getPacScript(config.proxies),
             mandatory: true,
-          }
+          },
         };
         break;
       }
     }
 
     if (value) {
-      await promisifyApi<ChromeSettingSetDetails>('chrome.proxy.settings.set')({value, scope: 'regular'});
+      await promisifyApi<ChromeSettingSetDetails>('chrome.proxy.settings.set')({
+        value,
+        scope: 'regular',
+      });
     } else {
-      await promisifyApi<ChromeSettingClearDetails>('chrome.proxy.settings.clear')({scope: 'regular'});
+      await promisifyApi<ChromeSettingClearDetails>('chrome.proxy.settings.clear')({
+        scope: 'regular',
+      });
     }
   }
 }
 
 async function getCurrentState() {
-  const proxySettings = await promisifyApi<ChromeSettingGetResultDetails>('chrome.proxy.settings.get')({
+  const proxySettings = await promisifyApi<ChromeSettingGetResultDetails>(
+    'chrome.proxy.settings.get',
+  )({
     incognito: false,
   });
   const {mode, rules} = proxySettings.value;
-  let result: null | {mode: string, id?: string} = null;
+  let result: null | {mode: string; id?: string} = null;
 
   if (proxySettings.levelOfControl === 'controlled_by_this_extension') {
     result = {mode};
     if (mode === 'direct') {
-      const {lastDirectId} = await promisifyApi<{lastDirectId?: string}>('chrome.storage.local.get')('lastDirectId');
+      const {lastDirectId} = await promisifyApi<{lastDirectId?: string}>(
+        'chrome.storage.local.get',
+      )('lastDirectId');
       result.id = lastDirectId;
-    } else
-    if (mode === 'fixed_servers' && rules && rules.bypassList) {
+    } else if (mode === 'fixed_servers' && rules && rules.bypassList) {
       rules.bypassList.some((pattern: string) => {
         const m = /^(.+)\.proxyfy\.localhost/.exec(pattern);
         if (m) {
@@ -281,7 +296,7 @@ async function getPacScript(proxies: Config['proxies']) {
     if (!proxy.enabled) return;
 
     switch (proxy.type) {
-      case "direct": {
+      case DirectProxyType.Direct: {
         return rules.push({
           type: proxy.type,
           whitePatterns: getPatterns(proxy.whitePatterns),
@@ -303,8 +318,8 @@ async function getPacScript(proxies: Config['proxies']) {
   const config: PacScript = {rules};
 
   const pacScript = await fetch('./pacScript.js')
-    .then(r => r.text())
-    .then(t => t.replace(/[^\x00-\x7F]/g, ''));
+    .then((r) => r.text())
+    .then((t) => t.replace(/[^\x00-\x7F]/g, ''));
 
   return `var FindProxyForURL=null;\nvar Config=${JSON.stringify(config)};\n${pacScript};`;
 }

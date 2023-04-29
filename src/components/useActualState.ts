@@ -1,8 +1,8 @@
-import React from "react";
-import promisifyApi from "../tools/promisifyApi";
+import React from 'react';
+import promisifyApi from '../tools/promisifyApi';
 
 const useActualState = () => {
-  const [state, setState] = React.useState<null | {mode: string, id?: string}>(null);
+  const [state, setState] = React.useState<null | {mode: string; id?: string}>(null);
 
   React.useEffect(() => {
     let mounted = true;
@@ -10,7 +10,7 @@ const useActualState = () => {
 
     fetchState();
 
-    function listener(message: Record<string, any>) {
+    function listener(message: Record<string, unknown>) {
       if (message.action === 'stateChanges') {
         fetchState();
       }
@@ -32,10 +32,9 @@ const useActualState = () => {
 };
 
 function getState() {
-  return promisifyApi<null | {mode: string, id?: string}>('chrome.runtime.sendMessage')({
-    action: 'get'
+  return promisifyApi<null | {mode: string; id?: string}>('chrome.runtime.sendMessage')({
+    action: 'get',
   });
 }
-
 
 export default useActualState;

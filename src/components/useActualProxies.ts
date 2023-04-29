@@ -1,9 +1,9 @@
-import React from "react";
-import getConfig from "../tools/getConfig";
-import {Proxy} from "../tools/ConfigStruct";
+import React from 'react';
+import getConfig from '../tools/getConfig';
+import {ConfigProxy} from '../tools/ConfigStruct';
 
 const useActualProxies = () => {
-  const [proxies, setProxies] = React.useState<Proxy[] | null>(null);
+  const [proxies, setProxies] = React.useState<ConfigProxy[] | null>(null);
 
   React.useEffect(() => {
     let mounted = true;
@@ -11,7 +11,7 @@ const useActualProxies = () => {
 
     fetchState();
 
-    function listener(message: Record<string, any>) {
+    function listener(message: Record<string, unknown>) {
       if (message.action === 'proxiesChanges') {
         fetchState();
       }
@@ -31,6 +31,5 @@ const useActualProxies = () => {
 
   return proxies;
 };
-
 
 export default useActualProxies;

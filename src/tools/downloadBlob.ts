@@ -1,7 +1,7 @@
 const downloadBlob = (blob: Blob, filename: string) => {
   const url = URL.createObjectURL(blob);
 
-  const downloadLink = document.createElement("a");
+  const downloadLink = document.createElement('a');
   downloadLink.href = url;
   downloadLink.download = filename;
 
@@ -10,7 +10,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
   }, 0);
 
   setTimeout(() => {
-    URL.revokeObjectURL(url)
+    URL.revokeObjectURL(url);
   }, 40 * 1000);
 };
 
