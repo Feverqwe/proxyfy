@@ -10,15 +10,13 @@ const MySelect: FC<MySelectProps> = ({label, children, ...props}) => {
   return (
     <FormControl fullWidth margin="dense">
       <Typography variant="subtitle1">{label}</Typography>
-      {createElement(
-        Select,
-        {
-          variant: 'outlined',
-          size: 'small',
-          ...props,
-        },
-        [children],
-      )}
+      <Select
+        variant="outlined"
+        size="small"
+        {...props}
+      >
+        {children}
+      </Select>
     </FormControl>
   );
 };
