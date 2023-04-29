@@ -1,11 +1,11 @@
-import React from 'react';
+import {useEffect, useState} from 'react';
 import getConfig from '../tools/getConfig';
 import {ConfigProxy} from '../tools/ConfigStruct';
 
 const useActualProxies = () => {
-  const [proxies, setProxies] = React.useState<ConfigProxy[] | null>(null);
+  const [proxies, setProxies] = useState<ConfigProxy[] | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     chrome.runtime.onMessage.addListener(listener);
 

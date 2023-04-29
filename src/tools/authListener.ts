@@ -3,6 +3,8 @@ import {GenericProxy, ConfigProxy} from './ConfigStruct';
 class AuthListener {
   destroyed = false;
 
+  enabled = false;
+
   public readonly isRequired: boolean;
 
   private proxies: GenericProxy[];
@@ -31,14 +33,18 @@ class AuthListener {
   };
 
   enable() {
-    if (!this.isRequired) return;
+    if (!this.isRequired || this.enabled) return;
+    if (!('webRequest' in chrome)) return;
     chrome.webRequest.onAuthRequired.addListener(this.handleAuthRequired, {urls: ['<all_urls>']}, [
       'blocking',
     ]);
+    this.enabled = true;
   }
 
   disable() {
+    if (!this.enabled) return;
     chrome.webRequest.onAuthRequired.removeListener(this.handleAuthRequired);
+    this.enabled = false;
   }
 
   destroy() {

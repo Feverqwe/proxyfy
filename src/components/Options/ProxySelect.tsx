@@ -1,8 +1,7 @@
-import React, {FC} from 'react';
+import React, {FC, useCallback, useMemo} from 'react';
 import {FormControl, MenuItem, Select, SelectProps} from '@mui/material';
 import useActualState from '../useActualState';
 import useActualProxies from '../useActualProxies';
-import promisifyApi from '../../tools/promisifyApi';
 
 const defaultItems = [
   {title: 'Use enabled proxies by patterns and order', mode: 'pac_script'},
@@ -14,26 +13,33 @@ const ProxySelect = () => {
   const state = useActualState();
   const proxies = useActualProxies();
 
-  const handleSelect = React.useCallback((e) => {
-    const {value} = e.target;
-    let id;
-    let mode;
-    if (['pac_script', 'system'].includes(value)) {
-      mode = value;
-    } else {
-      mode = 'fixed_servers';
-      id = value.substr(1);
-    }
-    promisifyApi('chrome.runtime.sendMessage')({
-      action: 'set',
-      mode,
-      id,
-    }).catch((err) => {
-      console.error('Set proxy error: %O', err);
-    });
-  }, []);
+  const handleSelect = useCallback(
+    async (e) => {
+      const {value} = e.target;
+      let proxy;
+      let mode;
+      if (['pac_script', 'system'].includes(value)) {
+        mode = value;
+      } else {
+        mode = 'fixed_servers';
+        const id = value.slice(1);
+        proxy = proxies?.find(({id: idLocal}) => idLocal === id);
+      }
 
-  const activeValue = React.useMemo(() => {
+      try {
+        await chrome.runtime.sendMessage({
+          action: 'set',
+          mode,
+          id: proxy?.id,
+        });
+      } catch (err) {
+        console.error('Set proxy error: %O', err);
+      }
+    },
+    [proxies],
+  );
+
+  const activeValue = useMemo(() => {
     if (!state || !proxies) return '';
     if (['pac_script', 'system'].includes(state.mode)) {
       return state.mode;

@@ -1,4 +1,13 @@
-import React, {FC, useEffect} from 'react';
+import React, {
+  FC,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Alert,
   Box,
@@ -28,7 +37,6 @@ import {styled} from '@mui/system';
 import getConfig from '../../tools/getConfig';
 import Header from '../Header';
 import ConfigStruct, {ConfigProxy, ProxyPattern, ProxyPatternType} from '../../tools/ConfigStruct';
-import promisifyApi from '../../tools/promisifyApi';
 import CopyIcon from './CopyIcon';
 import splitMultiPattern from '../../tools/splitMultiPattern';
 import getObjectId from '../../tools/getObjectId';
@@ -69,15 +77,15 @@ const TableContainerS = styled(TableContainer)(({theme}) => {
   };
 });
 
-const Patterns = React.memo(() => {
+const Patterns = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [proxy, setProxy] = React.useState<ConfigProxy>();
+  const [proxy, setProxy] = useState<ConfigProxy>();
 
   useEffect(() => {
     let isMounted = true;
 
-    const query = qs.parse(location.search.substr(1));
+    const query = qs.parse(location.search.slice(1));
     (async () => {
       try {
         let proxy: ConfigProxy | undefined;
@@ -105,7 +113,7 @@ const Patterns = React.memo(() => {
   if (!proxy) return null;
 
   return <PatternsLoaded key={proxy.id} proxy={proxy} />;
-});
+};
 
 export const matchAllPresets = [
   {
@@ -140,21 +148,21 @@ interface PatternsLoadedProps {
 
 const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   const navigate = useNavigate();
-  const refWhiteRules = React.useRef<PatternListHandler | null>(null);
-  const refBlackRules = React.useRef<PatternListHandler | null>(null);
-  const [notify, setNotify] = React.useState<{text: string} | null>(null);
+  const refWhiteRules = useRef<PatternListHandler | null>(null);
+  const refBlackRules = useRef<PatternListHandler | null>(null);
+  const [notify, setNotify] = useState<{text: string} | null>(null);
 
-  const handleNewWhite = React.useCallback((e) => {
+  const handleNewWhite = useCallback((e) => {
     e.preventDefault();
     refWhiteRules.current?.addRule();
   }, []);
 
-  const handleNewBlack = React.useCallback((e) => {
+  const handleNewBlack = useCallback((e) => {
     e.preventDefault();
     refBlackRules.current?.addRule();
   }, []);
 
-  const handleSave = React.useCallback(
+  const handleSave = useCallback(
     async (e, noRedirect = false) => {
       e.preventDefault();
       const whitePatterns = refWhiteRules.current?.getPatterns() || [];
@@ -170,7 +178,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         existsProxy.whitePatterns = whitePatterns;
         existsProxy.blackPatterns = blackPatterns;
         const _ = ConfigStruct.assert(config);
-        await promisifyApi('chrome.storage.sync.set')(config);
+        await chrome.storage.sync.set(config);
 
         if (!noRedirect) {
           navigate('/');
@@ -184,7 +192,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
     [proxy, navigate],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     function handleKeyDown(e: KeyboardEvent) {
       if (e.ctrlKey || e.metaKey) {
@@ -204,14 +212,14 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
     };
   }, [handleSave]);
 
-  const handleWhitelistMatchAll = React.useCallback((e) => {
+  const handleWhitelistMatchAll = useCallback((e) => {
     e.preventDefault();
     matchAllPresets.forEach(({name, pattern, type}) => {
       refWhiteRules.current?.addRule(name, pattern, type);
     });
   }, []);
 
-  const handleBlacklistLocalhost = React.useCallback((e) => {
+  const handleBlacklistLocalhost = useCallback((e) => {
     e.preventDefault();
     localhostPresets.forEach(({name, pattern, type}) => {
       refBlackRules.current?.addRule(name, pattern, type);
@@ -292,13 +300,13 @@ interface PatternListHandler {
   getPatterns: () => ProxyPattern[];
 }
 
-const PatternList = React.forwardRef<PatternListHandler, PatternListProps>(({list}, ref) => {
-  const [scope] = React.useState<{patterns: ProxyPattern[]}>({patterns: []});
-  const [patterns, setPatterns] = React.useState(list);
+const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, ref) => {
+  const [scope] = useState<{patterns: ProxyPattern[]}>({patterns: []});
+  const [patterns, setPatterns] = useState(list);
 
   scope.patterns = patterns;
 
-  React.useImperativeHandle(
+  useImperativeHandle(
     ref,
     () => {
       return {
@@ -320,7 +328,7 @@ const PatternList = React.forwardRef<PatternListHandler, PatternListProps>(({lis
     [scope],
   );
 
-  const handlePatternDelete = React.useCallback(
+  const handlePatternDelete = useCallback(
     (pattern) => {
       const {patterns} = scope;
       const pos = patterns.indexOf(pattern);
@@ -331,7 +339,7 @@ const PatternList = React.forwardRef<PatternListHandler, PatternListProps>(({lis
     [scope],
   );
 
-  const handlePatternCopy = React.useCallback(
+  const handlePatternCopy = useCallback(
     (pattern) => {
       const {patterns} = scope;
       const pos = patterns.indexOf(pattern);
@@ -343,7 +351,7 @@ const PatternList = React.forwardRef<PatternListHandler, PatternListProps>(({lis
     [scope],
   );
 
-  const handlePatternMove = React.useCallback(
+  const handlePatternMove = useCallback(
     (pattern, offset) => {
       const {patterns} = scope;
       const pos = patterns.indexOf(pattern);
@@ -356,7 +364,7 @@ const PatternList = React.forwardRef<PatternListHandler, PatternListProps>(({lis
     [scope],
   );
 
-  const helpTooltip = React.useMemo(() => {
+  const helpTooltip = useMemo(() => {
     return (
       <Box>
         <Typography variant="body2">
@@ -441,14 +449,14 @@ interface PatternProps {
 }
 
 const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, onMove}) => {
-  const [isValid, setValid] = React.useState(true);
-  const origPattern = React.useMemo(() => ({...pattern}), [pattern]);
+  const [isValid, setValid] = useState(true);
+  const origPattern = useMemo(() => ({...pattern}), [pattern]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setValid(isValidPattern(pattern.pattern, pattern.type));
   }, [pattern.pattern, pattern.type]);
 
-  const handleDelete = React.useCallback(
+  const handleDelete = useCallback(
     (e) => {
       e.preventDefault();
       onDelete(pattern);
@@ -456,7 +464,7 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
     [onDelete, pattern],
   );
 
-  const handleCopy = React.useCallback(
+  const handleCopy = useCallback(
     (e) => {
       e.preventDefault();
       onCopy(pattern);
@@ -464,7 +472,7 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
     [onCopy, pattern],
   );
 
-  const handleMoveUp = React.useCallback(
+  const handleMoveUp = useCallback(
     (e) => {
       e.preventDefault();
       onMove(pattern, -1);
@@ -472,7 +480,7 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
     [onMove, pattern],
   );
 
-  const handleMoveDown = React.useCallback(
+  const handleMoveDown = useCallback(
     (e) => {
       e.preventDefault();
       onMove(pattern, 1);
@@ -480,21 +488,21 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
     [onMove, pattern],
   );
 
-  const handleEnabledChange = React.useCallback(
+  const handleEnabledChange = useCallback(
     (e) => {
       pattern.enabled = e.target.checked;
     },
     [pattern],
   );
 
-  const handleNameChange = React.useCallback(
+  const handleNameChange = useCallback(
     (e) => {
       pattern.name = e.target.value;
     },
     [pattern],
   );
 
-  const handlePatternChange = React.useCallback(
+  const handlePatternChange = useCallback(
     (e) => {
       pattern.pattern = e.target.value;
       setValid(isValidPattern(pattern.pattern, pattern.type));
@@ -502,7 +510,7 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
     [pattern],
   );
 
-  const handleTypeChange = React.useCallback(
+  const handleTypeChange = useCallback(
     (e) => {
       pattern.type = e.target.value;
       setValid(isValidPattern(pattern.pattern, pattern.type));

@@ -14,6 +14,8 @@
     "16": "icons/icon_16.png"
   },
   "options_page": "options.html",
+  "optional_permissions": ["webRequest", "webRequestAuthProvider"],
+  "optional_host_permissions": ["<all_urls>"],
   "permissions": ["storage", "proxy"],
   "background": {
     "service_worker": "background.js"

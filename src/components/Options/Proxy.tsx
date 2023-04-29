@@ -1,4 +1,4 @@
-import React, {FC, useEffect} from 'react';
+import React, {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   Box,
   Checkbox,
@@ -18,8 +18,8 @@ import ConfigStruct, {
   DefaultProxyStruct,
   ConfigProxy,
   ProxyPattern,
+  GenericProxyType,
 } from '../../tools/ConfigStruct';
-import promisifyApi from '../../tools/promisifyApi';
 import getId from '../../tools/getId';
 import getObjectId from '../../tools/getObjectId';
 import {localhostPresets, matchAllPresets} from './Patterns';
@@ -30,10 +30,10 @@ import MySelect from './MySelect';
 import MyInput from './MyInput';
 import ActionBox from './ActionBox';
 import MyButtonM from './MyButtonM';
+import {AUTH_SUPPORTED} from '../../constants';
 
 const qs = require('querystring-es3');
 
-const AUTH_SUPPORTED = false;
 const noProxyTypes = ['direct'];
 const badgeColors = [
   '#f44336',
@@ -56,19 +56,19 @@ const badgeColors = [
   '#607d8b',
 ];
 
-const Proxy = React.memo(() => {
+const Proxy = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [proxy, setProxy] = React.useState<ConfigProxy | null>(null);
+  const [proxy, setProxy] = useState<ConfigProxy | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    const query = qs.parse(location.search.substr(1));
+    const query = qs.parse(location.search.slice(1));
 
     (async () => {
       try {
-        let proxy: undefined | ConfigProxy;
+        let proxy: undefined | ConfigProxy | null = null;
         if (query.id) {
           const {proxies} = await getConfig();
           proxy = proxies.find((p) => p.id === query.id);
@@ -94,14 +94,14 @@ const Proxy = React.memo(() => {
     };
   }, [location.search, navigate]);
 
-  const onReset = React.useCallback(() => {
+  const onReset = useCallback(() => {
     setProxy(DefaultProxyStruct.create({}) as ConfigProxy);
   }, []);
 
   if (!proxy) return null;
 
   return <ProxyLoaded key={getObjectId(proxy)} proxy={proxy} onReset={onReset} />;
-});
+};
 
 interface ChangedProxy extends Omit<ConfigProxy, 'whitePatterns' | 'blackPatterns'> {
   whitePatterns: (ProxyPattern & {id?: string})[];
@@ -116,169 +116,169 @@ interface ProxyLoadedProps {
 const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
   const navigate = useNavigate();
 
-  const refForm = React.useRef<
-    (HTMLFormElement & {elements: Record<string, HTMLInputElement>}) | null
-  >(null);
-  const [isValidHost, setValidHost] = React.useState(true);
-  const [isValidPort, setValidPort] = React.useState(true);
-  const [type, setType] = React.useState(proxy.type);
-  const [notify, setNotify] = React.useState<{text: string} | null>(null);
+  const refForm = useRef<(HTMLFormElement & {elements: Record<string, HTMLInputElement>}) | null>(
+    null,
+  );
+  const [isValidHost, setValidHost] = useState(true);
+  const [isValidPort, setValidPort] = useState(true);
+  const [type, setType] = useState(proxy.type);
+  const [notify, setNotify] = useState<{text: string} | null>(null);
 
-  const isNew = React.useMemo(() => !proxy.id, [proxy.id]);
+  const isNew = useMemo(() => !proxy.id, [proxy.id]);
 
-  const save = React.useMemo(() => {
-    return async () => {
-      const form = refForm.current;
-      if (!form) return;
-      const {
-        title: titleEl,
-        color: colorEl,
-        type: typeEl,
-        host: hostEl,
-        port: portEl,
-        username: usernameEl,
-        password: passwordEl,
-        enabled: enabledEl,
-        useMatchAllPreset: useMatchAllPresetEl,
-        useLocalhostPreset: useLocalhostPresetEl,
-        badgeText: badgeTextEl,
-        badgeColor: badgeColorEl,
-      } = form.elements;
+  const save = useCallback(async () => {
+    const form = refForm.current;
+    if (!form) return;
+    const {
+      title: titleEl,
+      color: colorEl,
+      type: typeEl,
+      host: hostEl,
+      port: portEl,
+      username: usernameEl,
+      password: passwordEl,
+      enabled: enabledEl,
+      useMatchAllPreset: useMatchAllPresetEl,
+      useLocalhostPreset: useLocalhostPresetEl,
+      badgeText: badgeTextEl,
+      badgeColor: badgeColorEl,
+    } = form.elements;
 
-      const data: Record<string, number | string | boolean> = {};
-      [
-        titleEl,
-        typeEl,
-        colorEl,
-        hostEl,
-        portEl,
-        usernameEl,
-        passwordEl,
-        badgeTextEl,
-        badgeColorEl,
-      ].forEach((element) => {
-        if (!element) return;
-        const key = element.name;
-        const {value} = element;
-        if (['port'].includes(key)) {
-          data[key] = parseInt(value, 10);
-        } else {
-          data[key] = value;
-        }
-      });
-
-      [enabledEl, useMatchAllPresetEl, useLocalhostPresetEl].forEach((element) => {
-        if (!element) return;
-        const key = element.name;
-        const value = element.checked;
+    const data: Record<string, number | string | boolean> = {};
+    [
+      titleEl,
+      typeEl,
+      colorEl,
+      hostEl,
+      portEl,
+      usernameEl,
+      passwordEl,
+      badgeTextEl,
+      badgeColorEl,
+    ].forEach((element) => {
+      if (!element) return;
+      const key = element.name;
+      const {value} = element;
+      if (['port'].includes(key)) {
+        data[key] = parseInt(value, 10);
+      } else {
         data[key] = value;
-      });
+      }
+    });
 
-      const {useMatchAllPreset} = data;
-      const {useLocalhostPreset} = data;
-      delete data.useMatchAllPreset;
-      delete data.useLocalhostPreset;
+    [enabledEl, useMatchAllPresetEl, useLocalhostPresetEl].forEach((element) => {
+      if (!element) return;
+      const key = element.name;
+      const value = element.checked;
+      data[key] = value;
+    });
 
-      if (noProxyTypes.includes(data.type as string)) {
+    const {useMatchAllPreset} = data;
+    const {useLocalhostPreset} = data;
+    delete data.useMatchAllPreset;
+    delete data.useLocalhostPreset;
+
+    if (noProxyTypes.includes(data.type as string)) {
+      setValidHost(true);
+      setValidPort(true);
+      delete data.host;
+      delete data.port;
+      delete data.password;
+      delete data.username;
+    } else {
+      let hasErrors = false;
+      if (!data.host) {
+        hasErrors = true;
+        setValidHost(false);
+      } else {
         setValidHost(true);
+      }
+      if (!data.port) {
+        hasErrors = true;
+        setValidPort(false);
+      } else {
         setValidPort(true);
-        delete data.host;
-        delete data.port;
+      }
+      if (hasErrors) {
+        throw new Error('Incorrect data');
+      }
+
+      if (!data.username) {
         delete data.password;
         delete data.username;
+      }
+    }
+
+    if (!data.title) {
+      if (data.type === 'direct') {
+        data.title = 'Direct';
       } else {
-        let hasErrors = false;
-        if (!data.host) {
-          hasErrors = true;
-          setValidHost(false);
-        } else {
-          setValidHost(true);
-        }
-        if (!data.port) {
-          hasErrors = true;
-          setValidPort(false);
-        } else {
-          setValidPort(true);
-        }
-        if (hasErrors) {
-          throw new Error('Incorrect data');
-        }
-
-        if (!data.username) {
-          delete data.password;
-          delete data.username;
-        }
+        data.title = [data.host, data.port].join(':');
       }
+    }
 
-      if (!data.title) {
-        if (data.type === 'direct') {
-          data.title = 'Direct';
-        } else {
-          data.title = [data.host, data.port].join(':');
-        }
-      }
+    const changedProxy: ChangedProxy = {...proxy, ...data};
 
-      const changedProxy: ChangedProxy = {...proxy, ...data};
-
-      if (useMatchAllPreset) {
-        matchAllPresets.forEach(({name, pattern, type}) => {
-          changedProxy.whitePatterns.push({
-            id: getId(),
-            enabled: true,
-            name,
-            pattern,
-            type,
-          });
+    if (useMatchAllPreset) {
+      matchAllPresets.forEach(({name, pattern, type}) => {
+        changedProxy.whitePatterns.push({
+          id: getId(),
+          enabled: true,
+          name,
+          pattern,
+          type,
         });
-      }
+      });
+    }
 
-      if (useLocalhostPreset) {
-        localhostPresets.forEach(({name, pattern, type}) => {
-          changedProxy.blackPatterns.push({
-            id: getId(),
-            enabled: true,
-            name,
-            pattern,
-            type,
-          });
+    if (useLocalhostPreset) {
+      localhostPresets.forEach(({name, pattern, type}) => {
+        changedProxy.blackPatterns.push({
+          id: getId(),
+          enabled: true,
+          name,
+          pattern,
+          type,
         });
-      }
+      });
+    }
 
-      const config = await getConfig();
-      if (isNew) {
-        changedProxy.id = getId();
-        config.proxies.push(changedProxy as ConfigProxy);
-      } else {
-        const existsProxy = config.proxies.find((p) => p.id === proxy.id);
-        const pos = config.proxies.indexOf(existsProxy as ConfigProxy);
-        if (pos === -1) {
-          throw new Error('Proxy is not found');
-        }
-        config.proxies.splice(pos, 1, changedProxy as ConfigProxy);
+    const config = await getConfig();
+    if (isNew) {
+      changedProxy.id = getId();
+      config.proxies.push(changedProxy as ConfigProxy);
+    } else {
+      const existsProxy = config.proxies.find((p) => p.id === proxy.id);
+      const pos = config.proxies.indexOf(existsProxy as ConfigProxy);
+      if (pos === -1) {
+        throw new Error('Proxy is not found');
       }
-      const _ = ConfigStruct.assert(config);
-      await promisifyApi('chrome.storage.sync.set')(config);
+      config.proxies.splice(pos, 1, changedProxy as ConfigProxy);
+    }
+    const _ = ConfigStruct.assert(config);
+    await chrome.storage.sync.set(config);
 
-      return changedProxy.id;
-    };
+    return changedProxy.id;
   }, [isNew, proxy]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
-    function handleKeyDown(e: KeyboardEvent) {
+    async function handleKeyDown(e: KeyboardEvent) {
       if (e.ctrlKey || e.metaKey) {
         const {keyCode} = e;
         switch (keyCode) {
           case 83:
             e.preventDefault();
-            save().then(
-              () => {
+            try {
+              const id = await save();
+              if (isNew) {
+                navigate(`/proxy?${qs.stringify({id})}`);
+              } else {
                 setNotify({text: 'Saved'});
-              },
-              (err) => {
-                console.error('Save error: %O', err);
-              },
-            );
+              }
+            } catch (err) {
+              console.error('Save error: %O', err);
+            }
             break;
         }
       }
@@ -286,60 +286,56 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [save]);
+  }, [save, isNew, navigate]);
 
-  const handleChangeType = React.useCallback((e) => {
+  const handleChangeType = useCallback((e) => {
     const {value} = e.target;
     setType(value);
   }, []);
 
-  const handleSubmit = React.useCallback((e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
   }, []);
 
-  const handleSave = React.useCallback(
-    (e) => {
+  const handleSave = useCallback(
+    async (e) => {
       e.preventDefault();
-      save().then(
-        () => {
-          navigate('/');
-        },
-        (err) => {
-          console.error('Save error: %O', err);
-        },
-      );
+      try {
+        await save();
+        navigate('/');
+      } catch (err) {
+        console.error('Save error: %O', err);
+      }
     },
     [navigate, save],
   );
 
-  const handleSaveAndEditPatterns = React.useCallback(
-    (e) => {
+  const handleSaveAndEditPatterns = useCallback(
+    async (e) => {
       e.preventDefault();
-      save()
-        .then((id) => {
-          navigate(`/patterns?${qs.stringify({id})}`);
-        })
-        .catch((err) => {
-          console.error('Save error: %O', err);
-        });
+      try {
+        const id = await save();
+        navigate(`/patterns?${qs.stringify({id})}`);
+      } catch (err) {
+        console.error('Save error: %O', err);
+      }
     },
     [navigate, save],
   );
 
-  const handleSaveAndAddAnother = React.useCallback(
-    (e) => {
+  const handleSaveAndAddAnother = useCallback(
+    async (e) => {
       e.preventDefault();
-      save()
-        .then(() => {
-          if (isNew) {
-            onReset();
-          } else {
-            navigate('/proxy');
-          }
-        })
-        .catch((err) => {
-          console.error('Save error: %O', err);
-        });
+      try {
+        const id = await save();
+        if (isNew) {
+          onReset();
+        } else {
+          navigate('/proxy');
+        }
+      } catch (err) {
+        console.error('Save error: %O', err);
+      }
     },
     [navigate, isNew, onReset, save],
   );
@@ -423,23 +419,26 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
                   hidden={isDirect}
                   type="number"
                 />
-                {AUTH_SUPPORTED && (
-                  <>
-                    <MyInput
-                      label="Username (optional)"
-                      placeholder="username"
-                      defaultValue={'username' in proxy ? proxy.username || '' : ''}
-                      name="username"
-                    />
-                    <MyInput
-                      label="Password (optional)"
-                      placeholder="*****"
-                      type="password"
-                      defaultValue={'password' in proxy ? proxy.password || '' : ''}
-                      name="password"
-                    />
-                  </>
-                )}
+                {[GenericProxyType.Http, GenericProxyType.Https].includes(
+                  type as GenericProxyType,
+                ) &&
+                  AUTH_SUPPORTED && (
+                    <>
+                      <MyInput
+                        label="Username (optional)"
+                        placeholder="username"
+                        defaultValue={'username' in proxy ? proxy.username || '' : ''}
+                        name="username"
+                      />
+                      <MyInput
+                        label="Password (optional)"
+                        placeholder="*****"
+                        type="password"
+                        defaultValue={'password' in proxy ? proxy.password || '' : ''}
+                        name="password"
+                      />
+                    </>
+                  )}
               </Box>
             </Grid>
             <Grid item xs={12}>

@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, useMemo} from 'react';
 import getExtensionIcon from '../../tools/getExtensionIcon';
 import getUrlFromImageData from '../../tools/getUrlFromImageData';
 
@@ -14,7 +14,7 @@ interface ColorIconProps {
 }
 
 const ColorIcon: FC<ColorIconProps> = ({color}) => {
-  const iconUrl = React.useMemo(() => getUrlFromImageData(color, 24, getExtensionIcon), [color]);
+  const iconUrl = useMemo(() => getUrlFromImageData(color, 24, getExtensionIcon), [color]);
 
   return (
     <div style={colorIconStyle}>

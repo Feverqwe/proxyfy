@@ -1,10 +1,9 @@
-import {List, ListItem, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
+import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
 import {Link} from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import React, {FC, useRef} from 'react';
+import React, {FC, useCallback, useEffect, useRef} from 'react';
 import SaveIcon from '@mui/icons-material/Save';
 import RestoreIcon from '@mui/icons-material/Restore';
-import promisifyApi from '../../tools/promisifyApi';
 import downloadBlob from '../../tools/downloadBlob';
 import fileReaderReady from '../../tools/fileReaderPromise';
 import ConfigStruct from '../../tools/ConfigStruct';
@@ -12,7 +11,7 @@ import ConfigStruct from '../../tools/ConfigStruct';
 const Menu: FC = () => {
   const refFileInput = useRef<HTMLInputElement | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const input = refFileInput.current;
     if (!input) return;
     input.addEventListener('change', (e) => {
@@ -25,35 +24,30 @@ const Menu: FC = () => {
       const promise = fileReaderReady(reader);
       reader.readAsText(file);
       promise
-        .then((json) => {
+        .then(async (json) => {
           const storage = JSON.parse(json as string);
           const _ = ConfigStruct.assert(storage);
-          return promisifyApi('chrome.storage.sync.set')(storage);
+          await chrome.storage.sync.set(storage);
+          location.reload();
         })
-        .then(
-          () => {
-            location.reload();
-          },
-          (err) => {
-            console.error('Import settings error: %O', err);
-          },
-        );
+        .catch((err) => {
+          console.error('Import settings error: %O', err);
+        });
     });
   }, []);
 
-  const handleExportSettings = React.useCallback((e) => {
+  const handleExportSettings = useCallback(async (e) => {
     e.preventDefault();
-    promisifyApi('chrome.storage.sync.get')()
-      .then((storage) => {
-        const blob = new Blob([JSON.stringify(storage, null, 2)]);
-        downloadBlob(blob, 'proxyfy.json');
-      })
-      .catch((err) => {
-        console.error('Export settings error: %O', err);
-      });
+    try {
+      const storage = await chrome.storage.sync.get();
+      const blob = new Blob([JSON.stringify(storage, null, 2)]);
+      downloadBlob(blob, 'proxyfy.json');
+    } catch (err) {
+      console.error('Export settings error: %O', err);
+    }
   }, []);
 
-  const handleImportSettings = React.useCallback((e) => {
+  const handleImportSettings = useCallback((e) => {
     e.preventDefault();
     const input = refFileInput.current;
     if (!input) return;
@@ -68,19 +62,19 @@ const Menu: FC = () => {
         </ListItemIcon>
         <ListItemText primary="Add" />
       </ListItemButton>
-      <ListItem button onClick={handleExportSettings}>
+      <ListItemButton onClick={handleExportSettings}>
         <ListItemIcon>
           <SaveIcon />
         </ListItemIcon>
         <ListItemText primary="Export settings" />
-      </ListItem>
-      <ListItem button onClick={handleImportSettings}>
+      </ListItemButton>
+      <ListItemButton onClick={handleImportSettings}>
         <ListItemIcon>
           <RestoreIcon />
         </ListItemIcon>
         <ListItemText primary="Import settings" />
         <input ref={refFileInput} type="file" accept=".json" hidden />
-      </ListItem>
+      </ListItemButton>
     </List>
   );
 };

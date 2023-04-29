@@ -1,14 +1,11 @@
-import React, {FC, ReactNode} from 'react';
+import React, {FC, ReactNode, useEffect, useState} from 'react';
 import {Box, Paper, Zoom} from '@mui/material';
 import {styled} from '@mui/system';
 
-const NotifyBox = styled(Box)(({theme}) => {
-  return {
-    position: 'fixed',
-    top: '30px',
-    right: '30px',
-    backgroundColor: theme.palette.primary.light,
-  };
+const NotifyBox = styled(Box)({
+  position: 'fixed',
+  top: '30px',
+  right: '30px',
 });
 
 interface NotificationProps {
@@ -16,9 +13,9 @@ interface NotificationProps {
 }
 
 const Notification: FC<NotificationProps> = ({notify}) => {
-  const [show, setShow] = React.useState(true);
+  const [show, setShow] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timeoutId = setTimeout(() => {
       setShow(false);
     }, 3 * 1000);
@@ -31,8 +28,10 @@ const Notification: FC<NotificationProps> = ({notify}) => {
 
   return (
     <Zoom in={show}>
-      <NotifyBox p={1}>
-        <Paper elevation={3}>{notify.text}</Paper>
+      <NotifyBox>
+        <Box component={Paper} elevation={3} p={1} px={2}>
+          {notify.text}
+        </Box>
       </NotifyBox>
     </Zoom>
   );

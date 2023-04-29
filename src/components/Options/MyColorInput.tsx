@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   Box,
   FormControl,
@@ -31,14 +31,14 @@ const MyColorInput: FC<MyColorInputProps> = ({
   format = 'hex',
   name,
 }) => {
-  const [color, setColor] = React.useState(value);
-  const [showPicker, setShowPicker] = React.useState(false);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const refPickerBody = React.useRef<HTMLDivElement | null>(null);
-  const refPickerBtn = React.useRef<HTMLButtonElement | null>(null);
-  const refColorIcon = React.useRef<HTMLCanvasElement | null>(null);
+  const [color, setColor] = useState(value);
+  const [showPicker, setShowPicker] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const refPickerBody = useRef<HTMLDivElement | null>(null);
+  const refPickerBtn = useRef<HTMLButtonElement | null>(null);
+  const refColorIcon = useRef<HTMLCanvasElement | null>(null);
 
-  const handleChangeColor = React.useCallback(
+  const handleChangeColor = useCallback(
     (color) => {
       if (format === 'rgba') {
         const {r, g, b, a} = color.rgb;
@@ -51,16 +51,16 @@ const MyColorInput: FC<MyColorInputProps> = ({
     [format],
   );
 
-  const handleChange = React.useCallback((e) => {
+  const handleChange = useCallback((e) => {
     setColor(e.target.value);
   }, []);
 
-  const handleClickPick = React.useCallback((e) => {
+  const handleClickPick = useCallback((e) => {
     setAnchorEl(e.currentTarget);
     setShowPicker((r) => !r);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!showPicker) return;
     document.addEventListener('click', listener);
     function listener(e: MouseEvent) {
@@ -76,7 +76,7 @@ const MyColorInput: FC<MyColorInputProps> = ({
     };
   }, [showPicker]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const canvas = refColorIcon.current;
     if (!canvas) return;
     canvas.width = canvasDprSize;
@@ -92,7 +92,7 @@ const MyColorInput: FC<MyColorInputProps> = ({
     context.putImageData(imageData, 0, 0);
   }, [color, iconType]);
 
-  const inputProps = React.useMemo(() => {
+  const inputProps = useMemo(() => {
     return {
       endAdornment: (
         <InputAdornment position="end">

@@ -1,10 +1,9 @@
-import React from 'react';
-import promisifyApi from '../tools/promisifyApi';
+import {useEffect, useState} from 'react';
 
 const useActualState = () => {
-  const [state, setState] = React.useState<null | {mode: string; id?: string}>(null);
+  const [state, setState] = useState<null | {mode: string; id?: string}>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     chrome.runtime.onMessage.addListener(listener);
 
@@ -31,10 +30,11 @@ const useActualState = () => {
   return state;
 };
 
-function getState() {
-  return promisifyApi<null | {mode: string; id?: string}>('chrome.runtime.sendMessage')({
+async function getState() {
+  const result = await chrome.runtime.sendMessage({
     action: 'get',
   });
+  return result as unknown as null | {mode: string; id?: string};
 }
 
 export default useActualState;

@@ -1,4 +1,4 @@
-import React, {FC, useEffect} from 'react';
+import React, {FC, useCallback, useEffect, useState} from 'react';
 import {Box, Button, Checkbox, Grid, Paper} from '@mui/material';
 import {Link} from 'react-router-dom';
 import IconButton from '@mui/material/IconButton';
@@ -7,7 +7,6 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import Header from '../Header';
 import getConfig from '../../tools/getConfig';
-import promisifyApi from '../../tools/promisifyApi';
 import ConfigStruct, {ConfigProxy} from '../../tools/ConfigStruct';
 import Menu from './Menu';
 import ProxySelect from './ProxySelect';
@@ -35,8 +34,8 @@ interface Scope {
 }
 
 const Options: FC = () => {
-  const [scope] = React.useState<Scope>({proxies: []});
-  const [proxies, setProxies] = React.useState<ConfigProxy[]>([]);
+  const [scope] = useState<Scope>({proxies: []});
+  const [proxies, setProxies] = useState<ConfigProxy[]>([]);
 
   scope.proxies = proxies;
 
@@ -56,8 +55,8 @@ const Options: FC = () => {
     };
   }, []);
 
-  const handleProxyDelete = React.useCallback(
-    (id) => {
+  const handleProxyDelete = useCallback(
+    async (id) => {
       const {proxies} = scope;
       const proxy = proxies.find((p) => p.id === id);
       if (!proxy) return;
@@ -65,15 +64,14 @@ const Options: FC = () => {
       if (pos === -1) return;
       proxies.splice(pos, 1);
       const _ = ConfigStruct.assert({proxies});
-      return promisifyApi('chrome.storage.sync.set')({proxies}).then(() => {
-        setProxies(proxies.slice(0));
-      });
+      await chrome.storage.sync.set({proxies});
+      setProxies(proxies.slice(0));
     },
     [scope],
   );
 
-  const handleMove = React.useCallback(
-    (id, offset) => {
+  const handleMove = useCallback(
+    async (id, offset) => {
       const {proxies} = scope;
       const proxy = proxies.find((p) => p.id === id);
       if (!proxy) return;
@@ -83,23 +81,21 @@ const Options: FC = () => {
 
       proxies.splice(pos + offset, 0, proxy);
       const _ = ConfigStruct.assert({proxies});
-      return promisifyApi('chrome.storage.sync.set')({proxies}).then(() => {
-        setProxies(proxies.slice(0));
-      });
+      await chrome.storage.sync.set({proxies});
+      setProxies(proxies.slice(0));
     },
     [scope],
   );
 
-  const handleEnabledChange = React.useCallback(
-    (isEnabled, id) => {
+  const handleEnabledChange = useCallback(
+    async (isEnabled, id) => {
       const {proxies} = scope;
       const proxy = proxies.find((p) => p.id === id);
       if (!proxy) return;
       proxy.enabled = isEnabled;
       const _ = ConfigStruct.assert({proxies});
-      return promisifyApi('chrome.storage.sync.set')({proxies}).then(() => {
-        setProxies(proxies.slice(0));
-      });
+      await chrome.storage.sync.set({proxies});
+      setProxies(proxies.slice(0));
     },
     [scope],
   );
@@ -160,7 +156,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
   onMove,
   onEnabledChange,
 }) => {
-  const handleDelete = React.useCallback(
+  const handleDelete = useCallback(
     (e) => {
       e.preventDefault();
       onDelete(proxy.id);
@@ -168,7 +164,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
     [proxy, onDelete],
   );
 
-  const handleMoveUp = React.useCallback(
+  const handleMoveUp = useCallback(
     (e) => {
       e.preventDefault();
       onMove(proxy.id, -1);
@@ -176,7 +172,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
     [proxy, onMove],
   );
 
-  const handleMoveDown = React.useCallback(
+  const handleMoveDown = useCallback(
     (e) => {
       e.preventDefault();
       onMove(proxy.id, 1);
@@ -184,7 +180,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
     [proxy, onMove],
   );
 
-  const handleEnabledChange = React.useCallback(
+  const handleEnabledChange = useCallback(
     (e) => {
       onEnabledChange(e.target.checked, proxy.id);
     },

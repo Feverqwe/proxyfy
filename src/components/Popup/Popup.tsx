@@ -1,10 +1,10 @@
-import React, {FC} from 'react';
+import React, {FC, useCallback} from 'react';
 import {Box, Divider, List, ListItem, ListItemButton, ListItemText, Paper} from '@mui/material';
 import {styled} from '@mui/system';
-import promisifyApi from '../../tools/promisifyApi';
 import useActualState from '../useActualState';
 import useActualProxies from '../useActualProxies';
-import {ConfigProxy} from '../../tools/ConfigStruct';
+import {ConfigProxy, GenericProxy} from '../../tools/ConfigStruct';
+import {AUTH_SUPPORTED} from '../../constants';
 
 const MyListItemButton = styled(ListItemButton)({
   '&.active': {
@@ -29,18 +29,33 @@ const defaultItems = [
   {title: 'Off (use system settings)', mode: 'system'},
 ];
 
-const Popup = React.memo(() => {
+const Popup = () => {
   const state = useActualState();
   const proxies = useActualProxies();
 
-  const handleClick = React.useCallback((mode, id) => {
-    promisifyApi('chrome.runtime.sendMessage')({
-      action: 'set',
-      mode,
-      id,
-    }).catch((err) => {
+  const handleClick = useCallback(async (mode, item: Item | ConfigProxy) => {
+    const {id} = item;
+
+    if (AUTH_SUPPORTED && (item as GenericProxy).username) {
+      try {
+        await chrome.permissions.request({
+          permissions: ['webRequest', 'webRequestAuthProvider'],
+          origins: ['<all_urls>'],
+        });
+      } catch (err) {
+        console.error('Unable request auth permissions: %O', err);
+      }
+    }
+
+    try {
+      await chrome.runtime.sendMessage({
+        action: 'set',
+        mode,
+        id,
+      });
+    } catch (err) {
       console.error('Set proxy error: %O', err);
-    });
+    }
   }, []);
 
   if (!proxies) return null;
@@ -79,21 +94,20 @@ const Popup = React.memo(() => {
       </List>
     </Box>
   );
-});
+};
 
 interface ProxyItemProps {
   item: Item | ConfigProxy;
   mode: string;
   checked: boolean;
-  onClick: (mode: string, id?: string) => void;
+  onClick: (mode: string, item: Item | ConfigProxy) => void;
 }
 
 const ProxyItem: FC<ProxyItemProps> = ({item, mode, checked, onClick}) => {
-  const handleClick = React.useCallback(
+  const handleClick = useCallback(
     (e) => {
       e.preventDefault();
-      const {id} = item;
-      onClick(mode, id);
+      onClick(mode, item);
     },
     [item, mode, onClick],
   );

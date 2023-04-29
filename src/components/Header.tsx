@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, useMemo} from 'react';
 import {Box, Grid, Paper, Typography} from '@mui/material';
 import getExtensionIcon from '../tools/getExtensionIcon';
 import getUrlFromImageData from '../tools/getUrlFromImageData';
@@ -8,7 +8,7 @@ interface HeaderProps {
 }
 
 const Header: FC<HeaderProps> = ({title}) => {
-  const logoUrl = React.useMemo(() => getUrlFromImageData('#0a77e5', 50, getExtensionIcon), []);
+  const logoUrl = useMemo(() => getUrlFromImageData('#0a77e5', 50, getExtensionIcon), []);
 
   return (
     <Box component={Paper} mx={2} mt={2} p={1}>
