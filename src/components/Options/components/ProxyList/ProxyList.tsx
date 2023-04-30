@@ -30,27 +30,28 @@ const STYLE = {
 const ProxyList: FC = () => {
   const [proxies, setProxies] = useState<ConfigProxy[]>([]);
 
-  useEffect(() => {
-    let isMounted = true;
-    getConfig().then(
-      ({proxies}) => {
-        if (!isMounted) return;
-        setProxies(proxies as ConfigProxy[]);
-      },
-      (err) => {
-        console.error('getConfig error: %O', err);
-      },
-    );
-    return () => {
-      isMounted = false;
-    };
+  const fetchProxies = useCallback(async () => {
+    try {
+      const {proxies} = await getConfig();
+
+      setProxies(proxies as ConfigProxy[]);
+    } catch (err) {
+      console.error('getConfig error: %O', err);
+    }
   }, []);
 
-  const saveProxies = useCallback(async (newProxies: ConfigProxy[]) => {
-    const _ = ConfigStruct.assert({proxies: newProxies});
-    await chrome.storage.sync.set({proxies: newProxies});
-    setProxies(newProxies);
-  }, []);
+  useEffect(() => {
+    fetchProxies();
+  }, [fetchProxies]);
+
+  const saveProxies = useCallback(
+    async (newProxies: ConfigProxy[]) => {
+      const _ = ConfigStruct.assert({proxies: newProxies});
+      await chrome.storage.sync.set({proxies: newProxies});
+      await fetchProxies();
+    },
+    [fetchProxies],
+  );
 
   const handleProxyDelete = useCallback(
     async (proxy: ConfigProxy) => {

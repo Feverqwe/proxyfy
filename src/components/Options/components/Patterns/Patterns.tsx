@@ -126,18 +126,18 @@ export const matchAllPresets = [
 
 export const localhostPresets = [
   {
-    name: "local hostnames (usually no dots in the name).",
+    name: 'local hostnames (usually no dots in the name).',
     pattern: '^[^:]+:\\/\\/(?:localhost|127\\.\\d+\\.\\d+\\.\\d+)(?::\\d+)?$',
     type: 'regexp' as ProxyPatternType,
   },
   {
-    name: "local subnets (IANA reserved address space).",
+    name: 'local subnets (IANA reserved address space).',
     pattern:
       '^[^:]+:\\/\\/(?:192\\.168\\.\\d+\\.\\d+|10\\.\\d+\\.\\d+\\.\\d+|172\\.(?:1[6789]|2[0-9]|3[01])\\.\\d+\\.\\d+)(?::\\d+)?$',
     type: 'regexp' as ProxyPatternType,
   },
   {
-    name: "localhost - matches the local host optionally suffixed by a port number. The entire local subnet (127.0.0.0/8) matches.",
+    name: 'localhost - matches the local host optionally suffixed by a port number. The entire local subnet (127.0.0.0/8) matches.',
     pattern: '^[^:]+:\\/\\/[\\w-]+(?::\\d+)?$',
     type: 'regexp' as ProxyPatternType,
   },
@@ -271,7 +271,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
           </Grid>
           <Grid item xs={12}>
             <ActionBox mx={2} mb={2}>
-              <MyButtonM component={Link} to="/" variant="contained">
+              <MyButtonM component={Link} to="/" variant="contained" color="inherit">
                 Cancel
               </MyButtonM>
               <MyButtonM onClick={handleNewWhite} variant="contained" color="secondary">

@@ -1,15 +1,16 @@
-const Fs = require('fs');
-const Path = require('path');
-const compress = require('./compress');
+import * as fs from "fs";
+import * as path from "path";
 
-let source = Path.resolve(process.argv[process.argv.indexOf('--target') + 1]);
+import zipFolder from "./zipFolder";
 
-source = Path.join(source, 'chrome');
+let source = path.resolve(process.argv[process.argv.indexOf('--target') + 1]);
 
-Fs.accessSync(source);
+source = path.join(source, 'chrome');
 
-const manifest = JSON.parse(Fs.readFileSync(`${source}/manifest.json`, 'utf8'));
+fs.accessSync(source);
 
-const target = Path.join(source, '..', `${Path.basename(source)}_${manifest.version}.zip`);
+const manifest = JSON.parse(fs.readFileSync(`${source}/manifest.json`, 'utf8'));
 
-compress(source, target);
+const target = path.join(source, '..', `${path.basename(source)}_${manifest.version}.zip`);
+
+zipFolder(source, target);

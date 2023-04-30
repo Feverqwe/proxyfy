@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "_clear": "del-cli ./dist",
-    "_compress": "node ./builder/compressDist --target ./dist/",
+    "_compress": "ts-node ./builder/compressDist --target ./dist/",
     "_build": "npm run _clear && webpack --config webpack.config.ts",
     "build": "npm run _build -- --mode development",
     "watch": "npm run _build -- --mode development --watch",
@@ -43,6 +43,7 @@
     "superstruct": "^1.0.3"
   },
   "devDependencies": {
+    "@types/archiver": "^5.3.2",
     "@types/chrome": "^0.0.231",
     "@types/jest": "^29.5.0",
     "@types/offscreencanvas": "^2019.7.0",

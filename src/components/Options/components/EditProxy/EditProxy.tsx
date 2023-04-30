@@ -426,7 +426,7 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
             </Grid>
             <Grid item xs={12}>
               <ActionBox mx={2} mb={2}>
-                <MyButtonM component={Link} to="/" variant="contained">
+                <MyButtonM component={Link} to="/" variant="contained" color="inherit">
                   Cancel
                 </MyButtonM>
                 <MyButtonM onClick={handleSaveAndAddAnother} variant="contained" color="secondary">

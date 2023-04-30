@@ -91,6 +91,7 @@ async function init() {
 
 async function syncUiState() {
   const state = await getCurrentState();
+  const config = await getConfig();
   let badgeColor = [0, 0, 0, 0];
   let badgeText = '';
   let iconColor;
@@ -101,7 +102,6 @@ async function syncUiState() {
       case 'direct':
       case 'fixed_servers': {
         const {id} = state;
-        const config = await getConfig();
         let proxy = config.proxies.find((p) => p.id === id);
         if (!proxy && state.mode === 'direct') {
           proxy = config.proxies.find((p) => p.type === 'direct');
@@ -134,7 +134,6 @@ async function syncUiState() {
       case 'pac_script': {
         iconColor = '#0a77e5';
         if (AUTH_SUPPORTED) {
-          const config = await getConfig();
           newAuthListener = new AuthListener(config.proxies);
         }
         break;
@@ -168,7 +167,7 @@ async function syncUiState() {
       }),
     ]);
   } catch (err) {
-    console.error('Change badage error: %O', err);
+    console.error('Change badge error: %O', err);
   }
 
   try {
@@ -202,6 +201,7 @@ async function applyConfig() {
 }
 
 async function setProxy(mode: string, id?: string) {
+  const config = await getConfig();
   let value = null;
   switch (mode) {
     case 'system': {
@@ -218,7 +218,6 @@ async function setProxy(mode: string, id?: string) {
     }
     case 'direct':
     case 'fixed_servers': {
-      const config = await getConfig();
       let proxy = config.proxies.find((proxy) => proxy.id === id);
       if (!proxy && mode === 'direct') {
         proxy = config.proxies.find((proxy) => proxy.type === 'direct');
@@ -246,7 +245,6 @@ async function setProxy(mode: string, id?: string) {
       break;
     }
     case 'pac_script': {
-      const config = await getConfig();
       value = {
         mode: 'pac_script',
         pacScript: {
@@ -275,24 +273,24 @@ async function getCurrentState() {
     incognito: false,
   });
   const {mode, rules} = proxySettings.value;
-  let result: null | {mode: string; id?: string} = null;
+  if (proxySettings.levelOfControl !== 'controlled_by_this_extension') {
+    return null;
+  }
 
-  if (proxySettings.levelOfControl === 'controlled_by_this_extension') {
-    result = {mode};
-    if (mode === 'direct') {
-      const {lastDirectId} = (await chrome.storage.local.get('lastDirectId')) as {
-        lastDirectId?: string;
-      };
-      result.id = lastDirectId;
-    } else if (mode === 'fixed_servers' && rules && rules.bypassList) {
-      rules.bypassList.some((pattern: string) => {
-        const m = /^(.+)\.proxyfy\.localhost/.exec(pattern);
-        if (m) {
-          result!.id = decodeURIComponent(m[1]);
-          return true;
-        }
-      });
-    }
+  const result: {mode: string; id?: string} = {mode};
+  if (mode === 'direct') {
+    const {lastDirectId} = (await chrome.storage.local.get('lastDirectId')) as {
+      lastDirectId?: string;
+    };
+    result.id = lastDirectId;
+  } else if (mode === 'fixed_servers' && rules && rules.bypassList) {
+    rules.bypassList.some((pattern: string) => {
+      const m = /^(.+)\.proxyfy\.localhost/.exec(pattern);
+      if (m) {
+        result.id = decodeURIComponent(m[1]);
+        return true;
+      }
+    });
   }
   return result;
 }
