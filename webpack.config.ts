@@ -13,8 +13,8 @@ const getOptions: CallableOption = (env, argv) => ({
   entry: {
     pacScript: './src/pacScript',
     background: './src/background',
-    popup: './src/popup',
-    options: './src/options',
+    popup: './src/Popup',
+    options: './src/Options',
   },
   output: {
     path: outputPath,
