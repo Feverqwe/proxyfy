@@ -18,7 +18,7 @@ const canvasDprSize = 24 * window.devicePixelRatio;
 
 type MyColorInputProps = {
   label: string;
-  value: string;
+  defaultValue?: string;
   iconType?: string;
   format?: string;
   name: string;
@@ -26,12 +26,12 @@ type MyColorInputProps = {
 
 const MyColorInput: FC<MyColorInputProps> = ({
   label,
-  value,
+  defaultValue = '',
   iconType = 'circle',
   format = 'hex',
   name,
 }) => {
-  const [color, setColor] = useState(value);
+  const [color, setColor] = useState(defaultValue);
   const [showPicker, setShowPicker] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const refPickerBody = useRef<HTMLDivElement | null>(null);

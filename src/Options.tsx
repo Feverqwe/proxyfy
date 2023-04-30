@@ -1,9 +1,9 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {HashRouter, Route, Routes} from 'react-router-dom';
-import Options from './components/Options/Options';
-import Proxy from './components/Options/Proxy';
-import Patterns from './components/Options/Patterns';
+import ProxyList from './components/Options/components/ProxyList/ProxyList';
+import EditProxy from './components/Options/components/EditProxy/EditProxy';
+import Patterns from './components/Options/components/Patterns/Patterns';
 import PageBase from './components/PageBase/PageBase';
 
 const root = createRoot(document.getElementById('root')!);
@@ -11,8 +11,8 @@ root.render(
   <PageBase>
     <HashRouter>
       <Routes>
-        <Route path="/" element={<Options />} />
-        <Route path="/proxy" element={<Proxy />} />
+        <Route path="/" element={<ProxyList />} />
+        <Route path="/proxy" element={<EditProxy />} />
         <Route path="/patterns" element={<Patterns />} />
       </Routes>
     </HashRouter>

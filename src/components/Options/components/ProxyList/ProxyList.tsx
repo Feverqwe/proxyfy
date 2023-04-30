@@ -5,14 +5,12 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import Header from '../Header';
-import getConfig from '../../tools/getConfig';
-import ConfigStruct, {ConfigProxy} from '../../tools/ConfigStruct';
-import Menu from './Menu';
-import ProxySelect from './ProxySelect';
-import ColorIcon from './ColorIcon';
-
-const qs = require('querystring-es3');
+import Header from '../../../Header';
+import getConfig from '../../../../tools/getConfig';
+import ConfigStruct, {ConfigProxy} from '../../../../tools/ConfigStruct';
+import Menu from '../Menu/Menu';
+import ProxySelect from '../../ProxySelect';
+import ColorIcon from '../../ColorIcon';
 
 const STYLE = {
   mainBox: {
@@ -29,15 +27,8 @@ const STYLE = {
   },
 };
 
-interface Scope {
-  proxies: ConfigProxy[];
-}
-
-const Options: FC = () => {
-  const [scope] = useState<Scope>({proxies: []});
+const ProxyList: FC = () => {
   const [proxies, setProxies] = useState<ConfigProxy[]>([]);
-
-  scope.proxies = proxies;
 
   useEffect(() => {
     let isMounted = true;
@@ -55,49 +46,50 @@ const Options: FC = () => {
     };
   }, []);
 
+  const saveProxies = useCallback(async (newProxies: ConfigProxy[]) => {
+    const _ = ConfigStruct.assert({proxies: newProxies});
+    await chrome.storage.sync.set({proxies: newProxies});
+    setProxies(newProxies);
+  }, []);
+
   const handleProxyDelete = useCallback(
-    async (id) => {
-      const {proxies} = scope;
-      const proxy = proxies.find((p) => p.id === id);
-      if (!proxy) return;
-      const pos = proxies.indexOf(proxy);
+    async (proxy: ConfigProxy) => {
+      const newProxies = proxies.slice(0);
+      const pos = newProxies.indexOf(proxy);
       if (pos === -1) return;
-      proxies.splice(pos, 1);
-      const _ = ConfigStruct.assert({proxies});
-      await chrome.storage.sync.set({proxies});
-      setProxies(proxies.slice(0));
+      newProxies.splice(pos, 1);
+
+      await saveProxies(newProxies);
     },
-    [scope],
+    [proxies, saveProxies],
   );
 
   const handleMove = useCallback(
-    async (id, offset) => {
-      const {proxies} = scope;
-      const proxy = proxies.find((p) => p.id === id);
-      if (!proxy) return;
-      const pos = proxies.indexOf(proxy);
+    async (proxy: ConfigProxy, offset: number) => {
+      const newProxies = proxies.slice(0);
+      const pos = newProxies.indexOf(proxy);
       if (pos === -1) return;
-      proxies.splice(pos, 1);
+      newProxies.splice(pos, 1);
+      newProxies.splice(pos + offset, 0, proxy);
 
-      proxies.splice(pos + offset, 0, proxy);
-      const _ = ConfigStruct.assert({proxies});
-      await chrome.storage.sync.set({proxies});
-      setProxies(proxies.slice(0));
+      await saveProxies(newProxies);
     },
-    [scope],
+    [proxies, saveProxies],
   );
 
   const handleEnabledChange = useCallback(
-    async (isEnabled, id) => {
-      const {proxies} = scope;
-      const proxy = proxies.find((p) => p.id === id);
-      if (!proxy) return;
-      proxy.enabled = isEnabled;
-      const _ = ConfigStruct.assert({proxies});
-      await chrome.storage.sync.set({proxies});
-      setProxies(proxies.slice(0));
+    async (isEnabled: boolean, proxy: ConfigProxy) => {
+      const newProxies = proxies.slice(0);
+      const pos = newProxies.indexOf(proxy);
+      if (pos === -1) return;
+      newProxies.splice(pos, 1, {
+        ...proxy,
+        enabled: isEnabled,
+      });
+
+      await saveProxies(newProxies);
     },
-    [scope],
+    [proxies, saveProxies],
   );
 
   return (
@@ -143,9 +135,9 @@ interface ProxyItemProps {
   proxy: ConfigProxy;
   isFirst: boolean;
   isLast: boolean;
-  onDelete: (id: string) => unknown;
-  onMove: (id: string, pos: number) => unknown;
-  onEnabledChange: (state: boolean, id: string) => unknown;
+  onDelete: (proxy: ConfigProxy) => unknown;
+  onMove: (proxy: ConfigProxy, pos: number) => unknown;
+  onEnabledChange: (state: boolean, proxy: ConfigProxy) => unknown;
 }
 
 const ProxyItem: FC<ProxyItemProps> = ({
@@ -159,7 +151,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
   const handleDelete = useCallback(
     (e) => {
       e.preventDefault();
-      onDelete(proxy.id);
+      onDelete(proxy);
     },
     [proxy, onDelete],
   );
@@ -167,7 +159,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
   const handleMoveUp = useCallback(
     (e) => {
       e.preventDefault();
-      onMove(proxy.id, -1);
+      onMove(proxy, -1);
     },
     [proxy, onMove],
   );
@@ -175,14 +167,14 @@ const ProxyItem: FC<ProxyItemProps> = ({
   const handleMoveDown = useCallback(
     (e) => {
       e.preventDefault();
-      onMove(proxy.id, 1);
+      onMove(proxy, 1);
     },
     [proxy, onMove],
   );
 
   const handleEnabledChange = useCallback(
     (e) => {
-      onEnabledChange(e.target.checked, proxy.id);
+      onEnabledChange(e.target.checked, proxy);
     },
     [proxy, onEnabledChange],
   );
@@ -210,9 +202,9 @@ const ProxyItem: FC<ProxyItemProps> = ({
           <Grid item>
             <Button
               component={Link}
-              to={`/proxy?${qs.stringify({
+              to={`/proxy?${new URLSearchParams({
                 id: proxy.id,
-              })}`}
+              }).toString()}`}
               variant="outlined"
               size="small"
               color="primary"
@@ -223,9 +215,9 @@ const ProxyItem: FC<ProxyItemProps> = ({
           <Grid item>
             <Button
               component={Link}
-              to={`/patterns?${qs.stringify({
+              to={`/patterns?${new URLSearchParams({
                 id: proxy.id,
-              })}`}
+              }).toString()}`}
               variant="outlined"
               size="small"
               color="primary"
@@ -254,4 +246,4 @@ const ProxyItem: FC<ProxyItemProps> = ({
   );
 };
 
-export default Options;
+export default ProxyList;

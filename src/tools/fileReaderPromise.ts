@@ -9,4 +9,9 @@ function fileReaderReady(reader: FileReader) {
   });
 }
 
-export default fileReaderReady;
+export async function readBlobAsText(blob: Blob) {
+  const reader = new FileReader();
+  const promise = fileReaderReady(reader);
+  reader.readAsText(blob);
+  return promise;
+}

@@ -34,17 +34,19 @@ import InfoIcon from '@mui/icons-material/Info';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {styled} from '@mui/system';
-import getConfig from '../../tools/getConfig';
-import Header from '../Header';
-import ConfigStruct, {ConfigProxy, ProxyPattern, ProxyPatternType} from '../../tools/ConfigStruct';
-import CopyIcon from './CopyIcon';
-import splitMultiPattern from '../../tools/splitMultiPattern';
-import getObjectId from '../../tools/getObjectId';
-import Notification from './Notification';
-import ActionBox from './ActionBox';
-import MyButtonM from './MyButtonM';
-
-const qs = require('querystring-es3');
+import getConfig from '../../../../tools/getConfig';
+import Header from '../../../Header';
+import ConfigStruct, {
+  ConfigProxy,
+  ProxyPattern,
+  ProxyPatternType,
+} from '../../../../tools/ConfigStruct';
+import CopyIcon from '../../CopyIcon';
+import splitMultiPattern from '../../../../tools/splitMultiPattern';
+import getObjectId from '../../../../tools/getObjectId';
+import Notification from '../../Notification';
+import ActionBox from '../../ActionBox';
+import MyButtonM from '../../MyButtonM';
 
 const TableContainerS = styled(TableContainer)(({theme}) => {
   return {
@@ -63,13 +65,12 @@ const TableContainerS = styled(TableContainer)(({theme}) => {
     '& .pattern-cell': {
       paddingLeft: '6px',
       paddingRight: '6px',
-      minWidth: '240px',
     },
     '& .type-cell': {
       width: '120px',
     },
     '& .enabled-cell': {
-      width: '140px',
+      width: '160px',
     },
     '& .MuiInputBase-root.Mui-error': {
       boxShadow: 'inset 0 0 2px #ff0000',
@@ -85,13 +86,13 @@ const Patterns = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const query = qs.parse(location.search.slice(1));
+    const query = new URLSearchParams(location.search.slice(1));
     (async () => {
       try {
         let proxy: ConfigProxy | undefined;
-        if (query.id) {
+        if (query.has('id')) {
           const {proxies} = await getConfig();
-          proxy = proxies.find((p) => p.id === query.id);
+          proxy = proxies.find((p) => p.id === query.get('id'));
         }
 
         if (!isMounted) return;
@@ -125,19 +126,19 @@ export const matchAllPresets = [
 
 export const localhostPresets = [
   {
-    name: "local hostnames (usually no dots in the name). Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.",
-    pattern: '^[^:]+\\/\\/(?:localhost|127\\.\\d+\\.\\d+\\.\\d+)(?::\\d+)?$',
+    name: "local hostnames (usually no dots in the name).",
+    pattern: '^[^:]+:\\/\\/(?:localhost|127\\.\\d+\\.\\d+\\.\\d+)(?::\\d+)?$',
     type: 'regexp' as ProxyPatternType,
   },
   {
-    name: "local subnets (IANA reserved address space). Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.",
+    name: "local subnets (IANA reserved address space).",
     pattern:
-      '^[^:]+\\/\\/(?:192\\.168\\.\\d+\\.\\d+|10\\.\\d+\\.\\d+\\.\\d+|172\\.(?:1[6789]|2[0-9]|3[01])\\.\\d+\\.\\d+)(?::\\d+)?$',
+      '^[^:]+:\\/\\/(?:192\\.168\\.\\d+\\.\\d+|10\\.\\d+\\.\\d+\\.\\d+|172\\.(?:1[6789]|2[0-9]|3[01])\\.\\d+\\.\\d+)(?::\\d+)?$',
     type: 'regexp' as ProxyPatternType,
   },
   {
-    name: "localhost - matches the local host optionally prefixed by a user:password authentication string and optionally suffixed by a port number. The entire local subnet (127.0.0.0/8) matches. Pattern exists because 'Do not use this proxy for localhost and intranet/private IP addresses' is checked.",
-    pattern: '^[^:]+\\/\\/[\\w-]+(?::\\d+)?$',
+    name: "localhost - matches the local host optionally suffixed by a port number. The entire local subnet (127.0.0.0/8) matches.",
+    pattern: '^[^:]+:\\/\\/[\\w-]+(?::\\d+)?$',
     type: 'regexp' as ProxyPatternType,
   },
 ];
@@ -301,67 +302,66 @@ interface PatternListHandler {
 }
 
 const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, ref) => {
-  const [scope] = useState<{patterns: ProxyPattern[]}>({patterns: []});
   const [patterns, setPatterns] = useState(list);
-
-  scope.patterns = patterns;
+  const refPatterns = useRef(patterns);
+  refPatterns.current = patterns;
 
   useImperativeHandle(
     ref,
     () => {
       return {
         addRule(name = '', pattern = '', type = ProxyPatternType.Wildcard) {
-          const {patterns} = scope;
-          patterns.push({
+          const newPatterns = refPatterns.current.slice(0);
+          newPatterns.push({
             enabled: true,
             name,
             type: type as ProxyPatternType,
             pattern,
           });
-          setPatterns(patterns.slice(0));
+          setPatterns((refPatterns.current = newPatterns));
         },
         getPatterns() {
-          return scope.patterns;
+          return refPatterns.current;
         },
       };
     },
-    [scope],
+    [],
   );
 
   const handlePatternDelete = useCallback(
     (pattern) => {
-      const {patterns} = scope;
-      const pos = patterns.indexOf(pattern);
+      const newPatterns = patterns.slice(0);
+      const pos = newPatterns.indexOf(pattern);
       if (pos === -1) return;
-      patterns.splice(pos, 1);
-      setPatterns(patterns.slice(0));
+      newPatterns.splice(pos, 1);
+      setPatterns(newPatterns);
     },
-    [scope],
+    [patterns],
   );
 
   const handlePatternCopy = useCallback(
     (pattern) => {
-      const {patterns} = scope;
-      const pos = patterns.indexOf(pattern);
+      const newPatterns = patterns.slice(0);
+      const pos = newPatterns.indexOf(pattern);
       if (pos === -1) return;
       const clone = JSON.parse(JSON.stringify(pattern));
-      patterns.splice(pos + 1, 0, clone);
-      setPatterns(patterns.slice(0));
+      newPatterns.splice(pos + 1, 0, clone);
+      setPatterns(newPatterns);
     },
-    [scope],
+    [patterns],
   );
 
   const handlePatternMove = useCallback(
     (pattern, offset) => {
-      const {patterns} = scope;
-      const pos = patterns.indexOf(pattern);
+      const newPatterns = patterns.slice(0);
+      const pos = newPatterns.indexOf(pattern);
       if (pos === -1) return;
-      patterns.splice(pos, 1);
+      newPatterns.splice(pos, 1);
 
-      patterns.splice(pos + offset, 0, pattern);
-      setPatterns(patterns.slice(0));
+      newPatterns.splice(pos + offset, 0, pattern);
+      setPatterns(newPatterns);
     },
-    [scope],
+    [patterns],
   );
 
   const helpTooltip = useMemo(() => {
@@ -443,9 +443,9 @@ interface PatternProps {
   pattern: ProxyPattern;
   isFirst: boolean;
   isLast: boolean;
-  onDelete: (pattern: ProxyPattern) => unknown;
-  onCopy: (pattern: ProxyPattern) => unknown;
-  onMove: (pattern: ProxyPattern, dir: number) => unknown;
+  onDelete: (pattern: ProxyPattern) => void;
+  onCopy: (pattern: ProxyPattern) => void;
+  onMove: (pattern: ProxyPattern, dir: number) => void;
 }
 
 const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, onMove}) => {

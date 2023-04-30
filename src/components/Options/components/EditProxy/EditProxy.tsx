@@ -12,29 +12,30 @@ import {
 } from '@mui/material';
 import {useNavigate, useLocation} from 'react-router';
 import {Link} from 'react-router-dom';
-import getConfig from '../../tools/getConfig';
-import Header from '../Header';
+import getConfig from '../../../../tools/getConfig';
+import Header from '../../../Header';
 import ConfigStruct, {
   DefaultProxyStruct,
   ConfigProxy,
   ProxyPattern,
   GenericProxyType,
-} from '../../tools/ConfigStruct';
-import getId from '../../tools/getId';
-import getObjectId from '../../tools/getObjectId';
-import {localhostPresets, matchAllPresets} from './Patterns';
-import MyColorInput from './MyColorInput';
-import getRandomInt from '../../tools/getRandomInt';
-import Notification from './Notification';
-import MySelect from './MySelect';
-import MyInput from './MyInput';
-import ActionBox from './ActionBox';
-import MyButtonM from './MyButtonM';
-import {AUTH_SUPPORTED} from '../../constants';
+  DirectProxyType,
+} from '../../../../tools/ConfigStruct';
+import getId from '../../../../tools/getId';
+import getObjectId from '../../../../tools/getObjectId';
+import {localhostPresets, matchAllPresets} from '../Patterns/Patterns';
+import MyColorInput from '../../MyColorInput';
+import getRandomInt from '../../../../tools/getRandomInt';
+import Notification from '../../Notification';
+import MySelect from '../../MySelect';
+import MyInput from '../../MyInput';
+import ActionBox from '../../ActionBox';
+import MyButtonM from '../../MyButtonM';
+import {AUTH_SUPPORTED} from '../../../../constants';
 
-const qs = require('querystring-es3');
+const noProxyTypes = [DirectProxyType.Direct];
+const authProxyTypes = AUTH_SUPPORTED ? [GenericProxyType.Http, GenericProxyType.Https] : [];
 
-const noProxyTypes = ['direct'];
 const badgeColors = [
   '#f44336',
   '#e91e63',
@@ -56,32 +57,38 @@ const badgeColors = [
   '#607d8b',
 ];
 
-const Proxy = () => {
+const EditProxy = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [proxy, setProxy] = useState<ConfigProxy | null>(null);
 
+  const handleNewProxy = useCallback(() => {
+    const newProxy = DefaultProxyStruct.create({
+      color: badgeColors[getRandomInt(0, badgeColors.length)],
+    }) as ConfigProxy;
+    setProxy(newProxy);
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
-    const query = qs.parse(location.search.slice(1));
+    const query = new URLSearchParams(location.search);
 
     (async () => {
       try {
         let proxy: undefined | ConfigProxy | null = null;
-        if (query.id) {
+        if (query.has('id')) {
           const {proxies} = await getConfig();
-          proxy = proxies.find((p) => p.id === query.id);
+          proxy = proxies.find((p) => p.id === query.get('id'));
         }
-
         if (!isMounted) return;
+
         if (proxy === undefined) {
           navigate('/');
+        } else if (proxy === null) {
+          handleNewProxy();
         } else {
-          const currentProxy = DefaultProxyStruct.create(proxy || {}) as ConfigProxy;
-          if (!proxy) {
-            currentProxy.color = badgeColors[getRandomInt(0, badgeColors.length)];
-          }
+          const currentProxy = DefaultProxyStruct.create(proxy) as ConfigProxy;
           setProxy(currentProxy);
         }
       } catch (err) {
@@ -92,15 +99,11 @@ const Proxy = () => {
     return () => {
       isMounted = false;
     };
-  }, [location.search, navigate]);
-
-  const onReset = useCallback(() => {
-    setProxy(DefaultProxyStruct.create({}) as ConfigProxy);
-  }, []);
+  }, [location.search, navigate, handleNewProxy]);
 
   if (!proxy) return null;
 
-  return <ProxyLoaded key={getObjectId(proxy)} proxy={proxy} onReset={onReset} />;
+  return <ProxyLoaded key={getObjectId(proxy)} proxy={proxy} onReset={handleNewProxy} />;
 };
 
 interface ChangedProxy extends Omit<ConfigProxy, 'whitePatterns' | 'blackPatterns'> {
@@ -111,6 +114,12 @@ interface ChangedProxy extends Omit<ConfigProxy, 'whitePatterns' | 'blackPattern
 interface ProxyLoadedProps {
   proxy: ConfigProxy;
   onReset: () => void;
+}
+
+enum FieldType {
+  String = 'string',
+  Number = 'number',
+  Checkbox = 'checkbox',
 }
 
 const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
@@ -126,66 +135,47 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
 
   const isNew = useMemo(() => !proxy.id, [proxy.id]);
 
-  const save = useCallback(async () => {
+  const refFields = useRef<{name: string; type: FieldType}[]>([]);
+  refFields.current = [];
+  const addField = useCallback(
+    (name: string, {type = FieldType.String}: {type?: FieldType} = {}) => {
+      refFields.current.push({name, type});
+      const props: {name: string; defaultValue?: string} = {name};
+      if ([FieldType.Number, FieldType.String].includes(type) && name in proxy) {
+        props.defaultValue = String(proxy[name as keyof ConfigProxy]);
+      }
+      return props;
+    },
+    [proxy],
+  );
+
+  const saveForm = useCallback(async () => {
     const form = refForm.current;
-    if (!form) return;
-    const {
-      title: titleEl,
-      color: colorEl,
-      type: typeEl,
-      host: hostEl,
-      port: portEl,
-      username: usernameEl,
-      password: passwordEl,
-      enabled: enabledEl,
-      useMatchAllPreset: useMatchAllPresetEl,
-      useLocalhostPreset: useLocalhostPresetEl,
-      badgeText: badgeTextEl,
-      badgeColor: badgeColorEl,
-    } = form.elements;
+    if (!form) {
+      throw new Error('Form is empty');
+    }
 
     const data: Record<string, number | string | boolean> = {};
-    [
-      titleEl,
-      typeEl,
-      colorEl,
-      hostEl,
-      portEl,
-      usernameEl,
-      passwordEl,
-      badgeTextEl,
-      badgeColorEl,
-    ].forEach((element) => {
-      if (!element) return;
-      const key = element.name;
-      const {value} = element;
-      if (['port'].includes(key)) {
-        data[key] = parseInt(value, 10);
-      } else {
-        data[key] = value;
+    refFields.current.forEach(({name, type}) => {
+      const el = form.elements[name];
+      let value;
+      if (type === FieldType.String) {
+        value = el.value;
+      } else if (type === FieldType.Number) {
+        value = parseInt(el.value, 10);
+      } else if (type === FieldType.Checkbox) {
+        value = el.checked;
+      }
+      if (value !== undefined) {
+        data[name] = value;
       }
     });
 
-    [enabledEl, useMatchAllPresetEl, useLocalhostPresetEl].forEach((element) => {
-      if (!element) return;
-      const key = element.name;
-      const value = element.checked;
-      data[key] = value;
-    });
-
-    const {useMatchAllPreset} = data;
-    const {useLocalhostPreset} = data;
+    const {useMatchAllPreset, useLocalhostPreset} = data;
     delete data.useMatchAllPreset;
     delete data.useLocalhostPreset;
 
-    if (noProxyTypes.includes(data.type as string)) {
-      setValidHost(true);
-      setValidPort(true);
-      delete data.host;
-      delete data.port;
-      delete data.password;
-      delete data.username;
-    } else {
+    if (!noProxyTypes.includes(data.type as DirectProxyType)) {
       let hasErrors = false;
       if (!data.host) {
         hasErrors = true;
@@ -259,7 +249,7 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
     await chrome.storage.sync.set(config);
 
     return changedProxy.id;
-  }, [isNew, proxy]);
+  }, [isNew, proxy, refFields]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -270,9 +260,9 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
           case 83:
             e.preventDefault();
             try {
-              const id = await save();
+              const id = await saveForm();
               if (isNew) {
-                navigate(`/proxy?${qs.stringify({id})}`);
+                navigate(`/proxy?${new URLSearchParams({id}).toString()}`);
               } else {
                 setNotify({text: 'Saved'});
               }
@@ -286,7 +276,7 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [save, isNew, navigate]);
+  }, [saveForm, isNew, navigate]);
 
   const handleChangeType = useCallback((e) => {
     const {value} = e.target;
@@ -301,33 +291,33 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
     async (e) => {
       e.preventDefault();
       try {
-        await save();
+        await saveForm();
         navigate('/');
       } catch (err) {
         console.error('Save error: %O', err);
       }
     },
-    [navigate, save],
+    [navigate, saveForm],
   );
 
   const handleSaveAndEditPatterns = useCallback(
     async (e) => {
       e.preventDefault();
       try {
-        const id = await save();
-        navigate(`/patterns?${qs.stringify({id})}`);
+        const id = await saveForm();
+        navigate(`/patterns?${new URLSearchParams({id}).toString()}`);
       } catch (err) {
         console.error('Save error: %O', err);
       }
     },
-    [navigate, save],
+    [navigate, saveForm],
   );
 
   const handleSaveAndAddAnother = useCallback(
     async (e) => {
       e.preventDefault();
       try {
-        const id = await save();
+        await saveForm();
         if (isNew) {
           onReset();
         } else {
@@ -337,10 +327,8 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
         console.error('Save error: %O', err);
       }
     },
-    [navigate, isNew, onReset, save],
+    [navigate, isNew, onReset, saveForm],
   );
-
-  const isDirect = noProxyTypes.includes(type);
 
   return (
     <>
@@ -350,35 +338,40 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
           <Grid container>
             <Grid item xs={6}>
               <Box m={2}>
-                <MyInput
-                  label="Title (optional)"
-                  placeholder="title"
-                  defaultValue={proxy.title}
-                  name="title"
-                />
-                <MyColorInput label="Icon color" value={proxy.color} name="color" iconType="logo" />
-                <MyInput label="Badge text" defaultValue={proxy.badgeText || ''} name="badgeText" />
-                <MyColorInput
-                  label="Badge color"
-                  value={proxy.badgeColor || ''}
-                  name="badgeColor"
-                  format="rgba"
-                />
+                <MyInput label="Title (optional)" placeholder="title" {...addField('title')} />
+                <MyColorInput label="Icon color" iconType="logo" {...addField('color')} />
+                <MyInput label="Badge text" {...addField('badgeText')} />
+                <MyColorInput label="Badge color" format="rgba" {...addField('badgeColor')} />
                 {isNew && (
                   <FormControl fullWidth margin="dense">
                     <Typography variant="subtitle1">Pattern Shortcuts</Typography>
                     <Box component={Paper} p={1} variant="outlined">
                       <FormGroup>
                         <FormControlLabel
-                          control={<Checkbox defaultChecked={true} name="enabled" />}
+                          control={
+                            <Checkbox
+                              defaultChecked={true}
+                              {...addField('enabled', {type: FieldType.Checkbox})}
+                            />
+                          }
                           label="Enabled"
                         />
                         <FormControlLabel
-                          control={<Checkbox defaultChecked={true} name="useMatchAllPreset" />}
+                          control={
+                            <Checkbox
+                              defaultChecked={true}
+                              {...addField('useMatchAllPreset', {type: FieldType.Checkbox})}
+                            />
+                          }
                           label="Add whitelist pattern to match all URLs"
                         />
                         <FormControlLabel
-                          control={<Checkbox defaultChecked={false} name="useLocalhostPreset" />}
+                          control={
+                            <Checkbox
+                              defaultChecked={false}
+                              {...addField('useLocalhostPreset', {type: FieldType.Checkbox})}
+                            />
+                          }
                           label="Do not use for localhost and intranet/private IP addresses"
                         />
                       </FormGroup>
@@ -389,12 +382,7 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
             </Grid>
             <Grid item xs={6}>
               <Box m={2}>
-                <MySelect
-                  onChange={handleChangeType}
-                  name="type"
-                  label="Proxy type"
-                  defaultValue={proxy.type}
-                >
+                <MySelect onChange={handleChangeType} label="Proxy type" {...addField('type')}>
                   <MenuItem value="http">HTTP</MenuItem>
                   <MenuItem value="https">HTTPS</MenuItem>
                   <MenuItem value="socks4">SOCKS4</MenuItem>
@@ -402,43 +390,38 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
                   <MenuItem value="quic">QUIC</MenuItem>
                   <MenuItem value="direct">Direct (no proxy)</MenuItem>
                 </MySelect>
-                <MyInput
-                  label="Proxy IP address or DNS name"
-                  placeholder="111.111.111.111, www.example.com"
-                  defaultValue={'host' in proxy ? proxy.host : ''}
-                  name="host"
-                  isError={!isValidHost}
-                  hidden={isDirect}
-                />
-                <MyInput
-                  label="Port"
-                  placeholder="3128"
-                  defaultValue={String('port' in proxy ? proxy.port : '')}
-                  name="port"
-                  isError={!isValidPort}
-                  hidden={isDirect}
-                  type="number"
-                />
-                {[GenericProxyType.Http, GenericProxyType.Https].includes(
-                  type as GenericProxyType,
-                ) &&
-                  AUTH_SUPPORTED && (
-                    <>
-                      <MyInput
-                        label="Username (optional)"
-                        placeholder="username"
-                        defaultValue={'username' in proxy ? proxy.username || '' : ''}
-                        name="username"
-                      />
-                      <MyInput
-                        label="Password (optional)"
-                        placeholder="*****"
-                        type="password"
-                        defaultValue={'password' in proxy ? proxy.password || '' : ''}
-                        name="password"
-                      />
-                    </>
-                  )}
+                {!noProxyTypes.includes(type as DirectProxyType) && (
+                  <>
+                    <MyInput
+                      label="Proxy IP address or DNS name"
+                      placeholder="111.111.111.111, www.example.com"
+                      isError={!isValidHost}
+                      {...addField('host')}
+                    />
+                    <MyInput
+                      label="Port"
+                      placeholder="3128"
+                      isError={!isValidPort}
+                      type="number"
+                      {...addField('port', {type: FieldType.Number})}
+                    />
+                    {authProxyTypes.includes(type as GenericProxyType) && (
+                      <>
+                        <MyInput
+                          label="Username (optional)"
+                          placeholder="username"
+                          {...addField('username', {type: FieldType.String})}
+                        />
+                        <MyInput
+                          label="Password (optional)"
+                          placeholder="*****"
+                          type="password"
+                          {...addField('password', {type: FieldType.String})}
+                        />
+                      </>
+                    )}
+                  </>
+                )}
               </Box>
             </Grid>
             <Grid item xs={12}>
@@ -469,4 +452,4 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
   );
 };
 
-export default Proxy;
+export default EditProxy;
