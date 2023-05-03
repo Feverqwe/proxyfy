@@ -1,17 +1,56 @@
-import * as s from "superstruct";
-import {Infer} from "superstruct";
+import * as s from 'superstruct';
+
+export enum ProxyPatternType {
+  Wildcard = 'wildcard',
+  Regexp = 'regexp',
+}
+
+const ProxyPatternTypeStruct = s.union([s.literal('wildcard'), s.literal('regexp')]);
 
 const ProxyPatternStruct = s.type({
   enabled: s.boolean(),
   name: s.string(),
-  type: s.union([s.literal('wildcard'), s.literal('regexp')]),
+  type: ProxyPatternTypeStruct,
   pattern: s.string(),
 });
 
-export type Config = Infer<typeof ConfigStruct>;
-export type Proxy = Infer<typeof ProxyStruct>;
-export type GenericProxy = Infer<typeof GenericProxyStruct>;
-export type DirectProxy = Infer<typeof DirectProxyStruct>;
+export interface ProxyPattern {
+  enabled: boolean;
+  name: string;
+  type: ProxyPatternType;
+  pattern: string;
+}
+
+interface BaseProxy {
+  id: string;
+  enabled: boolean;
+  title: string;
+  color: string;
+  badgeText?: string;
+  badgeColor?: string;
+  whitePatterns: ProxyPattern[];
+  blackPatterns: ProxyPattern[];
+}
+
+export enum GenericProxyType {
+  Http = 'http',
+  Https = 'https',
+  Socks4 = 'socks4',
+  Socks5 = 'socks5',
+  Quic = 'quic',
+}
+
+export enum DirectProxyType {
+  Direct = 'direct',
+}
+
+export interface GenericProxy extends BaseProxy {
+  type: GenericProxyType;
+  host: string;
+  port: number;
+  username?: string;
+  password?: string;
+}
 
 const GenericProxyStruct = s.type({
   id: s.string(),
@@ -20,7 +59,13 @@ const GenericProxyStruct = s.type({
   color: s.string(),
   badgeText: s.optional(s.string()),
   badgeColor: s.optional(s.string()),
-  type: s.union([s.literal('http'), s.literal('https'), s.literal('socks4'), s.literal('socks5'), s.literal('quic')]),
+  type: s.union([
+    s.literal('http'),
+    s.literal('https'),
+    s.literal('socks4'),
+    s.literal('socks5'),
+    s.literal('quic'),
+  ]),
   host: s.string(),
   port: s.number(),
   username: s.optional(s.string()),
@@ -28,6 +73,10 @@ const GenericProxyStruct = s.type({
   whitePatterns: s.array(ProxyPatternStruct),
   blackPatterns: s.array(ProxyPatternStruct),
 });
+
+export interface DirectProxy extends BaseProxy {
+  type: DirectProxyType.Direct;
+}
 
 const DirectProxyStruct = s.type({
   id: s.string(),
@@ -42,6 +91,12 @@ const DirectProxyStruct = s.type({
 });
 
 const ProxyStruct = s.union([GenericProxyStruct, DirectProxyStruct]);
+
+export type ConfigProxy = GenericProxy | DirectProxy;
+
+export interface Config {
+  proxies: ConfigProxy[];
+}
 
 const ConfigStruct = s.type({
   proxies: s.array(ProxyStruct),

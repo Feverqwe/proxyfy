@@ -1,4 +1,4 @@
-import wildcardToRegexpStr from "../wildcardToRegexpStr";
+import wildcardToRegexpStr from '../wildcardToRegexpStr';
 
 describe('wildcardToRegexpStr', () => {
   test('all', () => {
@@ -40,7 +40,6 @@ describe('wildcardToRegexpStr', () => {
     expect(new RegExp(results.join('|')).test('http://test.com')).toBe(false);
     expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
   });
-
 
   test('protocol subdomain and domain', () => {
     const results = wildcardToRegexpStr('*://*.test.com');

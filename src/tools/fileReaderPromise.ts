@@ -1,12 +1,17 @@
 function fileReaderReady(reader: FileReader) {
-  return new Promise(function(resolve, reject) {
-    reader.onload = function() {
-      resolve(reader.result)
-    }
-    reader.onerror = function() {
-      reject(reader.error)
-    }
-  })
+  return new Promise((resolve, reject) => {
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.onerror = () => {
+      reject(reader.error);
+    };
+  });
 }
 
-export default fileReaderReady;
+export async function readBlobAsText(blob: Blob) {
+  const reader = new FileReader();
+  const promise = fileReaderReady(reader);
+  reader.readAsText(blob);
+  return promise;
+}

@@ -1,19 +1,22 @@
-import {PacScript} from "./background";
-import wildcardToRegexpStr from "./tools/wildcardToRegexpStr";
-import splitMultiPattern from "./tools/splitMultiPattern";
+import {PacScript} from './background';
+import wildcardToRegexpStr from './tools/wildcardToRegexpStr';
+import splitMultiPattern from './tools/splitMultiPattern';
+import {DirectProxyType} from './tools/ConfigStruct';
 
+/* eslint-disable prefer-const */
 declare let FindProxyForURL: (url: string) => string;
 declare let Config: PacScript | null;
+// eslint-disable-next-line func-names
 FindProxyForURL = (function () {
   const config = Config!;
   Config = null;
 
   const rules = config.rules.map((rule) => {
-    const type = rule.type;
+    const {type} = rule;
     let address;
-    const whitePatterns = rule.whitePatterns;
-    const blackPatterns = rule.blackPatterns;
-    if (rule.type !== 'direct') {
+    const {whitePatterns} = rule;
+    const {blackPatterns} = rule;
+    if (rule.type !== DirectProxyType.Direct) {
       address = [rule.host, rule.port].join(':');
     }
     const [whiteRe, blackRe] = [whitePatterns, blackPatterns].map((patterns) => {
@@ -23,8 +26,7 @@ FindProxyForURL = (function () {
         const singlePatterns = splitMultiPattern(pattern);
         if (type === 'wildcard') {
           wildcardPatterns.push(...singlePatterns);
-        } else
-        if (type === 'regexp') {
+        } else if (type === 'regexp') {
           regexpPatterns.push(...singlePatterns);
         }
       });
@@ -37,7 +39,7 @@ FindProxyForURL = (function () {
 
       let re = null;
       if (regexpPatterns.length) {
-        re = new RegExp(regexpPatterns.map(v => `(?:${v})`).join('|'));
+        re = new RegExp(regexpPatterns.map((v) => `(?:${v})`).join('|'));
       }
       return re;
     });
@@ -55,7 +57,8 @@ FindProxyForURL = (function () {
     };
   });
 
-  const originRe = /^([^:]+:\/\/[^\/]+)/;
+  const originRe = /^([^:]+:\/\/[^/]+)/;
+  // eslint-disable-next-line func-names
   return function (url: string) {
     const m = originRe.exec(url);
     if (m) {
@@ -70,9 +73,8 @@ FindProxyForURL = (function () {
       if (currentRule) {
         if (currentRule.type === 'DIRECT') {
           return currentRule.type;
-        } else {
-          return `${currentRule.type} ${currentRule.address}`;
         }
+        return `${currentRule.type} ${currentRule.address}`;
       }
     }
     return 'DIRECT';

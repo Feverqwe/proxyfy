@@ -1,17 +1,17 @@
-import React from "react";
-import getConfig from "../tools/getConfig";
-import {Proxy} from "../tools/ConfigStruct";
+import {useEffect, useState} from 'react';
+import getConfig from '../tools/getConfig';
+import {ConfigProxy} from '../tools/ConfigStruct';
 
 const useActualProxies = () => {
-  const [proxies, setProxies] = React.useState<Proxy[] | null>(null);
+  const [proxies, setProxies] = useState<ConfigProxy[] | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     chrome.runtime.onMessage.addListener(listener);
 
     fetchState();
 
-    function listener(message: Record<string, any>) {
+    function listener(message: Record<string, unknown>) {
       if (message.action === 'proxiesChanges') {
         fetchState();
       }
@@ -31,6 +31,5 @@ const useActualProxies = () => {
 
   return proxies;
 };
-
 
 export default useActualProxies;

@@ -1,5 +1,3 @@
-declare const OffscreenCanvas: any;
-
 function getCircleIcon(color: string, wh = 24) {
   const path = new Path2D('M 0, 12 a 12,12 0 1,1 24,0 a 12,12 0 1,1 -24,0');
 

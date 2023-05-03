@@ -1,4 +1,8 @@
-function getUrlFromImageData(color: string, size: number, builder: (color: string, size: number) => ImageData) {
+function getUrlFromImageData(
+  color: string,
+  size: number,
+  builder: (color: string, size: number) => ImageData,
+) {
   const SIZE = size * window.devicePixelRatio;
   const canvas = document.createElement('canvas');
   canvas.width = SIZE;
