@@ -2,11 +2,11 @@
  * Tests for Storage Service Interface and Implementations
  */
 import {beforeEach, describe, expect, it} from 'vitest';
-import {StorageService} from '../StorageService.js';
-import {SyncStorageService} from '../SyncStorageService.js';
-import {LocalStorageService} from '../LocalStorageService.js';
-import {StorageSettings, StorageType} from '../StorageSettings.js';
-import {StorageFactory} from '../StorageFactory.js';
+import {StorageService} from '../StorageService';
+import {SyncStorageService} from '../SyncStorageService';
+import {LocalStorageService} from '../LocalStorageService';
+import {StorageSettings, StorageType} from '../StorageSettings';
+import {StorageFactory} from '../StorageFactory';
 
 describe('StorageService Interface', () => {
   describe('SyncStorageService', () => {

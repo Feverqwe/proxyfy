@@ -6,7 +6,7 @@ import getConfig from '../getConfig';
 import {StorageFactory} from '../../storage/StorageFactory';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
 import {DefaultConfigStruct} from '../ConfigStruct';
-import {StorageService} from '../../storage/StorageService.js';
+import {StorageService} from '../../storage/StorageService';
 
 describe('getConfig', () => {
   let storageFactory: StorageFactory;

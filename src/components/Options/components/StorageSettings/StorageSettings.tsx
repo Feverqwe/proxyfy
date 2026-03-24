@@ -10,13 +10,12 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material';
-import {StorageFactory} from '../../../../storage/StorageFactory';
 import {
+  StorageFactory,
   StorageSettings as StorageSettingsManager,
-  StorageType,
-} from '../../../../storage/StorageSettings';
-import Header from '../../../Header';
-import MyColorInput from '../../MyColorInput';
+} from '../../../../storage/index.ts';
+import {StorageType} from '../../../../storage/StorageSettings';
+import {Header, MyColorInput} from '../../../index';
 
 const StorageSettings: FC = () => {
   const [storageType, setStorageType] = useState<StorageType>(StorageType.SYNC);

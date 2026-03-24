@@ -10,8 +10,8 @@ import {
   DirectProxyType,
   GenericProxyType,
   ProxyPatternType,
-} from '../../../../../tools/ConfigStruct.js';
-import getId from '../../../../../tools/getId.js';
+} from '../../../../../tools/ConfigStruct.ts';
+import getId from '../../../../../tools/getId';
 
 // Mock the dependencies
 vi.mock('../../../../../tools/getId', () => ({

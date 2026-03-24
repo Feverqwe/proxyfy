@@ -5,9 +5,9 @@
  */
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {StorageFactory} from '../storage/StorageFactory.js';
-import {StorageSettings, StorageType} from '../storage/StorageSettings.js';
-import {ChromeStorageMock, createChromeStorageMock} from './mocks/chromeMocks.js';
+import {StorageFactory} from '../storage/StorageFactory';
+import {StorageSettings, StorageType} from '../storage/StorageSettings';
+import {ChromeStorageMock, createChromeStorageMock} from './mocks/chromeMocks';
 
 // Mock the background script functionality
 const setupBackgroundScript = () => {
@@ -80,7 +80,9 @@ describe('Background Script Integration', () => {
   describe('Storage Initialization', () => {
     it('should initialize storage system on startup', async () => {
       // Mock storage type preference
-      const mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({storageType: StorageType.SYNC});
+      const mockGet = vi
+        .spyOn(chromeLocalStorage, 'get')
+        .mockResolvedValue({storageType: StorageType.SYNC});
 
       const {storageFactory, storageSettings} = await backgroundScript.initializeStorage();
 
@@ -136,7 +138,9 @@ describe('Background Script Integration', () => {
 
     it('should handle storage errors gracefully', async () => {
       // Mock storage error
-      const mockSet = vi.spyOn(chromeSyncStorage, 'set').mockRejectedValue(new Error('Storage error'));
+      const mockSet = vi
+        .spyOn(chromeSyncStorage, 'set')
+        .mockRejectedValue(new Error('Storage error'));
 
       const proxyConfig = {
         type: 'http',
@@ -199,7 +203,7 @@ describe('Background Script Integration', () => {
 
       for (let i = 0; i < configs.length; i++) {
         const config = configs[i];
-        // eslint-disable-next-line no-await-in-loop
+
         await backgroundScript.setProxyConfig(config);
       }
 
@@ -213,11 +217,9 @@ describe('Background Script Integration', () => {
 
     it('should handle concurrent storage operations', async () => {
       // Mock storage operations with delays
-      const mockSet = vi.spyOn(chromeSyncStorage, 'set').mockImplementation(
-        () =>
-          // eslint-disable-next-line no-promise-executor-return
-          new Promise<void>((resolve) => setTimeout(() => resolve(), 10)),
-      );
+      const mockSet = vi
+        .spyOn(chromeSyncStorage, 'set')
+        .mockImplementation(() => new Promise<void>((resolve) => setTimeout(() => resolve(), 10)));
 
       // Start multiple concurrent operations
       const operations = [

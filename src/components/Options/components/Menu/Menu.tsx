@@ -5,10 +5,8 @@ import React, {FC, useCallback, useEffect, useRef} from 'react';
 import SaveIcon from '@mui/icons-material/Save';
 import RestoreIcon from '@mui/icons-material/Restore';
 import SettingsIcon from '@mui/icons-material/Settings';
-import downloadBlob from '../../../../tools/downloadBlob';
-import {readBlobAsText} from '../../../../tools/fileReaderPromise';
-import ConfigStruct from '../../../../tools/ConfigStruct';
-import {StorageFactory} from '../../../../storage/StorageFactory';
+import {ConfigStruct, downloadBlob, readBlobAsText} from '../../../../tools/index';
+import {StorageFactory} from '../../../../storage/index';
 
 const Menu: FC = () => {
   const refFileInput = useRef<HTMLInputElement | null>(null);

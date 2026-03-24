@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import type {ProxyState} from '../types/events';
+import type {ProxyState} from '../types/index';
 
 const useActualState = () => {
   const [state, setState] = useState<null | ProxyState>(null);

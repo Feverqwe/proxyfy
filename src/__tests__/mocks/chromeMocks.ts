@@ -1,6 +1,6 @@
 /**
  * Type-safe mocks for Chrome Extension APIs
- * 
+ *
  * Provides properly typed mock implementations for Chrome storage and other
  * extension APIs used in the application, eliminating the need for `as any` assertions.
  */
@@ -55,63 +55,63 @@ export interface ChromeMocks {
  */
 export function createChromeStorageMock(): ChromeStorageMock {
   const data = new Map<string, any>();
-  
+
   const mock: ChromeStorageMock = {
     _data: data,
     _reset: () => data.clear(),
-    
+
     async get(keys) {
       if (!keys) {
         // Return all data
         return Object.fromEntries(data);
       }
-      
+
       if (typeof keys === 'string') {
         // Single key
         return {[keys]: data.get(keys)};
       }
-      
+
       if (Array.isArray(keys)) {
         // Multiple keys
         const result: Record<string, any> = {};
-        keys.forEach(key => {
+        keys.forEach((key) => {
           result[key] = data.get(key);
         });
         return result;
       }
-      
+
       // Object with default values
       const result: Record<string, any> = {};
-      Object.keys(keys).forEach(key => {
+      Object.keys(keys).forEach((key) => {
         result[key] = data.has(key) ? data.get(key) : keys[key];
       });
       return result;
     },
-    
+
     async set(items) {
       Object.entries(items).forEach(([key, value]) => {
         data.set(key, value);
       });
     },
-    
+
     async remove(keys) {
       if (typeof keys === 'string') {
         data.delete(keys);
       } else {
-        keys.forEach(key => data.delete(key));
+        keys.forEach((key) => data.delete(key));
       }
     },
-    
+
     async clear() {
       data.clear();
     },
-    
+
     async getBytesInUse(keys) {
       const dataToMeasure = keys ? await this.get(keys) : Object.fromEntries(data);
       return JSON.stringify(dataToMeasure).length;
-    }
+    },
   };
-  
+
   return mock;
 }
 
@@ -121,7 +121,7 @@ export function createChromeStorageMock(): ChromeStorageMock {
 export function createChromeMocks(): ChromeMocks {
   const localStorage = createChromeStorageMock();
   const syncStorage = createChromeStorageMock();
-  
+
   const runtimeMock: ChromeRuntimeMock = {
     lastError: undefined,
     onMessage: {
@@ -130,7 +130,7 @@ export function createChromeMocks(): ChromeMocks {
     },
     sendMessage: vi.fn().mockResolvedValue({}),
   };
-  
+
   const proxyMock: ChromeProxyMock = {
     settings: {
       get: vi.fn().mockResolvedValue({}),
@@ -141,7 +141,7 @@ export function createChromeMocks(): ChromeMocks {
       },
     },
   };
-  
+
   return {
     storage: {
       local: localStorage,
@@ -157,7 +157,7 @@ export function createChromeMocks(): ChromeMocks {
  */
 export function setupChromeMocks(): ChromeMocks {
   const mocks = createChromeMocks();
-  
+
   // Set up global Chrome mock
   (globalThis as any).chrome = {
     storage: {
@@ -167,7 +167,7 @@ export function setupChromeMocks(): ChromeMocks {
     runtime: mocks.runtime,
     proxy: mocks.proxy,
   };
-  
+
   return mocks;
 }
 
@@ -177,12 +177,12 @@ export function setupChromeMocks(): ChromeMocks {
 export function resetChromeMocks(mocks: ChromeMocks): void {
   mocks.storage.local._reset();
   mocks.storage.sync._reset();
-  
+
   vi.resetAllMocks();
-  
+
   // Reset runtime mock
   mocks.runtime.lastError = undefined;
-  
+
   // Reset proxy mock
   vi.mocked(mocks.proxy.settings.get).mockClear();
   vi.mocked(mocks.proxy.settings.set).mockClear();

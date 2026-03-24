@@ -10,9 +10,8 @@ import {
 } from '@mui/material';
 import ColorizeIcon from '@mui/icons-material/Colorize';
 import {ChromePicker} from 'react-color';
-import getExtensionIcon from '../../tools/getExtensionIcon';
-import getCircleIcon from '../../tools/getCircleIcon';
-import type {ChromePickerColor} from '../../types/events';
+import {getCircleIcon, getExtensionIcon} from '../../tools/index';
+import type {ChromePickerColor} from '../../types/index';
 
 const canvasStyle = {width: '24px', height: '24px'};
 const canvasDprSize = 24 * window.devicePixelRatio;

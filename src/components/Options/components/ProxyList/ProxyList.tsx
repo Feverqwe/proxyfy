@@ -5,15 +5,10 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import Header from '../../../Header';
-import getConfig from '../../../../tools/getConfig';
-import ConfigStruct, {ConfigProxy} from '../../../../tools/ConfigStruct';
-import {StorageFactory} from '../../../../storage/StorageFactory';
+import {ColorIcon, CopyIcon, Header, ProxySelect} from '../../../index';
+import {ConfigProxy, ConfigStruct, getConfig, getId} from '../../../../tools/index';
+import {StorageFactory} from '../../../../storage/index';
 import Menu from '../Menu/Menu';
-import ProxySelect from '../../ProxySelect';
-import ColorIcon from '../../ColorIcon';
-import CopyIcon from '../../CopyIcon';
-import getId from '../../../../tools/getId';
 
 const STYLE = {
   mainBox: {

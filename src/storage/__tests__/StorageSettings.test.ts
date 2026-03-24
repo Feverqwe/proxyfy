@@ -2,7 +2,7 @@
  * Tests for StorageSettings class
  */
 import {beforeEach, describe, expect, it, Mock, vi} from 'vitest';
-import {StorageSettings, StorageType} from '../StorageSettings.js';
+import {StorageSettings, StorageType} from '../StorageSettings';
 
 describe('StorageSettings', () => {
   let storageSettings: StorageSettings;

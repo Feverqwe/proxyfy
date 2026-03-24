@@ -1,13 +1,13 @@
 /**
  * Type-safe mocks for Storage Service layer
- * 
+ *
  * Provides properly typed mock implementations for StorageService and related
  * components, eliminating the need for `as any` assertions in tests.
  */
 
 import {vi} from 'vitest';
-import {StorageService} from '../../storage/StorageService.js';
-import {StorageType} from '../../storage/StorageSettings.js';
+import {StorageService} from '../../storage/StorageService';
+import {StorageType} from '../../storage/StorageSettings';
 
 // Type definitions for storage mocks
 export interface MockStorageService extends StorageService {
@@ -32,7 +32,7 @@ export interface MockStorageFactory {
 export function createMockStorageService(): MockStorageService {
   const data = new Map<string, any>();
   let error: Error | null = null;
-  
+
   const mock: MockStorageService = {
     _data: data,
     _reset: () => {
@@ -45,85 +45,87 @@ export function createMockStorageService(): MockStorageService {
     _clearError: () => {
       error = null;
     },
-    
+
     async get(keys) {
       if (error) {
         throw error;
       }
-      
+
       if (!keys) {
         // Return all data
         return Object.fromEntries(data);
       }
-      
+
       if (typeof keys === 'string') {
         // Single key
         return {[keys]: data.get(keys)};
       }
-      
+
       if (Array.isArray(keys)) {
         // Multiple keys
         const result: Record<string, any> = {};
-        keys.forEach(key => {
+        keys.forEach((key) => {
           result[key] = data.get(key);
         });
         return result;
       }
-      
+
       // Default to empty object if no keys provided
       return {};
     },
-    
+
     async set(items) {
       if (error) {
         throw error;
       }
-      
+
       Object.entries(items).forEach(([key, value]) => {
         data.set(key, value);
       });
     },
-    
+
     async remove(keys) {
       if (error) {
         throw error;
       }
-      
+
       if (typeof keys === 'string') {
         data.delete(keys);
       } else {
-        keys.forEach(key => data.delete(key));
+        keys.forEach((key) => data.delete(key));
       }
     },
-    
+
     async clear() {
       if (error) {
         throw error;
       }
-      
+
       data.clear();
     },
-    
+
     async getBytesInUse(keys) {
       if (error) {
         throw error;
       }
-      
+
       const dataToMeasure = keys ? await this.get(keys) : Object.fromEntries(data);
       return JSON.stringify(dataToMeasure).length;
     },
   };
-  
+
   return mock;
 }
 
 /**
  * Creates a type-safe mock implementation of StorageFactory
  */
-export function createMockStorageFactory(initialType: StorageType = StorageType.SYNC): MockStorageFactory {
+export function createMockStorageFactory(
+  initialType: StorageType = StorageType.SYNC,
+): MockStorageFactory {
   let currentStorageType = initialType;
   const mockService = createMockStorageService();
-  
+
   const mock: MockStorageFactory = {
     _reset: () => {
       mockService._reset();
@@ -132,20 +134,20 @@ export function createMockStorageFactory(initialType: StorageType = StorageType.
     _setStorageType: (type: StorageType) => {
       currentStorageType = type;
     },
-    
+
     getStorageService: () => mockService,
-    
+
     async switchStorageType(type: StorageType) {
       currentStorageType = type;
     },
-    
+
     getCurrentStorageType: () => currentStorageType,
-    
+
     createSpecificStorageService(type: StorageType) {
       return createMockStorageService();
     },
   };
-  
+
   return mock;
 }
 
@@ -170,7 +172,7 @@ export function mockStorageSettingsSingleton(storageType: StorageType = StorageT
   isLocalStorage: () => boolean;
 } {
   let currentType = storageType;
-  
+
   return {
     getStorageType: () => currentType,
     async setStorageType(type: StorageType) {
@@ -185,17 +187,19 @@ export function mockStorageSettingsSingleton(storageType: StorageType = StorageT
  * Type-safe mock data generators for common test scenarios
  */
 export const MockDataGenerators = {
-  createProxyConfig: (overrides: Partial<{
-    id: string;
-    enabled: boolean;
-    title: string;
-    color: string;
-    type: string;
-    host: string;
-    port: number;
-    whitePatterns: string[];
-    blackPatterns: string[];
-  }> = {}) => ({
+  createProxyConfig: (
+    overrides: Partial<{
+      id: string;
+      enabled: boolean;
+      title: string;
+      color: string;
+      type: string;
+      host: string;
+      port: number;
+      whitePatterns: string[];
+      blackPatterns: string[];
+    }> = {},
+  ) => ({
     id: overrides.id || 'test-id',
     enabled: overrides.enabled ?? true,
     title: overrides.title || 'Test Proxy',
@@ -207,7 +211,7 @@ export const MockDataGenerators = {
     blackPatterns: overrides.blackPatterns || [],
     ...overrides,
   }),
-  
+
   createStorageData: (overrides: Record<string, any> = {}) => ({
     proxies: [MockDataGenerators.createProxyConfig()],
     storageType: StorageType.SYNC,

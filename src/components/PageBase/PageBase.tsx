@@ -3,7 +3,7 @@ import React, {FC, ReactNode} from 'react';
 import {CacheProvider} from '@emotion/react';
 import {GlobalStylesProps} from '@mui/material/GlobalStyles/GlobalStyles';
 import cache from './muiCache';
-import theme from '../theme';
+import {theme} from '../index';
 
 interface PageBaseProps {
   children: ReactNode;

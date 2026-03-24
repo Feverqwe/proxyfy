@@ -16,7 +16,7 @@ The mocking patterns include:
 ### Chrome API Mocks
 
 ```typescript
-import { createChromeMocks, setupChromeMocks } from './mocks/chromeMocks.js';
+import {createChromeMocks, setupChromeMocks} from './mocks/chromeMocks.js';
 
 describe('My Test', () => {
   let chromeMocks;
@@ -28,12 +28,12 @@ describe('My Test', () => {
   it('should use type-safe Chrome mocks', async () => {
     // Mock storage operations with proper typing
     const mockSet = vi.spyOn(chromeMocks.storage.sync, 'set').mockResolvedValue();
-    
+
     // Your test code here
     await someFunctionThatUsesChromeStorage();
-    
+
     // Type-safe assertions
-    expect(mockSet).toHaveBeenCalledWith({ key: 'value' });
+    expect(mockSet).toHaveBeenCalledWith({key: 'value'});
   });
 });
 ```
@@ -41,7 +41,7 @@ describe('My Test', () => {
 ### Storage Service Mocks
 
 ```typescript
-import { createMockStorageService, createMockStorageFactory } from './mocks/storageMocks.js';
+import {createMockStorageService, createMockStorageFactory} from './mocks/storageMocks.js';
 
 describe('Storage Tests', () => {
   let mockService;
@@ -54,8 +54,8 @@ describe('Storage Tests', () => {
 
   it('should use type-safe storage mocks', async () => {
     // Set up mock data
-    await mockService.set({ proxies: [{ id: '1', type: 'http' }] });
-    
+    await mockService.set({proxies: [{id: '1', type: 'http'}]});
+
     // Test retrieval
     const result = await mockService.get('proxies');
     expect(result.proxies).toHaveLength(1);
@@ -66,7 +66,7 @@ describe('Storage Tests', () => {
 ### Mock Data Generators
 
 ```typescript
-import { MockDataGenerators } from './mocks/storageMocks.js';
+import {MockDataGenerators} from './mocks/storageMocks.js';
 
 const proxyConfig = MockDataGenerators.createProxyConfig({
   title: 'Test Proxy',
@@ -95,7 +95,7 @@ const storageData = MockDataGenerators.createStorageData({
 ```typescript
 // Old pattern with unsafe type assertions
 (chrome.storage.sync.set as any) = vi.fn().mockResolvedValue(undefined);
-(chrome.storage.sync.get as any) = vi.fn().mockResolvedValue({ data: 'value' });
+(chrome.storage.sync.get as any) = vi.fn().mockResolvedValue({data: 'value'});
 ```
 
 ### After (Type-Safe)
@@ -103,13 +103,13 @@ const storageData = MockDataGenerators.createStorageData({
 ```typescript
 // New pattern with type-safe mocks
 const mockSet = vi.spyOn(chromeMocks.storage.sync, 'set').mockResolvedValue(undefined);
-const mockGet = vi.spyOn(chromeMocks.storage.sync, 'get').mockResolvedValue({ data: 'value' });
+const mockGet = vi.spyOn(chromeMocks.storage.sync, 'get').mockResolvedValue({data: 'value'});
 ```
 
 ## Files
 
 - `chromeMocks.ts` - Chrome extension API mocks
-- `storageMocks.ts` - Storage service layer mocks  
+- `storageMocks.ts` - Storage service layer mocks
 - `testHelpers.ts` - General testing utilities
 - `mockingPatterns.unit.test.ts` - Demonstration and verification of mocking patterns
 - `index.ts` - Barrel file for easy imports

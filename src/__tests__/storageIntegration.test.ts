@@ -8,9 +8,9 @@
  */
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {StorageFactory} from '../storage/StorageFactory.js';
-import {StorageSettings, StorageType} from '../storage/StorageSettings.js';
-import {ChromeStorageMock, createChromeStorageMock} from './mocks/chromeMocks.js';
+import {StorageFactory} from '../storage/StorageFactory';
+import {StorageSettings, StorageType} from '../storage/StorageSettings';
+import {ChromeStorageMock, createChromeStorageMock} from './mocks/chromeMocks';
 
 // Use type-safe Chrome mocks
 
@@ -44,7 +44,9 @@ describe('Storage System Integration', () => {
   describe('Storage Type Switching', () => {
     it('should switch between sync and local storage types', async () => {
       // Mock the storage type preference loading
-      const mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({storageType: StorageType.SYNC});
+      const mockGet = vi
+        .spyOn(chromeLocalStorage, 'get')
+        .mockResolvedValue({storageType: StorageType.SYNC});
       const mockSet = vi.spyOn(chromeLocalStorage, 'set').mockResolvedValue();
 
       // Initialize storage settings
@@ -74,7 +76,9 @@ describe('Storage System Integration', () => {
 
     it('should persist storage type preference across instances', async () => {
       // Mock initial storage type preference
-      const mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({storageType: StorageType.LOCAL});
+      const mockGet = vi
+        .spyOn(chromeLocalStorage, 'get')
+        .mockResolvedValue({storageType: StorageType.LOCAL});
 
       // Create first instance and initialize
       const settings1 = StorageSettings.getInstance();
@@ -91,7 +95,9 @@ describe('Storage System Integration', () => {
   describe('StorageFactory Integration', () => {
     it('should create correct storage service based on settings', async () => {
       // Mock storage type preference
-      const mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({storageType: StorageType.SYNC});
+      const mockGet = vi
+        .spyOn(chromeLocalStorage, 'get')
+        .mockResolvedValue({storageType: StorageType.SYNC});
 
       await storageSettings.initialize();
 
@@ -110,7 +116,9 @@ describe('Storage System Integration', () => {
     it('should handle storage operations through factory', async () => {
       // Mock storage operations
       const mockSyncSet = vi.spyOn(chromeSyncStorage, 'set').mockResolvedValue(undefined);
-      const mockSyncGet = vi.spyOn(chromeSyncStorage, 'get').mockResolvedValue({testKey: 'testValue'});
+      const mockSyncGet = vi
+        .spyOn(chromeSyncStorage, 'get')
+        .mockResolvedValue({testKey: 'testValue'});
 
       // Set storage type to SYNC
       await storageSettings.setStorageType(StorageType.SYNC);
@@ -141,7 +149,9 @@ describe('Storage System Integration', () => {
 
     it('should handle storage operation errors gracefully', async () => {
       // Mock storage operation failure
-      const mockSet = vi.spyOn(chromeSyncStorage, 'set').mockRejectedValue(new Error('Storage error'));
+      const mockSet = vi
+        .spyOn(chromeSyncStorage, 'set')
+        .mockRejectedValue(new Error('Storage error'));
 
       await storageSettings.setStorageType(StorageType.SYNC);
       const storageService = storageFactory.getStorageService();
@@ -152,11 +162,9 @@ describe('Storage System Integration', () => {
 
     it('should maintain consistency during concurrent operations', async () => {
       // Mock storage operations with delays to test concurrency
-      const mockSet = vi.spyOn(chromeSyncStorage, 'set').mockImplementation(
-        () =>
-          // eslint-disable-next-line no-promise-executor-return
-          new Promise<void>((resolve) => setTimeout(() => resolve(), 10)),
-      );
+      const mockSet = vi
+        .spyOn(chromeSyncStorage, 'set')
+        .mockImplementation(() => new Promise<void>((resolve) => setTimeout(() => resolve(), 10)));
 
       await storageSettings.setStorageType(StorageType.SYNC);
       const storageService = storageFactory.getStorageService();

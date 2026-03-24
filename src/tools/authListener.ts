@@ -1,4 +1,4 @@
-import {ConfigProxy, GenericProxy} from './ConfigStruct';
+import {ConfigProxy, GenericProxy} from './index';
 
 class AuthListener {
   destroyed = false;

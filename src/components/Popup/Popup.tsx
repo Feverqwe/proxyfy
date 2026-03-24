@@ -1,11 +1,10 @@
 import React, {FC, useCallback} from 'react';
 import {Box, Divider, List, ListItemButton, ListItemText, Paper} from '@mui/material';
 import {styled} from '@mui/system';
-import useActualState from '../useActualState';
-import useActualProxies from '../useActualProxies';
-import {ConfigProxy} from '../../tools/ConfigStruct';
+import {useActualProxies, useActualState} from '../index';
+import {ConfigProxy} from '../../tools/index';
 import {AUTH_SUPPORTED} from '../../constants';
-import type {MenuItem} from '../../types/events';
+import type {MenuItem} from '../../types/index';
 
 const MyListItemButton = styled(ListItemButton)({
   '&.active': {

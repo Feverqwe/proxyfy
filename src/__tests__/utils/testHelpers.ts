@@ -117,7 +117,9 @@ export const Assertions = {
       throw new Error('Function did not throw');
     } catch (error) {
       if (errorType && !(error instanceof errorType)) {
-        throw new Error(`Expected error of type ${errorType.name}, but got ${error?.constructor?.name}`);
+        throw new Error(
+          `Expected error of type ${errorType.name}, but got ${error?.constructor?.name}`,
+        );
       }
       if (message && error instanceof Error && error.message !== message) {
         throw new Error(`Expected error message "${message}", but got "${error.message}"`);
@@ -134,7 +136,7 @@ export const Assertions = {
       return false;
     }
 
-    return properties.every(prop => prop in (obj as any));
+    return properties.every((prop) => prop in (obj as any));
   },
 };
 
