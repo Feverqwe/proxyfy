@@ -34,15 +34,15 @@ import InfoIcon from '@mui/icons-material/Info';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {styled} from '@mui/system';
-import getConfig from '../../../../tools/getConfig.js';
-import {StorageFactory} from '../../../../storage/StorageFactory.js';
+import getConfig from '../../../../tools/getConfig';
+import {StorageFactory} from '../../../../storage/StorageFactory';
 import Header from '../../../Header';
 import ConfigStruct, {
   ConfigProxy,
   ProxyPattern,
   ProxyPatternType,
-} from '../../../../tools/ConfigStruct.js';
-import {configToStorageItems} from '../../../../tools/storageUtils.js';
+} from '../../../../tools/ConfigStruct';
+import {configToStorageItems} from '../../../../tools/storageUtils';
 import CopyIcon from '../../CopyIcon';
 import splitMultiPattern from '../../../../tools/splitMultiPattern';
 import getObjectId from '../../../../tools/getObjectId';

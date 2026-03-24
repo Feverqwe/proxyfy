@@ -2,7 +2,7 @@
  * Storage Settings Manager
  * Manages the storage type preference and persistence
  */
-import {isValidStorageKey} from '../types/storage.js';
+import {isValidStorageKey} from '../types/storage';
 
 export enum StorageType {
   SYNC = 'sync',

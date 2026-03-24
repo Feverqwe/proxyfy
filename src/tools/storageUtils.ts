@@ -3,9 +3,9 @@
  * Provides type-safe conversions between application types and storage types
  */
 
-import type {Config} from './ConfigStruct.js';
-import {DirectProxyType, GenericProxyType} from './ConfigStruct.js';
-import type {StorageSetItems} from '../types/storage.js';
+import type {Config} from './ConfigStruct';
+import {DirectProxyType, GenericProxyType} from './ConfigStruct';
+import type {StorageSetItems} from '../types/storage';
 
 /**
  * Converts a Config object to a storage-compatible object

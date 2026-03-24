@@ -2,8 +2,8 @@
  * Local Storage Service Implementation
  * Wrapper around chrome.storage.local
  */
-import {StorageService} from './StorageService.js';
-import type {StorageKeys, StorageSetItems} from '../types/storage.js';
+import {StorageService} from './StorageService';
+import type {StorageKeys, StorageSetItems} from '../types/storage';
 
 export class LocalStorageService implements StorageService {
   /**

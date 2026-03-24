@@ -2,7 +2,7 @@
  * Storage Service Interface
  * Defines a unified interface for storage operations
  */
-import type {StorageGetResult, StorageKeys, StorageSetItems} from '../types/storage.js';
+import type {StorageGetResult, StorageKeys, StorageSetItems} from '../types/storage';
 
 export interface StorageService {
   /**

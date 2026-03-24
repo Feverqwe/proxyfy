@@ -12,8 +12,8 @@ import {
 } from '@mui/material';
 import {useLocation, useNavigate} from 'react-router';
 import {Link} from 'react-router-dom';
-import getConfig from '../../../../tools/getConfig.js';
-import {StorageFactory} from '../../../../storage/StorageFactory.js';
+import getConfig from '../../../../tools/getConfig';
+import {StorageFactory} from '../../../../storage/StorageFactory';
 import Header from '../../../Header';
 import ConfigStruct, {
   ConfigProxy,
@@ -21,8 +21,8 @@ import ConfigStruct, {
   DirectProxyType,
   GenericProxyType,
   ProxyPattern,
-} from '../../../../tools/ConfigStruct.js';
-import {configToStorageItems} from '../../../../tools/storageUtils.js';
+} from '../../../../tools/ConfigStruct';
+import {configToStorageItems} from '../../../../tools/storageUtils';
 import getId from '../../../../tools/getId';
 import getObjectId from '../../../../tools/getObjectId';
 import {localhostPresets, matchAllPresets} from '../Patterns/Patterns';
