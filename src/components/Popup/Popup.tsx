@@ -88,9 +88,9 @@ const Popup = () => {
           );
         })}
         <Divider />
-        <ListItem component="a" href="./options.html" target="_blank">
+        <ListItemButton href="./options.html" target="_blank">
           <ListItemText primary="Options" />
-        </ListItem>
+        </ListItemButton>
       </List>
     </Box>
   );

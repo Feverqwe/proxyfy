@@ -118,7 +118,7 @@ const StorageSettings: FC = () => {
                   Choose the default color for extension icons when no proxy-specific color is set
                 </FormHelperText>
                 <MyColorInput
-                  label="Default Icon Color"
+                  label=""
                   defaultValue={defaultIconColor}
                   onChange={handleDefaultIconColorChange}
                   name="defaultIconColor"

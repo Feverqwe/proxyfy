@@ -117,12 +117,12 @@ const ProxyList: FC = () => {
       <Header title="Options" />
       <Box component={Paper} m={2}>
         <Grid container>
-          <Grid width={STYLE.menu.width}>
+          <Grid>
             <Box m={2}>
               <Menu />
             </Box>
           </Grid>
-          <Grid size={{xs: 12}}>
+          <Grid flexGrow={1}>
             <Box m={2} minHeight={STYLE.mainBox.minHeight}>
               <ProxySelect />
               <Grid container direction="column">
@@ -130,7 +130,7 @@ const ProxyList: FC = () => {
                   const isFirst = index === 0;
                   const isLast = index === proxies.length - 1;
                   return (
-                    <Grid component="div" key={proxy.id}>
+                    <Grid key={proxy.id}>
                       <ProxyItem
                         proxy={proxy}
                         isFirst={isFirst}
@@ -211,14 +211,14 @@ const ProxyItem: FC<ProxyItemProps> = ({
   );
 
   return (
-    <Grid container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
-      <Grid width={STYLE.colorCell.width}>
+    <Grid container spacing={1} direction="row" justifyContent="space-between" alignItems="center">
+      <Grid>
         <ColorIcon color={proxy.color} />
       </Grid>
-      <Grid size={{xs: 6}}>{proxy.title}</Grid>
-      <Grid size={{xs: 6}}>{'host' in proxy ? proxy.host : ''}</Grid>
-      <Grid width={STYLE.enabledCell.width}>
-        <Grid container alignItems="center" justifyContent="space-around">
+      <Grid flexGrow={1}>{proxy.title}</Grid>
+      <Grid flexGrow={1}>{'host' in proxy ? proxy.host : ''}</Grid>
+      <Grid>
+        <Grid container spacing={1} alignItems="center" justifyContent="space-around">
           <Grid>
             <Checkbox
               color="primary"
@@ -239,7 +239,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
               Edit
             </Button>
           </Grid>
-          <Grid component="div">
+          <Grid>
             <Button
               component={Link}
               to={`/patterns?${new URLSearchParams({
@@ -252,22 +252,22 @@ const ProxyItem: FC<ProxyItemProps> = ({
               Patterns
             </Button>
           </Grid>
-          <Grid component="div">
+          <Grid>
             <IconButton onClick={handleClone} size="small">
               <CopyIcon fontSize="small" />
             </IconButton>
           </Grid>
-          <Grid component="div">
+          <Grid>
             <IconButton onClick={handleDelete} size="small">
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Grid>
-          <Grid component="div">
+          <Grid>
             <IconButton onClick={handleMoveUp} disabled={isFirst} size="small">
               <ArrowUpwardIcon fontSize="small" />
             </IconButton>
           </Grid>
-          <Grid component="div">
+          <Grid>
             <IconButton onClick={handleMoveDown} disabled={isLast} size="small">
               <ArrowDownwardIcon fontSize="small" />
             </IconButton>

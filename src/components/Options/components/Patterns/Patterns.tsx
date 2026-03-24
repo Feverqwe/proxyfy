@@ -396,8 +396,8 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
             <TableCell className="name-cell">Name</TableCell>
             <TableCell className="pattern-cell">Pattern</TableCell>
             <TableCell className="type-cell">
-              <Grid container alignItems="center">
-                <Grid size={{xs: 12}}>Type</Grid>
+              <Grid container spacing={1} alignItems="center">
+                <Grid>Type</Grid>
                 <Grid>
                   <Tooltip
                     placement="left-start"
