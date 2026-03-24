@@ -42,7 +42,6 @@ import ConfigStruct, {
   ProxyPattern,
   ProxyPatternType,
 } from '../../../../tools/ConfigStruct';
-import {configToStorageItems} from '../../../../tools/storageUtils';
 import CopyIcon from '../../CopyIcon';
 import splitMultiPattern from '../../../../tools/splitMultiPattern';
 import getObjectId from '../../../../tools/getObjectId';
@@ -50,6 +49,7 @@ import Notification from '../../Notification';
 import ActionBox from '../../ActionBox';
 import MyButtonM from '../../MyButtonM';
 import {type MySelectProps} from '../../MySelect';
+import {StorageSetItems} from '../../../../types/storage';
 
 const TableContainerS = styled(TableContainer)(({theme}) => {
   return {
@@ -185,7 +185,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         const storageFactory = StorageFactory.getInstance();
         await storageFactory.initialize();
         const storageService = storageFactory.getStorageService();
-        await storageService.set(configToStorageItems(config));
+        await storageService.set(config);
 
         if (!noRedirect) {
           navigate('/');

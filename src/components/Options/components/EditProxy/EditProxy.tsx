@@ -22,7 +22,6 @@ import ConfigStruct, {
   GenericProxyType,
   ProxyPattern,
 } from '../../../../tools/ConfigStruct';
-import {configToStorageItems} from '../../../../tools/storageUtils';
 import getId from '../../../../tools/getId';
 import getObjectId from '../../../../tools/getObjectId';
 import {localhostPresets, matchAllPresets} from '../Patterns/Patterns';
@@ -252,7 +251,9 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
     const storageFactory = StorageFactory.getInstance();
     await storageFactory.initialize();
     const storageService = storageFactory.getStorageService();
-    await storageService.set(configToStorageItems(config));
+    await storageService.set(config);
+
+    console.log(config);
 
     return changedProxy.id;
   }, [isNew, proxy, refFields]);

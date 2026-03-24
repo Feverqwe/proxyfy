@@ -2,8 +2,6 @@
  * Storage Settings Manager
  * Manages the storage type preference and persistence
  */
-import {isValidStorageKey} from '../types/storage';
-
 export enum StorageType {
   SYNC = 'sync',
   LOCAL = 'local',
@@ -46,7 +44,7 @@ export class StorageSettings {
       if (result[STORAGE_TYPE_KEY] && isValidStorageType(result[STORAGE_TYPE_KEY])) {
         this.storageType = result[STORAGE_TYPE_KEY];
       }
-      if (result[DEFAULT_ICON_COLOR_KEY] && isValidStorageKey(result[DEFAULT_ICON_COLOR_KEY])) {
+      if (typeof result[DEFAULT_ICON_COLOR_KEY] === 'string') {
         this.defaultIconColor = result[DEFAULT_ICON_COLOR_KEY];
       }
     } catch (error) {
