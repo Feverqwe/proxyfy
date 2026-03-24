@@ -22,6 +22,7 @@ type MyColorInputProps = {
   iconType?: string;
   format?: string;
   name: string;
+  onChange?: (color: string) => void;
 };
 
 const MyColorInput: FC<MyColorInputProps> = ({
@@ -30,6 +31,7 @@ const MyColorInput: FC<MyColorInputProps> = ({
   iconType = 'circle',
   format = 'hex',
   name,
+  onChange,
 }) => {
   const [color, setColor] = useState(defaultValue);
   const [showPicker, setShowPicker] = useState(false);
@@ -39,24 +41,32 @@ const MyColorInput: FC<MyColorInputProps> = ({
   const refColorIcon = useRef<HTMLCanvasElement | null>(null);
 
   const handleChangeColor = useCallback(
-    (color) => {
+    (color: any) => {
+      let newColor: string;
       if (format === 'rgba') {
         const {r, g, b, a} = color.rgb;
-        const colorStr = `rgba(${r},${g},${b},${a})`;
-        setColor(colorStr);
+        newColor = `rgba(${r},${g},${b},${a})`;
       } else {
-        setColor(color.hex);
+        newColor = color.hex;
+      }
+      setColor(newColor);
+      if (onChange) {
+        onChange(newColor);
       }
     },
-    [format],
+    [format, onChange],
   );
 
-  const handleChange = useCallback((e) => {
-    setColor(e.target.value);
-  }, []);
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newColor = e.target.value;
+    setColor(newColor);
+    if (onChange) {
+      onChange(newColor);
+    }
+  }, [onChange]);
 
-  const handleClickPick = useCallback((e) => {
-    setAnchorEl(e.currentTarget);
+  const handleClickPick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget as any);
     setShowPicker((r) => !r);
   }, []);
 

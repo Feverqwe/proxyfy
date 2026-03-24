@@ -4,9 +4,11 @@ import AddIcon from '@mui/icons-material/Add';
 import React, {FC, useCallback, useEffect, useRef} from 'react';
 import SaveIcon from '@mui/icons-material/Save';
 import RestoreIcon from '@mui/icons-material/Restore';
+import SettingsIcon from '@mui/icons-material/Settings';
 import downloadBlob from '../../../../tools/downloadBlob';
 import {readBlobAsText} from '../../../../tools/fileReaderPromise';
 import ConfigStruct from '../../../../tools/ConfigStruct';
+import {StorageFactory} from '../../../../storage/StorageFactory';
 
 const Menu: FC = () => {
   const refFileInput = useRef<HTMLInputElement | null>(null);
@@ -24,7 +26,10 @@ const Menu: FC = () => {
         const data = await readBlobAsText(file);
         const storage = JSON.parse(data as string);
         const _ = ConfigStruct.assert(storage);
-        await chrome.storage.sync.set(storage);
+        const storageFactory = StorageFactory.getInstance();
+        await storageFactory.initialize();
+        const storageService = storageFactory.getStorageService();
+        await storageService.set(storage);
         location.reload();
       } catch (err) {
         console.error('Import settings error: %O', err);
@@ -32,10 +37,13 @@ const Menu: FC = () => {
     });
   }, []);
 
-  const handleExportSettings = useCallback(async (e) => {
+  const handleExportSettings = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
-      const storage = await chrome.storage.sync.get();
+      const storageFactory = StorageFactory.getInstance();
+      await storageFactory.initialize();
+      const storageService = storageFactory.getStorageService();
+      const storage = await storageService.get();
       const blob = new Blob([JSON.stringify(storage, null, 2)]);
       downloadBlob(blob, 'proxyfy.json');
     } catch (err) {
@@ -43,7 +51,7 @@ const Menu: FC = () => {
     }
   }, []);
 
-  const handleImportSettings = useCallback((e) => {
+  const handleImportSettings = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     const input = refFileInput.current;
     if (!input) return;
@@ -70,6 +78,12 @@ const Menu: FC = () => {
         </ListItemIcon>
         <ListItemText primary="Import settings" />
         <input ref={refFileInput} type="file" accept=".json" hidden />
+      </ListItemButton>
+      <ListItemButton component={Link} to="/storage">
+        <ListItemIcon>
+          <SettingsIcon />
+        </ListItemIcon>
+        <ListItemText primary="Storage Settings" />
       </ListItemButton>
     </List>
   );

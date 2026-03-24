@@ -8,9 +8,12 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import Header from '../../../Header';
 import getConfig from '../../../../tools/getConfig';
 import ConfigStruct, {ConfigProxy} from '../../../../tools/ConfigStruct';
+import {StorageFactory} from '../../../../storage/StorageFactory';
 import Menu from '../Menu/Menu';
 import ProxySelect from '../../ProxySelect';
 import ColorIcon from '../../ColorIcon';
+import CopyIcon from '../../CopyIcon';
+import getId from '../../../../tools/getId';
 
 const STYLE = {
   mainBox: {
@@ -23,7 +26,7 @@ const STYLE = {
     width: '32px',
   },
   enabledCell: {
-    width: '300px',
+    width: '350px',
   },
 };
 
@@ -47,7 +50,10 @@ const ProxyList: FC = () => {
   const saveProxies = useCallback(
     async (newProxies: ConfigProxy[]) => {
       const _ = ConfigStruct.assert({proxies: newProxies});
-      await chrome.storage.sync.set({proxies: newProxies});
+      const storageFactory = StorageFactory.getInstance();
+      await storageFactory.initialize();
+      const storageService = storageFactory.getStorageService();
+      await storageService.set({proxies: newProxies});
       await fetchProxies();
     },
     [fetchProxies],
@@ -93,17 +99,30 @@ const ProxyList: FC = () => {
     [proxies, saveProxies],
   );
 
+  const handleClone = useCallback(
+    async (proxy: ConfigProxy) => {
+      const newProxies = proxies.slice(0);
+      const clone = JSON.parse(JSON.stringify(proxy)) as ConfigProxy;
+      clone.id = getId();
+      clone.title = `Copy of ${proxy.title}`;
+      newProxies.push(clone);
+
+      await saveProxies(newProxies);
+    },
+    [proxies, saveProxies],
+  );
+
   return (
     <>
       <Header title="Options" />
       <Box component={Paper} m={2}>
         <Grid container>
-          <Grid item width={STYLE.menu.width}>
+          <Grid width={STYLE.menu.width}>
             <Box m={2}>
               <Menu />
             </Box>
           </Grid>
-          <Grid item xs>
+          <Grid size={{xs: 12}}>
             <Box m={2} minHeight={STYLE.mainBox.minHeight}>
               <ProxySelect />
               <Grid container direction="column">
@@ -111,7 +130,7 @@ const ProxyList: FC = () => {
                   const isFirst = index === 0;
                   const isLast = index === proxies.length - 1;
                   return (
-                    <Grid item key={proxy.id}>
+                    <Grid component="div" key={proxy.id}>
                       <ProxyItem
                         proxy={proxy}
                         isFirst={isFirst}
@@ -119,6 +138,7 @@ const ProxyList: FC = () => {
                         onDelete={handleProxyDelete}
                         onMove={handleMove}
                         onEnabledChange={handleEnabledChange}
+                        onClone={handleClone}
                       />
                     </Grid>
                   );
@@ -139,6 +159,7 @@ interface ProxyItemProps {
   onDelete: (proxy: ConfigProxy) => unknown;
   onMove: (proxy: ConfigProxy, pos: number) => unknown;
   onEnabledChange: (state: boolean, proxy: ConfigProxy) => unknown;
+  onClone: (proxy: ConfigProxy) => unknown;
 }
 
 const ProxyItem: FC<ProxyItemProps> = ({
@@ -148,9 +169,10 @@ const ProxyItem: FC<ProxyItemProps> = ({
   onDelete,
   onMove,
   onEnabledChange,
+  onClone,
 }) => {
   const handleDelete = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       onDelete(proxy);
     },
@@ -158,7 +180,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
   );
 
   const handleMoveUp = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       onMove(proxy, -1);
     },
@@ -166,7 +188,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
   );
 
   const handleMoveDown = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       onMove(proxy, 1);
     },
@@ -174,33 +196,37 @@ const ProxyItem: FC<ProxyItemProps> = ({
   );
 
   const handleEnabledChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       onEnabledChange(e.target.checked, proxy);
     },
     [proxy, onEnabledChange],
   );
 
+  const handleClone = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      onClone(proxy);
+    },
+    [proxy, onClone],
+  );
+
   return (
     <Grid container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
-      <Grid item width={STYLE.colorCell.width}>
+      <Grid width={STYLE.colorCell.width}>
         <ColorIcon color={proxy.color} />
       </Grid>
-      <Grid item xs>
-        {proxy.title}
-      </Grid>
-      <Grid item xs>
-        {'host' in proxy ? proxy.host : ''}
-      </Grid>
-      <Grid item width={STYLE.enabledCell.width}>
+      <Grid size={{xs: 6}}>{proxy.title}</Grid>
+      <Grid size={{xs: 6}}>{'host' in proxy ? proxy.host : ''}</Grid>
+      <Grid width={STYLE.enabledCell.width}>
         <Grid container alignItems="center" justifyContent="space-around">
-          <Grid item>
+          <Grid>
             <Checkbox
               color="primary"
               defaultChecked={proxy.enabled}
               onChange={handleEnabledChange}
             />
           </Grid>
-          <Grid item>
+          <Grid>
             <Button
               component={Link}
               to={`/proxy?${new URLSearchParams({
@@ -213,7 +239,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
               Edit
             </Button>
           </Grid>
-          <Grid item>
+          <Grid component="div">
             <Button
               component={Link}
               to={`/patterns?${new URLSearchParams({
@@ -226,17 +252,22 @@ const ProxyItem: FC<ProxyItemProps> = ({
               Patterns
             </Button>
           </Grid>
-          <Grid item>
+          <Grid component="div">
+            <IconButton onClick={handleClone} size="small">
+              <CopyIcon fontSize="small" />
+            </IconButton>
+          </Grid>
+          <Grid component="div">
             <IconButton onClick={handleDelete} size="small">
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Grid>
-          <Grid item>
+          <Grid component="div">
             <IconButton onClick={handleMoveUp} disabled={isFirst} size="small">
               <ArrowUpwardIcon fontSize="small" />
             </IconButton>
           </Grid>
-          <Grid item>
+          <Grid component="div">
             <IconButton onClick={handleMoveDown} disabled={isLast} size="small">
               <ArrowDownwardIcon fontSize="small" />
             </IconButton>

@@ -35,6 +35,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {styled} from '@mui/system';
 import getConfig from '../../../../tools/getConfig';
+import {StorageFactory} from '../../../../storage/StorageFactory';
 import Header from '../../../Header';
 import ConfigStruct, {
   ConfigProxy,
@@ -153,18 +154,18 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   const refBlackRules = useRef<PatternListHandler | null>(null);
   const [notify, setNotify] = useState<{text: string} | null>(null);
 
-  const handleNewWhite = useCallback((e) => {
+  const handleNewWhite = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     refWhiteRules.current?.addRule();
   }, []);
 
-  const handleNewBlack = useCallback((e) => {
+  const handleNewBlack = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     refBlackRules.current?.addRule();
   }, []);
 
   const handleSave = useCallback(
-    async (e, noRedirect = false) => {
+    async (e: React.MouseEvent, noRedirect = false) => {
       e.preventDefault();
       const whitePatterns = refWhiteRules.current?.getPatterns() || [];
       const blackPatterns = refBlackRules.current?.getPatterns() || [];
@@ -179,7 +180,10 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         existsProxy.whitePatterns = whitePatterns;
         existsProxy.blackPatterns = blackPatterns;
         const _ = ConfigStruct.assert(config);
-        await chrome.storage.sync.set(config);
+        const storageFactory = StorageFactory.getInstance();
+        await storageFactory.initialize();
+        const storageService = storageFactory.getStorageService();
+        await storageService.set(config);
 
         if (!noRedirect) {
           navigate('/');
@@ -201,7 +205,8 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         switch (keyCode) {
           case 83:
             e.preventDefault();
-            handleSave(e, true).then((isSaved) => {
+            const syntheticEvent = new MouseEvent('click') as unknown as React.MouseEvent;
+            handleSave(syntheticEvent, true).then((isSaved) => {
               isSaved && setNotify({text: 'Saved'});
             });
             break;
@@ -213,14 +218,14 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
     };
   }, [handleSave]);
 
-  const handleWhitelistMatchAll = useCallback((e) => {
+  const handleWhitelistMatchAll = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     matchAllPresets.forEach(({name, pattern, type}) => {
       refWhiteRules.current?.addRule(name, pattern, type);
     });
   }, []);
 
-  const handleBlacklistLocalhost = useCallback((e) => {
+  const handleBlacklistLocalhost = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     localhostPresets.forEach(({name, pattern, type}) => {
       refBlackRules.current?.addRule(name, pattern, type);
@@ -232,7 +237,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
       <Header title="Edit patterns" />
       <Box component={Paper} m={2}>
         <Grid container>
-          <Grid item xs={12}>
+          <Grid size={{xs: 12}}>
             <Alert severity="info">
               Proxyfy ignores everything on this page unless set to "Use enabled proxies by patterns
               and order"
@@ -269,7 +274,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{xs: 12}}>
             <ActionBox mx={2} mb={2}>
               <MyButtonM component={Link} to="/" variant="contained" color="inherit">
                 Cancel
@@ -306,30 +311,26 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
   const refPatterns = useRef(patterns);
   refPatterns.current = patterns;
 
-  useImperativeHandle(
-    ref,
-    () => {
-      return {
-        addRule(name = '', pattern = '', type = ProxyPatternType.Wildcard) {
-          const newPatterns = refPatterns.current.slice(0);
-          newPatterns.push({
-            enabled: true,
-            name,
-            type: type as ProxyPatternType,
-            pattern,
-          });
-          setPatterns((refPatterns.current = newPatterns));
-        },
-        getPatterns() {
-          return refPatterns.current;
-        },
-      };
-    },
-    [],
-  );
+  useImperativeHandle(ref, () => {
+    return {
+      addRule(name = '', pattern = '', type = ProxyPatternType.Wildcard) {
+        const newPatterns = refPatterns.current.slice(0);
+        newPatterns.push({
+          enabled: true,
+          name,
+          type: type as ProxyPatternType,
+          pattern,
+        });
+        setPatterns((refPatterns.current = newPatterns));
+      },
+      getPatterns() {
+        return refPatterns.current;
+      },
+    };
+  }, []);
 
   const handlePatternDelete = useCallback(
-    (pattern) => {
+    (pattern: any) => {
       const newPatterns = patterns.slice(0);
       const pos = newPatterns.indexOf(pattern);
       if (pos === -1) return;
@@ -340,7 +341,7 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
   );
 
   const handlePatternCopy = useCallback(
-    (pattern) => {
+    (pattern: any) => {
       const newPatterns = patterns.slice(0);
       const pos = newPatterns.indexOf(pattern);
       if (pos === -1) return;
@@ -352,7 +353,7 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
   );
 
   const handlePatternMove = useCallback(
-    (pattern, offset) => {
+    (pattern: any, offset: number) => {
       const newPatterns = patterns.slice(0);
       const pos = newPatterns.indexOf(pattern);
       if (pos === -1) return;
@@ -396,10 +397,8 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
             <TableCell className="pattern-cell">Pattern</TableCell>
             <TableCell className="type-cell">
               <Grid container alignItems="center">
-                <Grid item xs>
-                  Type
-                </Grid>
-                <Grid item>
+                <Grid size={{xs: 12}}>Type</Grid>
+                <Grid>
                   <Tooltip
                     placement="left-start"
                     title={helpTooltip}
@@ -457,7 +456,7 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
   }, [pattern.pattern, pattern.type]);
 
   const handleDelete = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       onDelete(pattern);
     },
@@ -465,7 +464,7 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
   );
 
   const handleCopy = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       onCopy(pattern);
     },
@@ -473,7 +472,7 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
   );
 
   const handleMoveUp = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       onMove(pattern, -1);
     },
@@ -481,7 +480,7 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
   );
 
   const handleMoveDown = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       onMove(pattern, 1);
     },
@@ -489,21 +488,21 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
   );
 
   const handleEnabledChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       pattern.enabled = e.target.checked;
     },
     [pattern],
   );
 
   const handleNameChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       pattern.name = e.target.value;
     },
     [pattern],
   );
 
   const handlePatternChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       pattern.pattern = e.target.value;
       setValid(isValidPattern(pattern.pattern, pattern.type));
     },
@@ -511,8 +510,8 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
   );
 
   const handleTypeChange = useCallback(
-    (e) => {
-      pattern.type = e.target.value;
+    (e: any) => {
+      pattern.type = e.target.value as ProxyPatternType;
       setValid(isValidPattern(pattern.pattern, pattern.type));
     },
     [pattern],
@@ -555,29 +554,29 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
       </TableCell>
       <TableCell padding="none" className="enabled-cell">
         <Grid container alignItems="center">
-          <Grid item>
+          <Grid>
             <Checkbox
               className="small-checkbox"
               onChange={handleEnabledChange}
               defaultChecked={origPattern.enabled}
             />
           </Grid>
-          <Grid item>
+          <Grid>
             <IconButton onClick={handleMoveUp} disabled={isFirst} size="small">
               <ArrowUpwardIcon fontSize="small" />
             </IconButton>
           </Grid>
-          <Grid item>
+          <Grid>
             <IconButton onClick={handleMoveDown} disabled={isLast} size="small">
               <ArrowDownwardIcon fontSize="small" />
             </IconButton>
           </Grid>
-          <Grid item>
+          <Grid>
             <IconButton onClick={handleCopy} size="small">
               <CopyIcon fontSize="small" />
             </IconButton>
           </Grid>
-          <Grid item>
+          <Grid>
             <IconButton onClick={handleDelete} size="small">
               <DeleteIcon fontSize="small" />
             </IconButton>

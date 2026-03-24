@@ -2,7 +2,6 @@ import React, {FC} from 'react';
 import {SvgIcon, SvgIconProps} from '@mui/material';
 
 const CopyIcon: FC<SvgIconProps> = (props) => {
-  // @ts-ignore
   return (
     <SvgIcon {...props}>
       <path d="M0 0h24v24H0z" fill="none" />,

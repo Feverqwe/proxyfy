@@ -33,7 +33,7 @@ const Popup = () => {
   const state = useActualState();
   const proxies = useActualProxies();
 
-  const handleClick = useCallback(async (mode, item: Item | ConfigProxy) => {
+  const handleClick = useCallback(async (mode: string, item: Item | ConfigProxy) => {
     const {id} = item;
 
     if (AUTH_SUPPORTED && (item as GenericProxy).username) {
@@ -88,7 +88,7 @@ const Popup = () => {
           );
         })}
         <Divider />
-        <ListItem button component="a" href="./options.html" target="_blank">
+        <ListItem component="a" href="./options.html" target="_blank">
           <ListItemText primary="Options" />
         </ListItem>
       </List>
@@ -105,7 +105,7 @@ interface ProxyItemProps {
 
 const ProxyItem: FC<ProxyItemProps> = ({item, mode, checked, onClick}) => {
   const handleClick = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       onClick(mode, item);
     },

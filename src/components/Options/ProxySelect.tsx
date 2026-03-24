@@ -14,8 +14,8 @@ const ProxySelect = () => {
   const proxies = useActualProxies();
 
   const handleSelect = useCallback(
-    async (e) => {
-      const {value} = e.target;
+    async (e: any) => {
+      const value = e.target.value as string;
       let proxy;
       let mode;
       if (['pac_script', 'system'].includes(value)) {

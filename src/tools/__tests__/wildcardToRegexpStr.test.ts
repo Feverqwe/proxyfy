@@ -1,7 +1,8 @@
+import {describe, it, expect} from 'vitest';
 import wildcardToRegexpStr from '../wildcardToRegexpStr';
 
 describe('wildcardToRegexpStr', () => {
-  test('all', () => {
+  it('all', () => {
     const results = wildcardToRegexpStr('*');
 
     console.log(results);
@@ -11,7 +12,7 @@ describe('wildcardToRegexpStr', () => {
     expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
   });
 
-  test('subdomain and domain', () => {
+  it('subdomain and domain', () => {
     const results = wildcardToRegexpStr('*.test.com');
 
     console.log(results);
@@ -21,7 +22,7 @@ describe('wildcardToRegexpStr', () => {
     expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
   });
 
-  test('domain only', () => {
+  it('domain only', () => {
     const results = wildcardToRegexpStr('test.com');
 
     console.log(results);
@@ -31,7 +32,7 @@ describe('wildcardToRegexpStr', () => {
     expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(false);
   });
 
-  test('subdomain only', () => {
+  it('subdomain only', () => {
     const results = wildcardToRegexpStr('**.test.com');
 
     console.log(results);
@@ -41,7 +42,7 @@ describe('wildcardToRegexpStr', () => {
     expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
   });
 
-  test('protocol subdomain and domain', () => {
+  it('protocol subdomain and domain', () => {
     const results = wildcardToRegexpStr('*://*.test.com');
 
     console.log(results);
@@ -51,7 +52,7 @@ describe('wildcardToRegexpStr', () => {
     expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
   });
 
-  test('protocol domain only', () => {
+  it('protocol domain only', () => {
     const results = wildcardToRegexpStr('*://test.com');
 
     console.log(results);
@@ -61,7 +62,7 @@ describe('wildcardToRegexpStr', () => {
     expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(false);
   });
 
-  test('protocol subdomain only', () => {
+  it('protocol subdomain only', () => {
     const results = wildcardToRegexpStr('*://**.test.com');
 
     console.log(results);
@@ -71,7 +72,7 @@ describe('wildcardToRegexpStr', () => {
     expect(new RegExp(results.join('|')).test('http://a.test.com')).toBe(true);
   });
 
-  test('http protocol only', () => {
+  it('http protocol only', () => {
     const results = wildcardToRegexpStr('http://test.com');
 
     console.log(results);

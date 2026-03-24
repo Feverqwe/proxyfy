@@ -13,6 +13,7 @@ import {
 import {useNavigate, useLocation} from 'react-router';
 import {Link} from 'react-router-dom';
 import getConfig from '../../../../tools/getConfig';
+import {StorageFactory} from '../../../../storage/StorageFactory';
 import Header from '../../../Header';
 import ConfigStruct, {
   DefaultProxyStruct,
@@ -246,7 +247,10 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
       config.proxies.splice(pos, 1, changedProxy as ConfigProxy);
     }
     const _ = ConfigStruct.assert(config);
-    await chrome.storage.sync.set(config);
+    const storageFactory = StorageFactory.getInstance();
+    await storageFactory.initialize();
+    const storageService = storageFactory.getStorageService();
+    await storageService.set(config);
 
     return changedProxy.id;
   }, [isNew, proxy, refFields]);
@@ -278,17 +282,17 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
     };
   }, [saveForm, isNew, navigate]);
 
-  const handleChangeType = useCallback((e) => {
-    const {value} = e.target;
-    setType(value);
+  const handleChangeType = useCallback((e: any) => {
+    const value = e.target.value;
+    setType(value as GenericProxyType | DirectProxyType);
   }, []);
 
-  const handleSubmit = useCallback((e) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
   }, []);
 
   const handleSave = useCallback(
-    async (e) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       try {
         await saveForm();
@@ -301,7 +305,7 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
   );
 
   const handleSaveAndEditPatterns = useCallback(
-    async (e) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       try {
         const id = await saveForm();
@@ -314,7 +318,7 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
   );
 
   const handleSaveAndAddAnother = useCallback(
-    async (e) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       try {
         await saveForm();
@@ -336,7 +340,7 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
       <Box component={Paper} m={2}>
         <form ref={refForm} onSubmit={handleSubmit}>
           <Grid container>
-            <Grid item xs={6}>
+            <Grid size={{xs: 6}}>
               <Box m={2}>
                 <MyInput label="Title (optional)" placeholder="title" {...addField('title')} />
                 <MyColorInput label="Icon color" iconType="logo" {...addField('color')} />
@@ -380,7 +384,7 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
                 )}
               </Box>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{xs: 6}}>
               <Box m={2}>
                 <MySelect onChange={handleChangeType} label="Proxy type" {...addField('type')}>
                   <MenuItem value="http">HTTP</MenuItem>
@@ -424,7 +428,7 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
                 )}
               </Box>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{xs: 12}}>
               <ActionBox mx={2} mb={2}>
                 <MyButtonM component={Link} to="/" variant="contained" color="inherit">
                   Cancel

@@ -1,12 +1,16 @@
 import {Config, DefaultConfigStruct} from './ConfigStruct';
+import {StorageFactory} from '../storage/StorageFactory';
 
 async function getConfig() {
-  const storage = await chrome.storage.sync.get();
+  const storageFactory = StorageFactory.getInstance();
+  await storageFactory.initialize();
+  const storageService = storageFactory.getStorageService();
+
   try {
+    const storage = await storageService.get();
     return DefaultConfigStruct.create(storage) as Config;
   } catch (err) {
     console.error('Validate config error: %O', err);
-    console.error('Config: %s', JSON.stringify(storage));
     return DefaultConfigStruct.create({}) as Config;
   }
 }

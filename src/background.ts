@@ -8,9 +8,11 @@ import {
 } from './tools/ConfigStruct';
 import getConfig from './tools/getConfig';
 import AuthListener from './tools/authListener';
-import ColorArray = chrome.action.ColorArray;
+import {StorageFactory} from './storage/StorageFactory';
+import {StorageSettings, StorageType} from './storage/StorageSettings';
 import {asyncResponse, chromeProxySettingsGet} from './tools/chromeApi';
 import {AUTH_SUPPORTED} from './constants';
+import {LocalStorageService} from './storage/LocalStorageService';
 
 export type PacScriptPattern = Pick<ProxyPattern, 'type' | 'pattern'>; //  | 'protocol'
 
@@ -48,16 +50,27 @@ async function init() {
     }
   });
 
-  chrome.storage.onChanged.addListener((changes, areaName) => {
-    switch (areaName) {
-      case 'sync': {
-        if (changes.proxies) {
-          applyConfig().catch((err) => {
-            console.error('applyConfig error: %O', err);
-          });
-        }
-        break;
-      }
+  chrome.storage.onChanged.addListener(async (changes, areaName) => {
+    const storageFactory = StorageFactory.getInstance();
+    await storageFactory.initialize();
+
+    if (areaName === 'local' && changes.storageType) {
+      return;
+    }
+
+    const currentStorageType = storageFactory.getCurrentStorageType();
+    const activeAreaName = currentStorageType === StorageType.SYNC ? 'sync' : 'local';
+
+    if (areaName === activeAreaName && changes.proxies) {
+      applyConfig().catch((err) => {
+        console.error('applyConfig error: %O', err);
+      });
+    }
+
+    if (areaName === 'local' && changes.defaultIconColor) {
+      syncUiState().catch((err) => {
+        console.error('syncUiState error: %O', err);
+      });
     }
   });
 
@@ -97,6 +110,10 @@ async function syncUiState() {
   let iconColor;
   let newAuthListener: AuthListener | null = null;
 
+  const storageSettings = StorageSettings.getInstance();
+  await storageSettings.initialize();
+  const defaultIconColor = storageSettings.getDefaultIconColor();
+
   if (state) {
     switch (state.mode) {
       case 'direct':
@@ -132,7 +149,7 @@ async function syncUiState() {
         break;
       }
       case 'pac_script': {
-        iconColor = '#0a77e5';
+        iconColor = defaultIconColor;
         if (AUTH_SUPPORTED) {
           newAuthListener = new AuthListener(config.proxies);
         }
@@ -156,7 +173,7 @@ async function syncUiState() {
         text: badgeText,
       }),
       chrome.action.setBadgeBackgroundColor({
-        color: badgeColor as ColorArray,
+        color: badgeColor as [number, number, number, number],
       }),
       chrome.action.setIcon({
         imageData: {
@@ -206,13 +223,13 @@ async function setProxy(mode: string, id?: string) {
   switch (mode) {
     case 'system': {
       value = {
-        mode: 'system',
+        mode: 'system' as const,
       };
       break;
     }
     case 'auto_detect': {
       value = {
-        mode: 'auto_detect',
+        mode: 'auto_detect' as const,
       };
       break;
     }
@@ -224,13 +241,14 @@ async function setProxy(mode: string, id?: string) {
       }
       if (proxy) {
         if (proxy.type === 'direct') {
-          await chrome.storage.local.set({lastDirectId: proxy.id});
+          const localService = new LocalStorageService();
+          await localService.set({lastDirectId: proxy.id});
           value = {
-            mode: 'direct',
+            mode: 'direct' as const,
           };
         } else {
           value = {
-            mode: 'fixed_servers',
+            mode: 'fixed_servers' as const,
             rules: {
               singleProxy: {
                 scheme: proxy.type,
@@ -246,7 +264,7 @@ async function setProxy(mode: string, id?: string) {
     }
     case 'pac_script': {
       value = {
-        mode: 'pac_script',
+        mode: 'pac_script' as const,
         pacScript: {
           data: await getPacScript(config.proxies),
           mandatory: true,
@@ -279,9 +297,8 @@ async function getCurrentState() {
 
   const result: {mode: string; id?: string} = {mode};
   if (mode === 'direct') {
-    const {lastDirectId} = (await chrome.storage.local.get('lastDirectId')) as {
-      lastDirectId?: string;
-    };
+    const localService = new LocalStorageService();
+    const {lastDirectId} = await localService.get('lastDirectId');
     result.id = lastDirectId;
   } else if (mode === 'fixed_servers' && rules && rules.bypassList) {
     rules.bypassList.some((pattern: string) => {
