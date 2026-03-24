@@ -8,7 +8,7 @@ import {
   getConfig,
   getId,
   ProxyPatternType,
-} from '../../../../../tools/index.ts';
+} from '../../../../../tools/index';
 import {StorageFactory} from '../../../../../storage/index';
 import {localhostPresets, matchAllPresets} from '../../Patterns/index';
 import {ChangedProxy, FieldType} from '../types';

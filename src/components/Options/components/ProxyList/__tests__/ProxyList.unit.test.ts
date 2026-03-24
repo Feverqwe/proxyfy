@@ -10,7 +10,7 @@ import {
   DirectProxyType,
   GenericProxyType,
   ProxyPatternType,
-} from '../../../../../tools/ConfigStruct.ts';
+} from '../../../../../tools/ConfigStruct';
 import getId from '../../../../../tools/getId';
 
 // Mock the dependencies

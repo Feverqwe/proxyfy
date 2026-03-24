@@ -1,22 +1,22 @@
 // Tools exports
 
 // Default exports
-export {default as authListener} from './authListener.ts';
-export {default as ConfigStruct} from './ConfigStruct.ts';
-export {default as downloadBlob} from './downloadBlob.ts';
-export {default as getCircleIcon} from './getCircleIcon.ts';
-export {default as getConfig} from './getConfig.ts';
-export {default as getExtensionIcon} from './getExtensionIcon.ts';
-export {default as getId} from './getId.ts';
-export {default as getObjectId} from './getObjectId.ts';
-export {default as getRandomInt} from './getRandomInt.ts';
-export {default as getUrlFromImageData} from './getUrlFromImageData.ts';
-export {default as splitMultiPattern} from './splitMultiPattern.ts';
-export {default as wildcardToRegexpStr} from './wildcardToRegexpStr.ts';
+export {default as authListener} from './authListener';
+export {default as ConfigStruct} from './ConfigStruct';
+export {default as downloadBlob} from './downloadBlob';
+export {default as getCircleIcon} from './getCircleIcon';
+export {default as getConfig} from './getConfig';
+export {default as getExtensionIcon} from './getExtensionIcon';
+export {default as getId} from './getId';
+export {default as getObjectId} from './getObjectId';
+export {default as getRandomInt} from './getRandomInt';
+export {default as getUrlFromImageData} from './getUrlFromImageData';
+export {default as splitMultiPattern} from './splitMultiPattern';
+export {default as wildcardToRegexpStr} from './wildcardToRegexpStr';
 
 // Named exports from modules
-export * from './chromeApi.ts';
-export * from './fileReaderPromise.ts';
+export * from './chromeApi';
+export * from './fileReaderPromise';
 
 // Named exports from ConfigStruct
 export {
@@ -27,6 +27,6 @@ export {
   ProxyPatternStruct,
   DefaultConfigStruct,
   DefaultProxyStruct,
-} from './ConfigStruct.ts';
+} from './ConfigStruct';
 
-export type {ProxyPattern, GenericProxy, DirectProxy, ConfigProxy, Config} from './ConfigStruct.ts';
+export type {ProxyPattern, GenericProxy, DirectProxy, ConfigProxy, Config} from './ConfigStruct';

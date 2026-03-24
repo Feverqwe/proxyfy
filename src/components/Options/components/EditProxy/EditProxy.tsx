@@ -6,7 +6,7 @@ import {
   getConfig,
   getObjectId,
   getRandomInt,
-} from '../../../../tools/index.ts';
+} from '../../../../tools/index';
 import {badgeColors} from './constants';
 import ProxyForm from './components/ProxyForm';
 

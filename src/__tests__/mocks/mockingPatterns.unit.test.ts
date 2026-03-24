@@ -13,7 +13,7 @@ import {
   MockDataGenerators,
   MockStorageFactory,
   MockStorageService,
-} from './storageMocks.ts';
+} from './storageMocks';
 import {StorageType} from '../../storage/StorageSettings';
 
 describe('Type-Safe Mocking Patterns', () => {

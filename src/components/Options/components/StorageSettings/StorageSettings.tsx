@@ -13,7 +13,7 @@ import {
 import {
   StorageFactory,
   StorageSettings as StorageSettingsManager,
-} from '../../../../storage/index.ts';
+} from '../../../../storage/index';
 import {StorageType} from '../../../../storage/StorageSettings';
 import {Header, MyColorInput} from '../../../index';
 

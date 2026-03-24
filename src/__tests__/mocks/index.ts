@@ -4,5 +4,5 @@
  * Exports all mocking utilities for use in tests.
  */
 
-export * from './chromeMocks.ts';
-export * from './storageMocks.ts';
+export * from './chromeMocks';
+export * from './storageMocks';
