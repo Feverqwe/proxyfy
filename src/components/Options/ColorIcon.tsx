@@ -1,6 +1,5 @@
 import React, {FC, useMemo} from 'react';
-import getExtensionIcon from '../../tools/getExtensionIcon';
-import getUrlFromImageData from '../../tools/getUrlFromImageData';
+import {getExtensionIcon, getUrlFromImageData} from '../../tools/index';
 
 const colorIconStyle = {
   display: 'inline-block',

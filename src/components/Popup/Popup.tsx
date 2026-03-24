@@ -1,10 +1,10 @@
 import React, {FC, useCallback} from 'react';
-import {Box, Divider, List, ListItem, ListItemButton, ListItemText, Paper} from '@mui/material';
+import {Box, Divider, List, ListItemButton, ListItemText, Paper} from '@mui/material';
 import {styled} from '@mui/system';
-import useActualState from '../useActualState';
-import useActualProxies from '../useActualProxies';
-import {ConfigProxy, GenericProxy} from '../../tools/ConfigStruct';
+import {useActualProxies, useActualState} from '../index';
+import {ConfigProxy} from '../../tools/index';
 import {AUTH_SUPPORTED} from '../../constants';
+import type {MenuItem} from '../../types/index';
 
 const MyListItemButton = styled(ListItemButton)({
   '&.active': {
@@ -17,13 +17,9 @@ const MyListItemButton = styled(ListItemButton)({
   },
 });
 
-interface Item {
-  id?: string;
-  title: string;
-  mode: string;
-}
+// Using MenuItem type from events.ts
 
-const defaultItems = [
+const defaultItems: MenuItem[] = [
   {title: 'Use enabled proxies by patterns and order', mode: 'pac_script'},
   /* {title: 'Off (use auto detect)', mode: 'auto_detect'}, */
   {title: 'Off (use system settings)', mode: 'system'},
@@ -33,10 +29,10 @@ const Popup = () => {
   const state = useActualState();
   const proxies = useActualProxies();
 
-  const handleClick = useCallback(async (mode, item: Item | ConfigProxy) => {
+  const handleClick = useCallback(async (mode: string, item: MenuItem | ConfigProxy) => {
     const {id} = item;
 
-    if (AUTH_SUPPORTED && (item as GenericProxy).username) {
+    if (AUTH_SUPPORTED && 'username' in item && item.username) {
       try {
         await chrome.permissions.request({
           permissions: ['webRequest', 'webRequestAuthProvider'],
@@ -88,24 +84,24 @@ const Popup = () => {
           );
         })}
         <Divider />
-        <ListItem button component="a" href="./options.html" target="_blank">
+        <ListItemButton href="./options.html" target="_blank">
           <ListItemText primary="Options" />
-        </ListItem>
+        </ListItemButton>
       </List>
     </Box>
   );
 };
 
 interface ProxyItemProps {
-  item: Item | ConfigProxy;
+  item: MenuItem | ConfigProxy;
   mode: string;
   checked: boolean;
-  onClick: (mode: string, item: Item | ConfigProxy) => void;
+  onClick: (mode: string, item: MenuItem | ConfigProxy) => void;
 }
 
 const ProxyItem: FC<ProxyItemProps> = ({item, mode, checked, onClick}) => {
   const handleClick = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       e.preventDefault();
       onClick(mode, item);
     },

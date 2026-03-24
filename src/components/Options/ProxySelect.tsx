@@ -1,7 +1,7 @@
 import React, {FC, useCallback, useMemo} from 'react';
 import {FormControl, MenuItem, Select, SelectProps} from '@mui/material';
-import useActualState from '../useActualState';
-import useActualProxies from '../useActualProxies';
+import {useActualProxies, useActualState} from '../index';
+import type {ProxyMode} from '../../types/index';
 
 const defaultItems = [
   {title: 'Use enabled proxies by patterns and order', mode: 'pac_script'},
@@ -13,12 +13,12 @@ const ProxySelect = () => {
   const state = useActualState();
   const proxies = useActualProxies();
 
-  const handleSelect = useCallback(
+  const handleSelect = useCallback<NonNullable<SelectProps['onChange']>>(
     async (e) => {
-      const {value} = e.target;
+      const value = e.target.value as string;
       let proxy;
-      let mode;
-      if (['pac_script', 'system'].includes(value)) {
+      let mode: ProxyMode;
+      if (value === 'pac_script' || value === 'system') {
         mode = value;
       } else {
         mode = 'fixed_servers';
@@ -47,7 +47,7 @@ const ProxySelect = () => {
     if (state.id) {
       return `_${state.id}`;
     }
-    if (!activeValue && state.mode === 'direct') {
+    if (state.mode === 'direct') {
       const proxy = proxies.find((p) => p.type === 'direct');
       if (proxy) {
         return `_${proxy.id}`;

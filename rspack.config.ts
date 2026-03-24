@@ -1,15 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import {DefinePlugin} from 'webpack';
+import { DefinePlugin, rspack } from '@rspack/core';
 import * as path from 'path';
-// @ts-ignore
-import CopyPlugin from 'copy-webpack-plugin';
-// @ts-ignore
-import HtmlPlugin from 'html-webpack-plugin';
-import {CallableOption} from 'webpack-cli/lib/types';
 
 const outputPath = path.resolve('./dist/chrome/');
 
-const getOptions: CallableOption = (env, argv) => ({
+const getOptions = (env: any, argv: any) => ({
   entry: {
     pacScript: './src/pacScript',
     background: './src/background',
@@ -29,7 +24,17 @@ const getOptions: CallableOption = (env, argv) => ({
       },
       {
         test: /\.[jt]sx?$/,
-        use: 'ts-loader',
+        use: {
+          loader: 'builtin:swc-loader',
+          options: {
+            jsc: {
+              parser: {
+                syntax: 'typescript',
+                tsx: true,
+              },
+            },
+          },
+        },
         exclude: /node_modules/,
       },
     ],
@@ -38,15 +43,18 @@ const getOptions: CallableOption = (env, argv) => ({
     extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
   plugins: [
-    new CopyPlugin({
-      patterns: [{from: './src/assets/manifest.json'}, {from: './src/assets/icons', to: './icons'}],
+    new rspack.CopyRspackPlugin({
+      patterns: [
+        { from: './src/assets/manifest.json' },
+        { from: './src/assets/icons', to: './icons' },
+      ],
     }),
-    new HtmlPlugin({
+    new rspack.HtmlRspackPlugin({
       filename: 'popup.html',
       template: './src/assets/popup.html',
       chunks: ['popup'],
     }),
-    new HtmlPlugin({
+    new rspack.HtmlRspackPlugin({
       filename: 'options.html',
       template: './src/assets/options.html',
       chunks: ['options'],

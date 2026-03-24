@@ -1,4 +1,3 @@
-import ChromeSettingGetResultDetails = chrome.types.ChromeSettingGetResultDetails;
 import ChromeSettingGetDetails = chrome.types.ChromeSettingGetDetails;
 
 export const asyncResponse = (
@@ -14,5 +13,5 @@ export const asyncResponse = (
 };
 
 export async function chromeProxySettingsGet(details: ChromeSettingGetDetails) {
-  return (await chrome.proxy.settings.get(details)) as unknown as ChromeSettingGetResultDetails;
+  return await chrome.proxy.settings.get(details);
 }

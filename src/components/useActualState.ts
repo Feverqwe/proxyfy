@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
+import type {ProxyState} from '../types/index';
 
 const useActualState = () => {
-  const [state, setState] = useState<null | {mode: string; id?: string}>(null);
+  const [state, setState] = useState<null | ProxyState>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -34,7 +35,13 @@ async function getState() {
   const result = await chrome.runtime.sendMessage({
     action: 'get',
   });
-  return result as unknown as null | {mode: string; id?: string};
+
+  if (result && typeof result === 'object' && 'mode' in result && typeof result.mode === 'string') {
+    const state = result as ProxyState;
+    return state;
+  }
+
+  return null;
 }
 
 export default useActualState;

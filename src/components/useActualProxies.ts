@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react';
-import getConfig from '../tools/getConfig';
-import {ConfigProxy} from '../tools/ConfigStruct';
+import {ConfigProxy, getConfig} from '../tools/index';
 
 const useActualProxies = () => {
   const [proxies, setProxies] = useState<ConfigProxy[] | null>(null);

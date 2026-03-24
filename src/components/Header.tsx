@@ -1,7 +1,6 @@
 import React, {FC, useMemo} from 'react';
 import {Box, Grid, Paper, Typography} from '@mui/material';
-import getExtensionIcon from '../tools/getExtensionIcon';
-import getUrlFromImageData from '../tools/getUrlFromImageData';
+import {getExtensionIcon, getUrlFromImageData} from '../tools/index';
 
 interface HeaderProps {
   title: string;
@@ -13,10 +12,10 @@ const Header: FC<HeaderProps> = ({title}) => {
   return (
     <Box component={Paper} mx={2} mt={2} p={1}>
       <Grid container alignItems="center" spacing={2}>
-        <Grid display="flex" item>
+        <Grid>
           <img src={logoUrl} width={50} height={50} alt="Proxyfy" />
         </Grid>
-        <Grid item>
+        <Grid>
           <Typography variant="h5">{title}</Typography>
         </Grid>
       </Grid>

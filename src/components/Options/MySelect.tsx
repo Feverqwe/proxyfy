@@ -1,7 +1,7 @@
 import React, {FC, ReactNode} from 'react';
 import {FormControl, Select, SelectProps, Typography} from '@mui/material';
 
-type MySelectProps = {
+export type MySelectProps = {
   label: ReactNode;
   children: ReactNode;
 } & SelectProps;

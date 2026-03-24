@@ -1,12 +1,17 @@
-import {Config, DefaultConfigStruct} from './ConfigStruct';
+import {Config, DefaultConfigStruct} from './index';
+import {StorageFactory} from '../storage/index';
 
-async function getConfig() {
-  const storage = await chrome.storage.sync.get();
+async function getConfig(): Promise<Config> {
+  const storageFactory = StorageFactory.getInstance();
+  await storageFactory.initialize();
+  const storageService = storageFactory.getStorageService();
+
   try {
+    const storage = await storageService.get();
+    // Use type assertion since DefaultConfigStruct.create should ensure type safety
     return DefaultConfigStruct.create(storage) as Config;
   } catch (err) {
     console.error('Validate config error: %O', err);
-    console.error('Config: %s', JSON.stringify(storage));
     return DefaultConfigStruct.create({}) as Config;
   }
 }

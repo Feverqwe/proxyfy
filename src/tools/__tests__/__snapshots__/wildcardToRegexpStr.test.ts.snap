@@ -1,0 +1,51 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`wildcardToRegexpStr > all 1`] = `
+[
+  "^.*://.*$",
+]
+`;
+
+exports[`wildcardToRegexpStr > domain only 1`] = `
+[
+  "^.*://test\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr > http protocol only 1`] = `
+[
+  "^http://test\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr > protocol domain only 1`] = `
+[
+  "^.*://test\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr > protocol subdomain and domain 1`] = `
+[
+  "^.*://.*\\.test\\.com$",
+  "^.*://test\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr > protocol subdomain only 1`] = `
+[
+  "^.*://.*\\.test\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr > subdomain and domain 1`] = `
+[
+  "^.*://.*\\.test\\.com$",
+  "^.*://test\\.com$",
+]
+`;
+
+exports[`wildcardToRegexpStr > subdomain only 1`] = `
+[
+  "^.*://.*\\.test\\.com$",
+]
+`;

@@ -10,8 +10,8 @@ import {
 } from '@mui/material';
 import ColorizeIcon from '@mui/icons-material/Colorize';
 import {ChromePicker} from 'react-color';
-import getExtensionIcon from '../../tools/getExtensionIcon';
-import getCircleIcon from '../../tools/getCircleIcon';
+import {getCircleIcon, getExtensionIcon} from '../../tools/index';
+import type {ChromePickerColor} from '../../types/index';
 
 const canvasStyle = {width: '24px', height: '24px'};
 const canvasDprSize = 24 * window.devicePixelRatio;
@@ -22,6 +22,7 @@ type MyColorInputProps = {
   iconType?: string;
   format?: string;
   name: string;
+  onChange?: (color: string) => void;
 };
 
 const MyColorInput: FC<MyColorInputProps> = ({
@@ -30,32 +31,44 @@ const MyColorInput: FC<MyColorInputProps> = ({
   iconType = 'circle',
   format = 'hex',
   name,
+  onChange,
 }) => {
   const [color, setColor] = useState(defaultValue);
   const [showPicker, setShowPicker] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const refPickerBody = useRef<HTMLDivElement | null>(null);
   const refPickerBtn = useRef<HTMLButtonElement | null>(null);
   const refColorIcon = useRef<HTMLCanvasElement | null>(null);
 
   const handleChangeColor = useCallback(
-    (color) => {
+    (color: ChromePickerColor) => {
+      let newColor: string;
       if (format === 'rgba') {
         const {r, g, b, a} = color.rgb;
-        const colorStr = `rgba(${r},${g},${b},${a})`;
-        setColor(colorStr);
+        newColor = `rgba(${r},${g},${b},${a})`;
       } else {
-        setColor(color.hex);
+        newColor = color.hex;
+      }
+      setColor(newColor);
+      if (onChange) {
+        onChange(newColor);
       }
     },
-    [format],
+    [format, onChange],
   );
 
-  const handleChange = useCallback((e) => {
-    setColor(e.target.value);
-  }, []);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newColor = e.target.value;
+      setColor(newColor);
+      if (onChange) {
+        onChange(newColor);
+      }
+    },
+    [onChange],
+  );
 
-  const handleClickPick = useCallback((e) => {
+  const handleClickPick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
     setShowPicker((r) => !r);
   }, []);
@@ -64,7 +77,7 @@ const MyColorInput: FC<MyColorInputProps> = ({
     if (!showPicker) return;
     document.addEventListener('click', listener);
     function listener(e: MouseEvent) {
-      const target = e.target as HTMLElement;
+      const target = e.target as Node;
       const body = refPickerBody.current;
       const btn = refPickerBtn.current;
       if (!body || !btn) return;
