@@ -11,7 +11,10 @@ import {
   Typography,
 } from '@mui/material';
 import {StorageFactory} from '../../../../storage/StorageFactory';
-import {StorageSettings as StorageSettingsManager, StorageType} from '../../../../storage/StorageSettings';
+import {
+  StorageSettings as StorageSettingsManager,
+  StorageType,
+} from '../../../../storage/StorageSettings';
 import Header from '../../../Header';
 import MyColorInput from '../../MyColorInput';
 
@@ -49,15 +52,12 @@ const StorageSettings: FC = () => {
     [],
   );
 
-  const handleDefaultIconColorChange = useCallback(
-    async (color: string) => {
-      setDefaultIconColor(color);
+  const handleDefaultIconColorChange = useCallback(async (color: string) => {
+    setDefaultIconColor(color);
 
-      const storageSettings = StorageSettingsManager.getInstance();
-      await storageSettings.setDefaultIconColor(color);
-    },
-    [],
-  );
+    const storageSettings = StorageSettingsManager.getInstance();
+    await storageSettings.setDefaultIconColor(color);
+  }, []);
 
   if (!isInitialized) {
     return (
@@ -110,7 +110,7 @@ const StorageSettings: FC = () => {
                 />
               </RadioGroup>
 
-              <Box sx={{ mt: 3 }}>
+              <Box sx={{mt: 3}}>
                 <Typography variant="h6" gutterBottom>
                   Default Icon Color
                 </Typography>

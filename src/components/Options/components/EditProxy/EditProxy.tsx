@@ -10,25 +10,26 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
-import {useNavigate, useLocation} from 'react-router';
+import {useLocation, useNavigate} from 'react-router';
 import {Link} from 'react-router-dom';
-import getConfig from '../../../../tools/getConfig';
-import {StorageFactory} from '../../../../storage/StorageFactory';
+import getConfig from '../../../../tools/getConfig.js';
+import {StorageFactory} from '../../../../storage/StorageFactory.js';
 import Header from '../../../Header';
 import ConfigStruct, {
-  DefaultProxyStruct,
   ConfigProxy,
-  ProxyPattern,
-  GenericProxyType,
+  DefaultProxyStruct,
   DirectProxyType,
-} from '../../../../tools/ConfigStruct';
+  GenericProxyType,
+  ProxyPattern,
+} from '../../../../tools/ConfigStruct.js';
+import {configToStorageItems} from '../../../../tools/storageUtils.js';
 import getId from '../../../../tools/getId';
 import getObjectId from '../../../../tools/getObjectId';
 import {localhostPresets, matchAllPresets} from '../Patterns/Patterns';
 import MyColorInput from '../../MyColorInput';
 import getRandomInt from '../../../../tools/getRandomInt';
 import Notification from '../../Notification';
-import MySelect from '../../MySelect';
+import MySelect, {type MySelectProps} from '../../MySelect';
 import MyInput from '../../MyInput';
 import ActionBox from '../../ActionBox';
 import MyButtonM from '../../MyButtonM';
@@ -143,7 +144,8 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
       refFields.current.push({name, type});
       const props: {name: string; defaultValue?: string} = {name};
       if ([FieldType.Number, FieldType.String].includes(type) && name in proxy) {
-        props.defaultValue = String(proxy[name as keyof ConfigProxy]);
+        const value = proxy[name as keyof ConfigProxy];
+        props.defaultValue = String(value);
       }
       return props;
     },
@@ -240,17 +242,17 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
       config.proxies.push(changedProxy as ConfigProxy);
     } else {
       const existsProxy = config.proxies.find((p) => p.id === proxy.id);
-      const pos = config.proxies.indexOf(existsProxy as ConfigProxy);
-      if (pos === -1) {
+      if (!existsProxy) {
         throw new Error('Proxy is not found');
       }
+      const pos = config.proxies.indexOf(existsProxy);
       config.proxies.splice(pos, 1, changedProxy as ConfigProxy);
     }
     const _ = ConfigStruct.assert(config);
     const storageFactory = StorageFactory.getInstance();
     await storageFactory.initialize();
     const storageService = storageFactory.getStorageService();
-    await storageService.set(config);
+    await storageService.set(configToStorageItems(config));
 
     return changedProxy.id;
   }, [isNew, proxy, refFields]);
@@ -282,10 +284,13 @@ const ProxyLoaded: FC<ProxyLoadedProps> = ({proxy, onReset}) => {
     };
   }, [saveForm, isNew, navigate]);
 
-  const handleChangeType = useCallback((e: any) => {
-    const value = e.target.value;
-    setType(value as GenericProxyType | DirectProxyType);
-  }, []);
+  const handleChangeType = useCallback<NonNullable<MySelectProps['onChange']>>(
+    (e: Parameters<NonNullable<MySelectProps['onChange']>>[0]) => {
+      const value = e.target.value as GenericProxyType | DirectProxyType;
+      setType(value);
+    },
+    [],
+  );
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();

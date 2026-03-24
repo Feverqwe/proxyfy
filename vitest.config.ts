@@ -21,7 +21,11 @@ export default defineConfig({
     
     // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
     exclude: [
-      '**/node_modules/**'
+      '**/node_modules/**',
+      '**/__tests__/mocks/chromeMocks.ts',
+      '**/__tests__/mocks/storageMocks.ts',
+      '**/__tests__/mocks/index.ts',
+      '**/__tests__/utils/testHelpers.ts'
     ],
     
     // Global configuration

@@ -2,6 +2,8 @@
  * Storage Settings Manager
  * Manages the storage type preference and persistence
  */
+import {isValidStorageKey} from '../types/storage.js';
+
 export enum StorageType {
   SYNC = 'sync',
   LOCAL = 'local',
@@ -10,6 +12,13 @@ export enum StorageType {
 
 const STORAGE_TYPE_KEY = 'storageType';
 const DEFAULT_ICON_COLOR_KEY = 'defaultIconColor';
+
+/**
+ * Type guard to check if a value is a valid StorageType
+ */
+function isValidStorageType(value: unknown): value is StorageType {
+  return typeof value === 'string' && Object.values(StorageType).includes(value as StorageType);
+}
 
 export class StorageSettings {
   private static instance: StorageSettings;
@@ -34,11 +43,11 @@ export class StorageSettings {
   async initialize(): Promise<void> {
     try {
       const result = await chrome.storage.local.get([STORAGE_TYPE_KEY, DEFAULT_ICON_COLOR_KEY]);
-      if (result[STORAGE_TYPE_KEY]) {
-        this.storageType = result[STORAGE_TYPE_KEY] as StorageType;
+      if (result[STORAGE_TYPE_KEY] && isValidStorageType(result[STORAGE_TYPE_KEY])) {
+        this.storageType = result[STORAGE_TYPE_KEY];
       }
-      if (result[DEFAULT_ICON_COLOR_KEY]) {
-        this.defaultIconColor = result[DEFAULT_ICON_COLOR_KEY] as string;
+      if (result[DEFAULT_ICON_COLOR_KEY] && isValidStorageKey(result[DEFAULT_ICON_COLOR_KEY])) {
+        this.defaultIconColor = result[DEFAULT_ICON_COLOR_KEY];
       }
     } catch (error) {
       console.warn('Failed to load storage preferences, using defaults:', error);

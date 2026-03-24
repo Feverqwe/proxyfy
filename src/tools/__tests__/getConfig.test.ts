@@ -1,11 +1,12 @@
 /**
  * Tests for getConfig function
  */
-import {describe, it, expect, beforeEach, vi} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 import getConfig from '../getConfig';
 import {StorageFactory} from '../../storage/StorageFactory';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
 import {DefaultConfigStruct} from '../ConfigStruct';
+import {StorageService} from '../../storage/StorageService.js';
 
 describe('getConfig', () => {
   let storageFactory: StorageFactory;
@@ -26,15 +27,16 @@ describe('getConfig', () => {
   it('should initialize storage factory and get config from storage service', async () => {
     // Mock storage service get method to return empty object
     const mockGet = vi.fn().mockResolvedValue({});
-    const mockStorageService = {
+    const mockStorageService: StorageService = {
       get: mockGet,
       set: vi.fn(),
       remove: vi.fn(),
       clear: vi.fn(),
+      getBytesInUse: vi.fn(),
     };
 
     // Mock storage factory to return our mock service
-    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService as any);
+    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService);
 
     const config = await getConfig();
 
@@ -66,14 +68,15 @@ describe('getConfig', () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockStorageData);
-    const mockStorageService = {
+    const mockStorageService: StorageService = {
       get: mockGet,
       set: vi.fn(),
       remove: vi.fn(),
       clear: vi.fn(),
+      getBytesInUse: vi.fn(),
     };
 
-    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService as any);
+    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService);
 
     const config = await getConfig();
 
@@ -88,14 +91,15 @@ describe('getConfig', () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(invalidStorageData);
-    const mockStorageService = {
+    const mockStorageService: StorageService = {
       get: mockGet,
       set: vi.fn(),
       remove: vi.fn(),
       clear: vi.fn(),
+      getBytesInUse: vi.fn(),
     };
 
-    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService as any);
+    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService);
 
     // Mock console.error to avoid test output noise
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
@@ -114,14 +118,15 @@ describe('getConfig', () => {
     await storageSettings.setStorageType(StorageType.SYNC);
 
     const mockGet = vi.fn().mockResolvedValue({});
-    const mockStorageService = {
+    const mockStorageService: StorageService = {
       get: mockGet,
       set: vi.fn(),
       remove: vi.fn(),
       clear: vi.fn(),
+      getBytesInUse: vi.fn(),
     };
 
-    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService as any);
+    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService);
 
     const config = await getConfig();
 
@@ -132,14 +137,15 @@ describe('getConfig', () => {
     await storageSettings.setStorageType(StorageType.LOCAL);
 
     const mockGet2 = vi.fn().mockResolvedValue({});
-    const mockStorageService2 = {
+    const mockStorageService2: StorageService = {
       get: mockGet2,
       set: vi.fn(),
       remove: vi.fn(),
       clear: vi.fn(),
+      getBytesInUse: vi.fn(),
     };
 
-    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService2 as any);
+    vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService2);
 
     const config2 = await getConfig();
 

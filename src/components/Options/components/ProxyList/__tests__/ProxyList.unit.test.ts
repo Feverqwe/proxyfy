@@ -4,11 +4,11 @@
  * Tests the clone proxy logic without complex UI testing
  */
 
-import {vi, describe, beforeEach, it, expect} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {
   ConfigProxy,
-  GenericProxyType,
   DirectProxyType,
+  GenericProxyType,
   ProxyPatternType,
 } from '../../../../../tools/ConfigStruct.js';
 import getId from '../../../../../tools/getId.js';

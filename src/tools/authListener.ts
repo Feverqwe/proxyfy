@@ -1,4 +1,4 @@
-import {GenericProxy, ConfigProxy} from './ConfigStruct';
+import {ConfigProxy, GenericProxy} from './ConfigStruct';
 
 class AuthListener {
   destroyed = false;
@@ -11,8 +11,9 @@ class AuthListener {
 
   constructor(proxies: ConfigProxy[]) {
     this.proxies = proxies.filter(
-      (proxy) => proxy.type !== 'direct' && Boolean((proxy as GenericProxy).username),
-    ) as GenericProxy[];
+      (proxy): proxy is GenericProxy =>
+        proxy.type !== 'direct' && 'username' in proxy && Boolean(proxy.username),
+    );
     this.isRequired = !!this.proxies.length;
   }
 

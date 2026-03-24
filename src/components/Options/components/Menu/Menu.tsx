@@ -37,7 +37,7 @@ const Menu: FC = () => {
     });
   }, []);
 
-  const handleExportSettings = useCallback(async (e: React.MouseEvent) => {
+  const handleExportSettings = useCallback(async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     try {
       const storageFactory = StorageFactory.getInstance();
@@ -51,7 +51,7 @@ const Menu: FC = () => {
     }
   }, []);
 
-  const handleImportSettings = useCallback((e: React.MouseEvent) => {
+  const handleImportSettings = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     const input = refFileInput.current;
     if (!input) return;

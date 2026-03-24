@@ -2,10 +2,10 @@
  * Storage Factory
  * Creates and manages storage service instances based on settings
  */
-import {StorageService} from './StorageService';
-import {SyncStorageService} from './SyncStorageService';
-import {LocalStorageService} from './LocalStorageService';
-import {StorageSettings, StorageType} from './StorageSettings';
+import {StorageService} from './StorageService.js';
+import {SyncStorageService} from './SyncStorageService.js';
+import {LocalStorageService} from './LocalStorageService.js';
+import {StorageSettings, StorageType} from './StorageSettings.js';
 
 export class StorageFactory {
   private static instance: StorageFactory;

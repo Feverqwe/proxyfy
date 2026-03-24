@@ -2,16 +2,18 @@
  * Storage Service Interface
  * Defines a unified interface for storage operations
  */
+import type {StorageGetResult, StorageKeys, StorageSetItems} from '../types/storage.js';
+
 export interface StorageService {
   /**
    * Gets one or more items from storage
    */
-  get(keys?: string | string[] | Record<string, any> | null): Promise<Record<string, any>>;
+  get(keys?: StorageKeys): Promise<StorageGetResult>;
 
   /**
    * Sets one or more items in storage
    */
-  set(items: Record<string, any>): Promise<void>;
+  set(items: StorageSetItems): Promise<void>;
 
   /**
    * Removes one or more items from storage

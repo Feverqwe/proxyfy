@@ -1,8 +1,8 @@
 /**
  * Tests for StorageSettings class
  */
-import {describe, it, expect, beforeEach, vi, Mock} from 'vitest';
-import {StorageSettings, StorageType} from '../StorageSettings';
+import {beforeEach, describe, expect, it, Mock, vi} from 'vitest';
+import {StorageSettings, StorageType} from '../StorageSettings.js';
 
 describe('StorageSettings', () => {
   let storageSettings: StorageSettings;
@@ -11,7 +11,7 @@ describe('StorageSettings', () => {
     // Clear the singleton instance before each test
     (StorageSettings as any).instance = undefined;
     storageSettings = StorageSettings.getInstance();
-    
+
     // Mock chrome.storage.local
     vi.stubGlobal('chrome', {
       storage: {
@@ -40,15 +40,13 @@ describe('StorageSettings', () => {
       const mockGet = chrome.storage.local.get as Mock;
       mockGet.mockResolvedValue({
         storageType: StorageType.LOCAL,
-        endpointUrl: 'https://example.com/api',
         defaultIconColor: '#ff0000',
       });
 
       await storageSettings.initialize();
 
-      expect(mockGet).toHaveBeenCalledWith(['storageType', 'endpointUrl', 'defaultIconColor']);
+      expect(mockGet).toHaveBeenCalledWith(['storageType', 'defaultIconColor']);
       expect(storageSettings.getStorageType()).toBe(StorageType.LOCAL);
-      expect(storageSettings.getEndpointUrl()).toBe('https://example.com/api');
       expect(storageSettings.getDefaultIconColor()).toBe('#ff0000');
     });
 
@@ -59,7 +57,6 @@ describe('StorageSettings', () => {
       await storageSettings.initialize();
 
       expect(storageSettings.getStorageType()).toBe(StorageType.SYNC);
-      expect(storageSettings.getEndpointUrl()).toBe('');
       expect(storageSettings.getDefaultIconColor()).toBe('#0a77e5');
     });
 
@@ -68,10 +65,9 @@ describe('StorageSettings', () => {
       mockGet.mockRejectedValue(new Error('Storage error'));
 
       await expect(storageSettings.initialize()).resolves.not.toThrow();
-      
+
       // Should still have default values
       expect(storageSettings.getStorageType()).toBe(StorageType.SYNC);
-      expect(storageSettings.getEndpointUrl()).toBe('');
       expect(storageSettings.getDefaultIconColor()).toBe('#0a77e5');
     });
   });
@@ -91,29 +87,14 @@ describe('StorageSettings', () => {
       await storageSettings.setStorageType(StorageType.SYNC);
       expect(storageSettings.isSyncStorage()).toBe(true);
       expect(storageSettings.isLocalStorage()).toBe(false);
-      expect(storageSettings.isEndpointStorage()).toBe(false);
 
       await storageSettings.setStorageType(StorageType.LOCAL);
       expect(storageSettings.isSyncStorage()).toBe(false);
       expect(storageSettings.isLocalStorage()).toBe(true);
-      expect(storageSettings.isEndpointStorage()).toBe(false);
 
       await storageSettings.setStorageType(StorageType.ENDPOINT);
       expect(storageSettings.isSyncStorage()).toBe(false);
       expect(storageSettings.isLocalStorage()).toBe(false);
-      expect(storageSettings.isEndpointStorage()).toBe(true);
-    });
-  });
-
-  describe('endpoint URL management', () => {
-    it('should set and get endpoint URL', async () => {
-      const mockSet = chrome.storage.local.set as Mock;
-      mockSet.mockResolvedValue(undefined);
-
-      await storageSettings.setEndpointUrl('https://api.example.com/storage');
-
-      expect(mockSet).toHaveBeenCalledWith({endpointUrl: 'https://api.example.com/storage'});
-      expect(storageSettings.getEndpointUrl()).toBe('https://api.example.com/storage');
     });
   });
 

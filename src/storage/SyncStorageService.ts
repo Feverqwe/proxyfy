@@ -2,20 +2,21 @@
  * Sync Storage Service Implementation
  * Wrapper around chrome.storage.sync
  */
-import {StorageService} from './StorageService';
+import {StorageService} from './StorageService.js';
+import type {StorageKeys, StorageSetItems} from '../types/storage.js';
 
 export class SyncStorageService implements StorageService {
   /**
    * Gets one or more items from chrome.storage.sync
    */
-  async get(keys?: string | string[] | Record<string, any> | null): Promise<Record<string, any>> {
+  async get(keys?: StorageKeys): Promise<Record<string, unknown>> {
     return chrome.storage.sync.get(keys);
   }
 
   /**
    * Sets one or more items in chrome.storage.sync
    */
-  async set(items: Record<string, any>): Promise<void> {
+  async set(items: StorageSetItems): Promise<void> {
     await chrome.storage.sync.set(items);
   }
 

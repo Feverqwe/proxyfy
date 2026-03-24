@@ -12,6 +12,7 @@ import ColorizeIcon from '@mui/icons-material/Colorize';
 import {ChromePicker} from 'react-color';
 import getExtensionIcon from '../../tools/getExtensionIcon';
 import getCircleIcon from '../../tools/getCircleIcon';
+import type {ChromePickerColor} from '../../types/events';
 
 const canvasStyle = {width: '24px', height: '24px'};
 const canvasDprSize = 24 * window.devicePixelRatio;
@@ -35,13 +36,13 @@ const MyColorInput: FC<MyColorInputProps> = ({
 }) => {
   const [color, setColor] = useState(defaultValue);
   const [showPicker, setShowPicker] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const refPickerBody = useRef<HTMLDivElement | null>(null);
   const refPickerBtn = useRef<HTMLButtonElement | null>(null);
   const refColorIcon = useRef<HTMLCanvasElement | null>(null);
 
   const handleChangeColor = useCallback(
-    (color: any) => {
+    (color: ChromePickerColor) => {
       let newColor: string;
       if (format === 'rgba') {
         const {r, g, b, a} = color.rgb;
@@ -57,16 +58,19 @@ const MyColorInput: FC<MyColorInputProps> = ({
     [format, onChange],
   );
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newColor = e.target.value;
-    setColor(newColor);
-    if (onChange) {
-      onChange(newColor);
-    }
-  }, [onChange]);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newColor = e.target.value;
+      setColor(newColor);
+      if (onChange) {
+        onChange(newColor);
+      }
+    },
+    [onChange],
+  );
 
   const handleClickPick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(e.currentTarget as any);
+    setAnchorEl(e.currentTarget);
     setShowPicker((r) => !r);
   }, []);
 
@@ -74,7 +78,7 @@ const MyColorInput: FC<MyColorInputProps> = ({
     if (!showPicker) return;
     document.addEventListener('click', listener);
     function listener(e: MouseEvent) {
-      const target = e.target as HTMLElement;
+      const target = e.target as Node;
       const body = refPickerBody.current;
       const btn = refPickerBtn.current;
       if (!body || !btn) return;

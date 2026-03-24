@@ -37,7 +37,7 @@ const ProxyList: FC = () => {
     try {
       const {proxies} = await getConfig();
 
-      setProxies(proxies as ConfigProxy[]);
+      setProxies(proxies);
     } catch (err) {
       console.error('getConfig error: %O', err);
     }
@@ -102,7 +102,7 @@ const ProxyList: FC = () => {
   const handleClone = useCallback(
     async (proxy: ConfigProxy) => {
       const newProxies = proxies.slice(0);
-      const clone = JSON.parse(JSON.stringify(proxy)) as ConfigProxy;
+      const clone = JSON.parse(JSON.stringify(proxy));
       clone.id = getId();
       clone.title = `Copy of ${proxy.title}`;
       newProxies.push(clone);

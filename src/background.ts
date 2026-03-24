@@ -247,15 +247,17 @@ async function setProxy(mode: string, id?: string) {
             mode: 'direct' as const,
           };
         } else {
+          // Use type assertion since we know proxy is GenericProxy at this point
+          const genericProxy = proxy as GenericProxy;
           value = {
             mode: 'fixed_servers' as const,
             rules: {
               singleProxy: {
-                scheme: proxy.type,
-                host: (proxy as GenericProxy).host,
-                port: (proxy as GenericProxy).port,
+                scheme: genericProxy.type,
+                host: genericProxy.host,
+                port: genericProxy.port,
               },
-              bypassList: [`${encodeURIComponent(proxy.id)}.proxyfy.localhost`],
+              bypassList: [`${encodeURIComponent(genericProxy.id)}.proxyfy.localhost`],
             },
           };
         }
@@ -299,7 +301,9 @@ async function getCurrentState() {
   if (mode === 'direct') {
     const localService = new LocalStorageService();
     const {lastDirectId} = await localService.get('lastDirectId');
-    result.id = lastDirectId;
+    if (typeof lastDirectId === 'string') {
+      result.id = lastDirectId;
+    }
   } else if (mode === 'fixed_servers' && rules && rules.bypassList) {
     rules.bypassList.some((pattern: string) => {
       const m = /^(.+)\.proxyfy\.localhost/.exec(pattern);

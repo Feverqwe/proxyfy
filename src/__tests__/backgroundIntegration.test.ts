@@ -4,9 +4,10 @@
  * Tests the integration between background script and storage system
  */
 
-import {vi, describe, beforeEach, it, expect} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {StorageFactory} from '../storage/StorageFactory.js';
 import {StorageSettings, StorageType} from '../storage/StorageSettings.js';
+import {ChromeStorageMock, createChromeStorageMock} from './mocks/chromeMocks.js';
 
 // Mock the background script functionality
 const setupBackgroundScript = () => {
@@ -52,9 +53,24 @@ const setupBackgroundScript = () => {
 
 describe('Background Script Integration', () => {
   let backgroundScript: ReturnType<typeof setupBackgroundScript>;
+  let chromeLocalStorage: ChromeStorageMock;
+  let chromeSyncStorage: ChromeStorageMock;
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Create type-safe Chrome storage mocks
+    chromeLocalStorage = createChromeStorageMock();
+    chromeSyncStorage = createChromeStorageMock();
+
+    // Set up global Chrome mocks
+    (globalThis as any).chrome = {
+      storage: {
+        local: chromeLocalStorage,
+        sync: chromeSyncStorage,
+      },
+    };
+
     // Reset singleton instances
     (StorageFactory as any).instance = undefined;
     (StorageSettings as any).instance = undefined;
@@ -64,8 +80,7 @@ describe('Background Script Integration', () => {
   describe('Storage Initialization', () => {
     it('should initialize storage system on startup', async () => {
       // Mock storage type preference
-      const mockGet = vi.fn().mockResolvedValue({storageType: StorageType.SYNC});
-      (chrome.storage.local.get as any) = mockGet;
+      const mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({storageType: StorageType.SYNC});
 
       const {storageFactory, storageSettings} = await backgroundScript.initializeStorage();
 
@@ -76,8 +91,7 @@ describe('Background Script Integration', () => {
 
     it('should handle missing storage type preference gracefully', async () => {
       // Mock empty storage (no preference set)
-      const mockGet = vi.fn().mockResolvedValue({});
-      (chrome.storage.local.get as any) = mockGet;
+      const mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({});
 
       const {storageSettings} = await backgroundScript.initializeStorage();
 
@@ -89,17 +103,14 @@ describe('Background Script Integration', () => {
   describe('Proxy Configuration Management', () => {
     it('should store and retrieve proxy configuration', async () => {
       // Mock storage operations
-      const mockSet = vi.fn().mockResolvedValue(undefined);
-      const mockGet = vi.fn().mockResolvedValue({
+      const mockSet = vi.spyOn(chromeSyncStorage, 'set').mockResolvedValue(undefined);
+      const mockGet = vi.spyOn(chromeSyncStorage, 'get').mockResolvedValue({
         proxies: {
           type: 'http',
           host: 'proxy.example.com',
           port: 8080,
         },
       });
-
-      (chrome.storage.sync.set as any) = mockSet;
-      (chrome.storage.sync.get as any) = mockGet;
 
       // Set storage type to SYNC
       const storageSettings = StorageSettings.getInstance();
@@ -115,18 +126,17 @@ describe('Background Script Integration', () => {
       await backgroundScript.setProxyConfig(proxyConfig);
 
       // Verify storage operation
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({proxies: proxyConfig});
+      expect(mockSet).toHaveBeenCalledWith({proxies: proxyConfig});
 
       // Retrieve proxy configuration
       const retrieved = await backgroundScript.getProxyConfig();
       expect(retrieved).toEqual({proxies: proxyConfig});
-      expect(chrome.storage.sync.get).toHaveBeenCalledWith('proxies');
+      expect(mockGet).toHaveBeenCalledWith('proxies');
     });
 
     it('should handle storage errors gracefully', async () => {
       // Mock storage error
-      const mockSet = vi.fn().mockRejectedValue(new Error('Storage error'));
-      (chrome.storage.sync.set as any) = mockSet;
+      const mockSet = vi.spyOn(chromeSyncStorage, 'set').mockRejectedValue(new Error('Storage error'));
 
       const proxyConfig = {
         type: 'http',
@@ -142,15 +152,10 @@ describe('Background Script Integration', () => {
   describe('Storage Type Switching', () => {
     it('should maintain consistency when switching storage types', async () => {
       // Mock storage operations for both storage types
-      const mockSyncSet = vi.fn().mockResolvedValue(undefined);
-      const mockLocalSet = vi.fn().mockResolvedValue(undefined);
-      const mockSyncGet = vi.fn().mockResolvedValue({});
-      const mockLocalGet = vi.fn().mockResolvedValue({});
-
-      (chrome.storage.sync.set as any) = mockSyncSet;
-      (chrome.storage.local.set as any) = mockLocalSet;
-      (chrome.storage.sync.get as any) = mockSyncGet;
-      (chrome.storage.local.get as any) = mockLocalGet;
+      const mockSyncSet = vi.spyOn(chromeSyncStorage, 'set').mockResolvedValue(undefined);
+      const mockLocalSet = vi.spyOn(chromeLocalStorage, 'set').mockResolvedValue(undefined);
+      const mockSyncGet = vi.spyOn(chromeSyncStorage, 'get').mockResolvedValue({});
+      const mockLocalGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({});
 
       // Initialize with SYNC storage
       const {storageSettings} = await backgroundScript.initializeStorage();
@@ -160,8 +165,8 @@ describe('Background Script Integration', () => {
       await backgroundScript.setProxyConfig(proxyConfig);
 
       // Should use SYNC storage
-      expect(chrome.storage.sync.set).toHaveBeenCalledWith({proxies: proxyConfig});
-      expect(chrome.storage.local.set).not.toHaveBeenCalled();
+      expect(mockSyncSet).toHaveBeenCalledWith({proxies: proxyConfig});
+      expect(mockLocalSet).not.toHaveBeenCalled();
 
       // Switch to LOCAL storage using the storage factory's switch method
       const storageFactory = backgroundScript.getStorageFactory();
@@ -175,16 +180,15 @@ describe('Background Script Integration', () => {
       await backgroundScript.setProxyConfig(newConfig);
 
       // Should now use LOCAL storage
-      expect(chrome.storage.local.set).toHaveBeenCalledWith({proxies: newConfig});
-      expect(chrome.storage.sync.set).not.toHaveBeenCalled();
+      expect(mockLocalSet).toHaveBeenCalledWith({proxies: newConfig});
+      expect(mockSyncSet).not.toHaveBeenCalled();
     });
   });
 
   describe('Real-world Scenarios', () => {
     it('should handle multiple configuration updates', async () => {
       // Mock storage operations
-      const mockSet = vi.fn().mockResolvedValue(undefined);
-      (chrome.storage.sync.set as any) = mockSet;
+      const mockSet = vi.spyOn(chromeSyncStorage, 'set').mockResolvedValue(undefined);
 
       // Simulate multiple configuration updates
       const configs = [
@@ -209,12 +213,11 @@ describe('Background Script Integration', () => {
 
     it('should handle concurrent storage operations', async () => {
       // Mock storage operations with delays
-      const mockSet = vi.fn().mockImplementation(
+      const mockSet = vi.spyOn(chromeSyncStorage, 'set').mockImplementation(
         () =>
           // eslint-disable-next-line no-promise-executor-return
           new Promise<void>((resolve) => setTimeout(() => resolve(), 10)),
       );
-      (chrome.storage.sync.set as any) = mockSet;
 
       // Start multiple concurrent operations
       const operations = [

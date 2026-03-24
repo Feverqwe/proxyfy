@@ -28,26 +28,28 @@ import {
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {useNavigate, useLocation} from 'react-router';
+import {useLocation, useNavigate} from 'react-router';
 import {Link} from 'react-router-dom';
 import InfoIcon from '@mui/icons-material/Info';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {styled} from '@mui/system';
-import getConfig from '../../../../tools/getConfig';
-import {StorageFactory} from '../../../../storage/StorageFactory';
+import getConfig from '../../../../tools/getConfig.js';
+import {StorageFactory} from '../../../../storage/StorageFactory.js';
 import Header from '../../../Header';
 import ConfigStruct, {
   ConfigProxy,
   ProxyPattern,
   ProxyPatternType,
-} from '../../../../tools/ConfigStruct';
+} from '../../../../tools/ConfigStruct.js';
+import {configToStorageItems} from '../../../../tools/storageUtils.js';
 import CopyIcon from '../../CopyIcon';
 import splitMultiPattern from '../../../../tools/splitMultiPattern';
 import getObjectId from '../../../../tools/getObjectId';
 import Notification from '../../Notification';
 import ActionBox from '../../ActionBox';
 import MyButtonM from '../../MyButtonM';
+import {type MySelectProps} from '../../MySelect';
 
 const TableContainerS = styled(TableContainer)(({theme}) => {
   return {
@@ -165,8 +167,8 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   }, []);
 
   const handleSave = useCallback(
-    async (e: React.MouseEvent, noRedirect = false) => {
-      e.preventDefault();
+    async (e?: React.MouseEvent, noRedirect = false) => {
+      e?.preventDefault();
       const whitePatterns = refWhiteRules.current?.getPatterns() || [];
       const blackPatterns = refBlackRules.current?.getPatterns() || [];
 
@@ -183,7 +185,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         const storageFactory = StorageFactory.getInstance();
         await storageFactory.initialize();
         const storageService = storageFactory.getStorageService();
-        await storageService.set(config);
+        await storageService.set(configToStorageItems(config));
 
         if (!noRedirect) {
           navigate('/');
@@ -205,8 +207,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         switch (keyCode) {
           case 83:
             e.preventDefault();
-            const syntheticEvent = new MouseEvent('click') as unknown as React.MouseEvent;
-            handleSave(syntheticEvent, true).then((isSaved) => {
+            handleSave(undefined, true).then((isSaved) => {
               isSaved && setNotify({text: 'Saved'});
             });
             break;
@@ -330,7 +331,7 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
   }, []);
 
   const handlePatternDelete = useCallback(
-    (pattern: any) => {
+    (pattern: ProxyPattern) => {
       const newPatterns = patterns.slice(0);
       const pos = newPatterns.indexOf(pattern);
       if (pos === -1) return;
@@ -341,7 +342,7 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
   );
 
   const handlePatternCopy = useCallback(
-    (pattern: any) => {
+    (pattern: ProxyPattern) => {
       const newPatterns = patterns.slice(0);
       const pos = newPatterns.indexOf(pattern);
       if (pos === -1) return;
@@ -353,7 +354,7 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
   );
 
   const handlePatternMove = useCallback(
-    (pattern: any, offset: number) => {
+    (pattern: ProxyPattern, offset: number) => {
       const newPatterns = patterns.slice(0);
       const pos = newPatterns.indexOf(pattern);
       if (pos === -1) return;
@@ -509,9 +510,10 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
     [pattern],
   );
 
-  const handleTypeChange = useCallback(
-    (e: any) => {
-      pattern.type = e.target.value as ProxyPatternType;
+  const handleTypeChange = useCallback<NonNullable<MySelectProps['onChange']>>(
+    (e: Parameters<NonNullable<MySelectProps['onChange']>>[0]) => {
+      const value = e.target.value as ProxyPatternType;
+      pattern.type = value;
       setValid(isValidPattern(pattern.pattern, pattern.type));
     },
     [pattern],
