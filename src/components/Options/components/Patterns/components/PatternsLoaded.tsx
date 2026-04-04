@@ -94,7 +94,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   return (
     <Box>
       {notify && <Notification notify={notify} />}
-      <Paper sx={{p: 2}}>
+      <Box component={Paper} m={2} p={2}>
         <Alert severity="info" sx={{mb: 2}}>
           Proxyfy ignores everything on this page unless set to "Use enabled proxies by patterns and
           order"
@@ -118,8 +118,8 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
             size="small"
             color="secondary"
           >
-            Add black patterns to prevent this proxy being used for localhost & intranet/private IP
-            addresses
+            Add black patterns to prevent this proxy being used for localhost & intranet/private
+            IP addresses
           </MyButtonM>
         </ActionBox>
 
@@ -145,7 +145,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
             Save
           </MyButtonM>
         </ActionBox>
-      </Paper>
+      </Box>
     </Box>
   );
 };
