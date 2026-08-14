@@ -88,8 +88,6 @@ describe('Type-Safe Mocking Patterns', () => {
       expect(typeof mockService.get).toBe('function');
       expect(typeof mockService.set).toBe('function');
       expect(typeof mockService.remove).toBe('function');
-      expect(typeof mockService.clear).toBe('function');
-      expect(typeof mockService.getBytesInUse).toBe('function');
     });
 
     it('should store and retrieve data from storage service mock', async () => {
@@ -132,7 +130,6 @@ describe('Type-Safe Mocking Patterns', () => {
       expect(typeof mockFactory.getStorageService).toBe('function');
       expect(typeof mockFactory.switchStorageType).toBe('function');
       expect(typeof mockFactory.getCurrentStorageType).toBe('function');
-      expect(typeof mockFactory.createSpecificStorageService).toBe('function');
     });
 
     it('should handle storage type switching', async () => {

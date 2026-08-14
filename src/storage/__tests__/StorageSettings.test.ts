@@ -71,6 +71,29 @@ describe('StorageSettings', () => {
       expect(storageSettings.getStorageType()).toBe(StorageType.SYNC);
       expect(storageSettings.getDefaultIconColor()).toBe('#0a77e5');
     });
+
+    it('should share one initialization read', async () => {
+      const mockGet = chrome.storage.local.get as Mock;
+      mockGet.mockResolvedValue({storageType: StorageType.LOCAL});
+
+      await Promise.all([storageSettings.initialize(), storageSettings.initialize()]);
+
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(storageSettings.getStorageType()).toBe(StorageType.LOCAL);
+    });
+
+    it('should retry initialization after a storage error', async () => {
+      const mockGet = chrome.storage.local.get as Mock;
+      mockGet
+        .mockRejectedValueOnce(new Error('Storage error'))
+        .mockResolvedValueOnce({storageType: StorageType.LOCAL});
+
+      await storageSettings.initialize();
+      await storageSettings.initialize();
+
+      expect(mockGet).toHaveBeenCalledTimes(2);
+      expect(storageSettings.getStorageType()).toBe(StorageType.LOCAL);
+    });
   });
 
   describe('storage type management', () => {
@@ -92,16 +115,6 @@ describe('StorageSettings', () => {
         'Storage error',
       );
       expect(storageSettings.getStorageType()).toBe(StorageType.SYNC);
-    });
-
-    it('should check storage type correctly', async () => {
-      await storageSettings.setStorageType(StorageType.SYNC);
-      expect(storageSettings.isSyncStorage()).toBe(true);
-      expect(storageSettings.isLocalStorage()).toBe(false);
-
-      await storageSettings.setStorageType(StorageType.LOCAL);
-      expect(storageSettings.isSyncStorage()).toBe(false);
-      expect(storageSettings.isLocalStorage()).toBe(true);
     });
   });
 

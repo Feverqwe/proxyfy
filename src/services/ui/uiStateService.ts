@@ -1,6 +1,7 @@
 import {AUTH_SUPPORTED} from '../../constants';
 import {StorageSettings} from '../../storage/index';
-import {authListener as AuthListener, getConfig, getExtensionIcon} from '../../tools/index';
+import {authListener as AuthListener, getExtensionIcon} from '../../tools/index';
+import {readConfig} from '../config/configService';
 import {getCurrentState} from '../proxy/proxyStateService';
 import {RuntimeAction} from '../runtime/runtimeContract';
 
@@ -26,7 +27,7 @@ export function parseRgbaColor(color: string): [number, number, number, number] 
 
 export async function syncUiState(): Promise<void> {
   const state = await getCurrentState();
-  const config = await getConfig();
+  const config = await readConfig();
   let badgeColor = [0, 0, 0, 0];
   let badgeText = '';
   let iconColor;

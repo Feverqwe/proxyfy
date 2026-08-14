@@ -19,14 +19,4 @@ export interface StorageService {
    * Removes one or more items from storage
    */
   remove(keys: string | string[]): Promise<void>;
-
-  /**
-   * Clears all items from storage
-   */
-  clear(): Promise<void>;
-
-  /**
-   * Gets the total number of bytes being used by storage
-   */
-  getBytesInUse?(keys?: string | string[] | null): Promise<number>;
 }

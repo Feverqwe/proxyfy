@@ -1,11 +1,4 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, {FC, useCallback, useMemo} from 'react';
 
 import InfoIcon from '@mui/icons-material/Info';
 import {
@@ -19,108 +12,33 @@ import {
 } from '@mui/material';
 import {styled} from '@mui/system';
 
-import {ProxyPattern, ProxyPatternType, getId} from '../../../../../tools/index';
-import {clonePattern, initializePatterns} from '../utils/patternListState';
+import {ProxyPattern} from '../../../../../tools/index';
+import {copyPattern, movePattern, removePattern, updatePattern} from '../utils/patternListState';
 
 import {Pattern} from './Pattern';
 
-const TableContainerS = styled(TableContainer)(({theme}) => {
-  return {
-    '& .small-checkbox': {
-      padding: '4px',
-    },
-    '& tbody tr:hover': {
-      backgroundColor: theme.palette.action.hover,
-    },
-    '& tbody td': {
-      verticalAlign: 'top',
-    },
-    '& .name-cell': {
-      width: '250px',
-    },
-    '& .pattern-cell': {
-      paddingLeft: '6px',
-      paddingRight: '6px',
-    },
-    '& .type-cell': {
-      width: '120px',
-    },
-    '& .enabled-cell': {
-      width: '160px',
-    },
-    '& .MuiInputBase-root.Mui-error': {
-      boxShadow: 'inset 0 0 2px #ff0000',
-    },
-  };
-});
+const TableContainerS = styled(TableContainer)(({theme}) => ({
+  '& .small-checkbox': {padding: '4px'},
+  '& tbody tr:hover': {backgroundColor: theme.palette.action.hover},
+  '& tbody td': {verticalAlign: 'top'},
+  '& .name-cell': {width: '250px'},
+  '& .pattern-cell': {paddingLeft: '6px', paddingRight: '6px'},
+  '& .type-cell': {width: '120px'},
+  '& .enabled-cell': {width: '160px'},
+  '& .MuiInputBase-root.Mui-error': {boxShadow: 'inset 0 0 2px #ff0000'},
+}));
 
 interface PatternListProps {
-  list: ProxyPattern[];
+  patterns: ProxyPattern[];
+  onChange: (patterns: ProxyPattern[]) => void;
 }
 
-export interface PatternListHandler {
-  addRule: (name?: string, pattern?: string, type?: ProxyPatternType) => void;
-  getPatterns: () => ProxyPattern[];
-}
-
-const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, ref) => {
-  const [patterns, setPatterns] = useState(() => initializePatterns(list));
-  const refPatterns = useRef(patterns);
-  refPatterns.current = patterns;
-
-  useImperativeHandle(ref, () => ({
-    addRule(name = '', pattern = '', type = ProxyPatternType.Wildcard) {
-      const newPatterns = refPatterns.current.slice(0);
-      newPatterns.push({
-        id: getId(),
-        enabled: true,
-        name,
-        type: type as ProxyPatternType,
-        pattern,
-      });
-      setPatterns((refPatterns.current = newPatterns));
+const PatternList: FC<PatternListProps> = ({patterns, onChange}) => {
+  const handlePatternChange = useCallback(
+    (pattern: ProxyPattern, changes: Partial<Omit<ProxyPattern, 'id'>>) => {
+      onChange(updatePattern(patterns, pattern.id, changes));
     },
-    getPatterns() {
-      return refPatterns.current;
-    },
-  }));
-
-  const handlePatternDelete = useCallback(
-    (pattern: ProxyPattern) => {
-      const newPatterns = patterns.slice(0);
-      const pos = newPatterns.indexOf(pattern);
-      if (pos >= 0) {
-        newPatterns.splice(pos, 1);
-        setPatterns(newPatterns);
-      }
-    },
-    [patterns],
-  );
-
-  const handlePatternCopy = useCallback(
-    (pattern: ProxyPattern) => {
-      const newPatterns = patterns.slice(0);
-      const pos = newPatterns.indexOf(pattern);
-      if (pos >= 0) {
-        const clone = clonePattern(pattern);
-        newPatterns.splice(pos + 1, 0, clone);
-        setPatterns(newPatterns);
-      }
-    },
-    [patterns],
-  );
-
-  const handlePatternMove = useCallback(
-    (pattern: ProxyPattern, offset: number) => {
-      const newPatterns = patterns.slice(0);
-      const pos = newPatterns.indexOf(pattern);
-      if (pos >= 0) {
-        newPatterns.splice(pos, 1);
-        newPatterns.splice(pos + offset, 0, pattern);
-        setPatterns(newPatterns);
-      }
-    },
-    [patterns],
+    [onChange, patterns],
   );
 
   const helpTooltip = useMemo(
@@ -158,27 +76,22 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
           </TableRow>
         </TableHead>
         <TableBody>
-          {patterns.map((pattern, index) => {
-            const isFirst = index === 0;
-            const isLast = index === patterns.length - 1;
-            return (
-              <Pattern
-                key={pattern.id}
-                pattern={pattern}
-                onMove={handlePatternMove}
-                onCopy={handlePatternCopy}
-                onDelete={handlePatternDelete}
-                isFirst={isFirst}
-                isLast={isLast}
-              />
-            );
-          })}
+          {patterns.map((pattern, index) => (
+            <Pattern
+              key={pattern.id}
+              pattern={pattern}
+              onChange={handlePatternChange}
+              onMove={(item, offset) => onChange(movePattern(patterns, item.id, offset))}
+              onCopy={(item) => onChange(copyPattern(patterns, item.id))}
+              onDelete={(item) => onChange(removePattern(patterns, item.id))}
+              isFirst={index === 0}
+              isLast={index === patterns.length - 1}
+            />
+          ))}
         </TableBody>
       </Table>
     </TableContainerS>
   );
-});
-
-PatternList.displayName = 'PatternList';
+};
 
 export {PatternList};

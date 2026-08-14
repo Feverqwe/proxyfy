@@ -21,6 +21,7 @@ const canvasDprSize = 24 * window.devicePixelRatio;
 type MyColorInputProps = {
   label: string;
   defaultValue?: string;
+  value?: string;
   iconType?: string;
   format?: string;
   name: string;
@@ -30,17 +31,22 @@ type MyColorInputProps = {
 const MyColorInput: FC<MyColorInputProps> = ({
   label,
   defaultValue = '',
+  value,
   iconType = 'circle',
   format = 'hex',
   name,
   onChange,
 }) => {
-  const [color, setColor] = useState(defaultValue);
+  const [color, setColor] = useState(value ?? defaultValue);
   const [showPicker, setShowPicker] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const refPickerBody = useRef<HTMLDivElement | null>(null);
   const refPickerBtn = useRef<HTMLButtonElement | null>(null);
   const refColorIcon = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    if (value !== undefined) setColor(value);
+  }, [value]);
 
   const handleChangeColor = useCallback(
     (color: ChromePickerColor) => {

@@ -22,7 +22,6 @@ export interface MockStorageFactory {
   getStorageService: () => StorageService;
   switchStorageType: (type: StorageType) => Promise<void>;
   getCurrentStorageType: () => StorageType;
-  createSpecificStorageService: (type: StorageType) => StorageService;
   _reset: () => void;
   _setStorageType: (type: StorageType) => void;
 }
@@ -96,23 +95,6 @@ export function createMockStorageService(): MockStorageService {
         keys.forEach((key) => data.delete(key));
       }
     },
-
-    async clear() {
-      if (error) {
-        throw error;
-      }
-
-      data.clear();
-    },
-
-    async getBytesInUse(keys) {
-      if (error) {
-        throw error;
-      }
-
-      const dataToMeasure = keys ? await this.get(keys) : Object.fromEntries(data);
-      return JSON.stringify(dataToMeasure).length;
-    },
   };
 
   return mock;
@@ -143,10 +125,6 @@ export function createMockStorageFactory(
     },
 
     getCurrentStorageType: () => currentStorageType,
-
-    createSpecificStorageService(_type: StorageType) {
-      return createMockStorageService();
-    },
   };
 
   return mock;
@@ -169,8 +147,6 @@ export function mockStorageFactorySingleton(factory: MockStorageFactory): void {
 export function mockStorageSettingsSingleton(storageType: StorageType = StorageType.SYNC): {
   getStorageType: () => StorageType;
   setStorageType: (type: StorageType) => Promise<void>;
-  isSyncStorage: () => boolean;
-  isLocalStorage: () => boolean;
 } {
   let currentType = storageType;
 
@@ -179,8 +155,6 @@ export function mockStorageSettingsSingleton(storageType: StorageType = StorageT
     async setStorageType(type: StorageType) {
       currentType = type;
     },
-    isSyncStorage: () => currentType === StorageType.SYNC,
-    isLocalStorage: () => currentType === StorageType.LOCAL,
   };
 }
 

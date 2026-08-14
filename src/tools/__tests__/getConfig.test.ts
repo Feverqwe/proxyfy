@@ -1,16 +1,16 @@
 /**
- * Tests for getConfig function
+ * Tests for configuration reads
  */
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
+import {readConfig} from '../../services/config/configService';
 import {ConfigRepositoryError} from '../../storage/ConfigRepository';
 import {StorageFactory} from '../../storage/StorageFactory';
 import {StorageService} from '../../storage/StorageService';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
 import {parseStoredConfig} from '../ConfigSchema';
-import getConfig from '../getConfig';
 
-describe('getConfig', () => {
+describe('readConfig', () => {
   let storageFactory: StorageFactory;
   let storageSettings: StorageSettings;
 
@@ -34,14 +34,12 @@ describe('getConfig', () => {
       get: mockGet,
       set: vi.fn(),
       remove: vi.fn(),
-      clear: vi.fn(),
-      getBytesInUse: vi.fn(),
     };
 
     // Mock storage factory to return our mock service
     vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService);
 
-    const config = await getConfig();
+    const config = await readConfig();
 
     // Verify storage factory was initialized
     expect(storageFactory.getStorageService).toHaveBeenCalled();
@@ -75,13 +73,11 @@ describe('getConfig', () => {
       get: mockGet,
       set: vi.fn(),
       remove: vi.fn(),
-      clear: vi.fn(),
-      getBytesInUse: vi.fn(),
     };
 
     vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService);
 
-    const config = await getConfig();
+    const config = await readConfig();
 
     expect(mockGet).toHaveBeenCalled();
     expect(config.proxies).toEqual(mockStorageData.proxies);
@@ -98,13 +94,11 @@ describe('getConfig', () => {
       get: mockGet,
       set: vi.fn(),
       remove: vi.fn(),
-      clear: vi.fn(),
-      getBytesInUse: vi.fn(),
     };
 
     vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService);
 
-    await expect(getConfig()).rejects.toMatchObject<Partial<ConfigRepositoryError>>({
+    await expect(readConfig()).rejects.toMatchObject<Partial<ConfigRepositoryError>>({
       code: 'corrupt',
     });
     expect(mockGet).toHaveBeenCalled();
@@ -119,13 +113,11 @@ describe('getConfig', () => {
       get: mockGet,
       set: vi.fn(),
       remove: vi.fn(),
-      clear: vi.fn(),
-      getBytesInUse: vi.fn(),
     };
 
     vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService);
 
-    const config = await getConfig();
+    const config = await readConfig();
 
     expect(mockGet).toHaveBeenCalled();
     expect(config).toEqual(parseStoredConfig({}));
@@ -138,13 +130,11 @@ describe('getConfig', () => {
       get: mockGet2,
       set: vi.fn(),
       remove: vi.fn(),
-      clear: vi.fn(),
-      getBytesInUse: vi.fn(),
     };
 
     vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService2);
 
-    const config2 = await getConfig();
+    const config2 = await readConfig();
 
     expect(mockGet2).toHaveBeenCalled();
     expect(config2).toEqual(parseStoredConfig({}));

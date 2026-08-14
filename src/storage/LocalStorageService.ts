@@ -27,18 +27,4 @@ export class LocalStorageService implements StorageService {
   async remove(keys: string | string[]): Promise<void> {
     await chrome.storage.local.remove(keys);
   }
-
-  /**
-   * Clears all items from chrome.storage.local
-   */
-  async clear(): Promise<void> {
-    await chrome.storage.local.clear();
-  }
-
-  /**
-   * Gets the total number of bytes being used by chrome.storage.local
-   */
-  async getBytesInUse(keys?: string | string[] | null): Promise<number> {
-    return chrome.storage.local.getBytesInUse(keys);
-  }
 }

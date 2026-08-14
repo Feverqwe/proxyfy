@@ -32,22 +32,19 @@ export class StorageSettings {
 
   private storageType: StorageType = StorageType.SYNC; // Default to sync for backward compatibility
   private defaultIconColor = '#0a77e5'; // Default to the current PAC script color
+  private initializePromise: Promise<void> | null = null;
 
   /**
    * Initialize the storage settings by loading the preferred storage type
    */
-  async initialize(): Promise<void> {
-    try {
-      const result = await chrome.storage.local.get([STORAGE_TYPE_KEY, DEFAULT_ICON_COLOR_KEY]);
-      if (result[STORAGE_TYPE_KEY] && isValidStorageType(result[STORAGE_TYPE_KEY])) {
-        this.storageType = result[STORAGE_TYPE_KEY];
-      }
-      if (typeof result[DEFAULT_ICON_COLOR_KEY] === 'string') {
-        this.defaultIconColor = result[DEFAULT_ICON_COLOR_KEY];
-      }
-    } catch (error) {
-      console.warn('Failed to load storage preferences, using defaults:', error);
+  initialize(): Promise<void> {
+    if (!this.initializePromise) {
+      this.initializePromise = this.load().catch((error) => {
+        this.initializePromise = null;
+        console.warn('Failed to load storage preferences, using defaults:', error);
+      });
     }
+    return this.initializePromise;
   }
 
   /**
@@ -71,20 +68,6 @@ export class StorageSettings {
   }
 
   /**
-   * Check if sync storage is currently selected
-   */
-  isSyncStorage(): boolean {
-    return this.storageType === StorageType.SYNC;
-  }
-
-  /**
-   * Check if local storage is currently selected
-   */
-  isLocalStorage(): boolean {
-    return this.storageType === StorageType.LOCAL;
-  }
-
-  /**
    * Get the default icon color
    */
   getDefaultIconColor(): string {
@@ -101,6 +84,16 @@ export class StorageSettings {
     } catch (error) {
       console.error('Failed to save default icon color preference:', error);
       throw error;
+    }
+  }
+
+  private async load(): Promise<void> {
+    const result = await chrome.storage.local.get([STORAGE_TYPE_KEY, DEFAULT_ICON_COLOR_KEY]);
+    if (result[STORAGE_TYPE_KEY] && isValidStorageType(result[STORAGE_TYPE_KEY])) {
+      this.storageType = result[STORAGE_TYPE_KEY];
+    }
+    if (typeof result[DEFAULT_ICON_COLOR_KEY] === 'string') {
+      this.defaultIconColor = result[DEFAULT_ICON_COLOR_KEY];
     }
   }
 }

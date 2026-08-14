@@ -1,15 +1,16 @@
-import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
+import React, {FC, useCallback, useEffect, useState} from 'react';
 
 import {Alert, Box, Paper, Typography} from '@mui/material';
 import {useNavigate} from 'react-router';
 
 import {replaceProxyPatterns as replaceProxyPatternsConfig} from '../../../../../services/runtime/runtimeClient';
-import {ConfigProxy} from '../../../../../tools/index';
+import {ConfigProxy, ProxyPattern} from '../../../../../tools/index';
 import {ActionBox, MyButtonM, Notification} from '../../../../index';
 import {localhostPresets, matchAllPresets} from '../presets';
+import {addPattern, initializePatterns} from '../utils/patternListState';
 import {arePatternsValid} from '../utils/validation';
 
-import {PatternList, PatternListHandler} from './PatternList';
+import {PatternList} from './PatternList';
 
 interface PatternsLoadedProps {
   proxy: ConfigProxy;
@@ -17,26 +18,23 @@ interface PatternsLoadedProps {
 
 const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   const navigate = useNavigate();
-  const refWhiteRules = useRef<PatternListHandler | null>(null);
-  const refBlackRules = useRef<PatternListHandler | null>(null);
+  const [whitePatterns, setWhitePatterns] = useState(() => initializePatterns(proxy.whitePatterns));
+  const [blackPatterns, setBlackPatterns] = useState(() => initializePatterns(proxy.blackPatterns));
   const [notify, setNotify] = useState<{text: string} | null>(null);
 
   const handleNewWhite = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    refWhiteRules.current?.addRule();
+    setWhitePatterns((patterns) => addPattern(patterns));
   }, []);
 
   const handleNewBlack = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    refBlackRules.current?.addRule();
+    setBlackPatterns((patterns) => addPattern(patterns));
   }, []);
 
   const handleSave = useCallback(
     async (e?: React.MouseEvent, noRedirect = false) => {
       e?.preventDefault();
-      const whitePatterns = refWhiteRules.current?.getPatterns() || [];
-      const blackPatterns = refBlackRules.current?.getPatterns() || [];
-
       if (!arePatternsValid([...whitePatterns, ...blackPatterns])) {
         setNotify({text: 'Fix invalid regular expressions before saving'});
         return false;
@@ -55,7 +53,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         return false;
       }
     },
-    [proxy.id, navigate],
+    [blackPatterns, navigate, proxy.id, whitePatterns],
   );
 
   useEffect(() => {
@@ -78,16 +76,12 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
 
   const handleWhitelistMatchAll = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    matchAllPresets.forEach(({name, pattern, type}) => {
-      refWhiteRules.current?.addRule(name, pattern, type);
-    });
+    setWhitePatterns((patterns) => addPresets(patterns, matchAllPresets));
   }, []);
 
   const handleBlacklistLocalhost = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    localhostPresets.forEach(({name, pattern, type}) => {
-      refBlackRules.current?.addRule(name, pattern, type);
-    });
+    setBlackPatterns((patterns) => addPresets(patterns, localhostPresets));
   }, []);
 
   return (
@@ -123,12 +117,12 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         </ActionBox>
 
         <Typography variant="h5">White Patterns</Typography>
-        <PatternList ref={refWhiteRules} list={proxy.whitePatterns} />
+        <PatternList patterns={whitePatterns} onChange={setWhitePatterns} />
 
         <Typography variant="h5" sx={{mt: 4}}>
           Black Patterns
         </Typography>
-        <PatternList ref={refBlackRules} list={proxy.blackPatterns} />
+        <PatternList patterns={blackPatterns} onChange={setBlackPatterns} />
 
         <ActionBox>
           <MyButtonM onClick={() => navigate('/')} variant="outlined" size="small">
@@ -148,5 +142,12 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
     </Box>
   );
 };
+
+function addPresets(
+  patterns: ProxyPattern[],
+  presets: Pick<ProxyPattern, 'name' | 'pattern' | 'type'>[],
+): ProxyPattern[] {
+  return presets.reduce((result, preset) => addPattern(result, preset), patterns);
+}
 
 export {PatternsLoaded};

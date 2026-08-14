@@ -9,22 +9,65 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
+import {Field} from 'react-final-form';
 
 import {MyColorInput, MyInput} from '../../../../index';
-import {FieldType} from '../types';
+import type {ProxyFormValues} from '../types';
 
 interface BasicInfoFieldsProps {
   isNew: boolean;
-  addField: (name: string, options?: {type?: FieldType}) => {name: string; defaultValue?: string};
 }
 
-const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew, addField}) => {
+const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew}) => {
   return (
     <>
-      <MyInput label="Title (optional)" placeholder="title" {...addField('title')} />
-      <MyColorInput label="Icon color" iconType="logo" {...addField('color')} />
-      <MyInput label="Badge text" {...addField('badgeText')} />
-      <MyColorInput label="Badge color" format="rgba" {...addField('badgeColor')} />
+      <Field<string, HTMLInputElement, ProxyFormValues> name="title">
+        {({input}) => (
+          <MyInput
+            label="Title (optional)"
+            placeholder="title"
+            name={input.name}
+            value={input.value}
+            onBlur={() => input.onBlur()}
+            onFocus={() => input.onFocus()}
+            onChange={(event) => input.onChange(event.target.value)}
+          />
+        )}
+      </Field>
+      <Field<string, HTMLInputElement, ProxyFormValues> name="color">
+        {({input}) => (
+          <MyColorInput
+            label="Icon color"
+            iconType="logo"
+            name={input.name}
+            value={input.value}
+            onChange={input.onChange}
+          />
+        )}
+      </Field>
+      <Field<string, HTMLInputElement, ProxyFormValues> name="badgeText">
+        {({input}) => (
+          <MyInput
+            label="Badge text"
+            name={input.name}
+            value={input.value}
+            onBlur={() => input.onBlur()}
+            onFocus={() => input.onFocus()}
+            onChange={(event) => input.onChange(event.target.value)}
+          />
+        )}
+      </Field>
+      <Field<string, HTMLInputElement, ProxyFormValues> name="badgeColor">
+        {({input}) => (
+          <MyColorInput
+            label="Badge color"
+            format="rgba"
+            name={input.name}
+            value={input.value}
+            onChange={input.onChange}
+          />
+        )}
+      </Field>
       {isNew && (
         <FormControl fullWidth margin="dense">
           <Typography variant="subtitle1">Pattern Shortcuts</Typography>
@@ -32,28 +75,49 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew, addField}) => {
             <FormGroup>
               <FormControlLabel
                 control={
-                  <Checkbox
-                    defaultChecked={true}
-                    {...addField('enabled', {type: FieldType.Checkbox})}
-                  />
+                  <Field<boolean, HTMLInputElement, ProxyFormValues> name="enabled" type="checkbox">
+                    {({input}) => (
+                      <Checkbox
+                        name={input.name}
+                        checked={input.checked}
+                        onChange={(event) => input.onChange(event.target.checked)}
+                      />
+                    )}
+                  </Field>
                 }
                 label="Enabled"
               />
               <FormControlLabel
                 control={
-                  <Checkbox
-                    defaultChecked={true}
-                    {...addField('useMatchAllPreset', {type: FieldType.Checkbox})}
-                  />
+                  <Field<boolean, HTMLInputElement, ProxyFormValues>
+                    name="useMatchAllPreset"
+                    type="checkbox"
+                  >
+                    {({input}) => (
+                      <Checkbox
+                        name={input.name}
+                        checked={input.checked}
+                        onChange={(event) => input.onChange(event.target.checked)}
+                      />
+                    )}
+                  </Field>
                 }
                 label="Add whitelist pattern to match all URLs"
               />
               <FormControlLabel
                 control={
-                  <Checkbox
-                    defaultChecked={false}
-                    {...addField('useLocalhostPreset', {type: FieldType.Checkbox})}
-                  />
+                  <Field<boolean, HTMLInputElement, ProxyFormValues>
+                    name="useLocalhostPreset"
+                    type="checkbox"
+                  >
+                    {({input}) => (
+                      <Checkbox
+                        name={input.name}
+                        checked={input.checked}
+                        onChange={(event) => input.onChange(event.target.checked)}
+                      />
+                    )}
+                  </Field>
                 }
                 label="Do not use for localhost and intranet/private IP addresses"
               />

@@ -1,5 +1,5 @@
 import type {ProxyMode, ProxyState} from '../../domain/proxy/proxyState';
-import {getConfig} from '../../tools/index';
+import {readConfig} from '../config/configService';
 import {getPacScript} from '../pac/pacService';
 
 export class ProxySelectionError extends Error {}
@@ -25,7 +25,7 @@ export async function setProxy(mode: ProxyMode, id?: string): Promise<ProxyState
     }
     case 'direct':
     case 'fixed_servers': {
-      const config = await getConfig();
+      const config = await readConfig();
       let proxy = config.proxies.find((proxy) => proxy.id === id);
       if (!proxy && mode === 'direct') {
         proxy = config.proxies.find((proxy) => proxy.type === 'direct');
@@ -55,7 +55,7 @@ export async function setProxy(mode: ProxyMode, id?: string): Promise<ProxyState
       break;
     }
     case 'pac_script': {
-      const config = await getConfig();
+      const config = await readConfig();
       value = {
         mode: 'pac_script' as const,
         pacScript: {

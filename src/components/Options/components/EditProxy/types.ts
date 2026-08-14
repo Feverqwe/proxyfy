@@ -1,17 +1,21 @@
-import {ConfigProxy, ProxyPattern} from '../../../../tools/index';
-
-export interface ChangedProxy extends Omit<ConfigProxy, 'whitePatterns' | 'blackPatterns'> {
-  whitePatterns: (ProxyPattern & {id?: string})[];
-  blackPatterns: (ProxyPattern & {id?: string})[];
-}
+import type {ConfigProxy, DirectProxyType, GenericProxyType} from '../../../../tools/index';
 
 export interface ProxyFormProps {
   proxy: ConfigProxy;
   onReset: () => void;
 }
 
-export enum FieldType {
-  String = 'string',
-  Number = 'number',
-  Checkbox = 'checkbox',
+export interface ProxyFormValues {
+  type: GenericProxyType | DirectProxyType;
+  title: string;
+  color: string;
+  badgeText: string;
+  badgeColor: string;
+  host: string;
+  port: string;
+  username: string;
+  password: string;
+  enabled: boolean;
+  useMatchAllPreset: boolean;
+  useLocalhostPreset: boolean;
 }

@@ -25,6 +25,8 @@ describe('Storage System Integration', () => {
   beforeEach(() => {
     // Clear all mocks
     vi.clearAllMocks();
+    (StorageFactory as unknown as {instance?: StorageFactory}).instance = undefined;
+    (StorageSettings as unknown as {instance?: StorageSettings}).instance = undefined;
 
     // Create type-safe Chrome storage mocks
     chromeLocalStorage = createChromeStorageMock();

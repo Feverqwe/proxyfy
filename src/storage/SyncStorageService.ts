@@ -27,18 +27,4 @@ export class SyncStorageService implements StorageService {
   async remove(keys: string | string[]): Promise<void> {
     await chrome.storage.sync.remove(keys);
   }
-
-  /**
-   * Clears all items from chrome.storage.sync
-   */
-  async clear(): Promise<void> {
-    await chrome.storage.sync.clear();
-  }
-
-  /**
-   * Gets the total number of bytes being used by chrome.storage.sync
-   */
-  async getBytesInUse(keys?: string | string[] | null): Promise<number> {
-    return chrome.storage.sync.getBytesInUse(keys);
-  }
 }

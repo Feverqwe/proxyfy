@@ -1,19 +1,19 @@
 /**
- * Integration Tests for getConfig Tool
+ * Integration tests for configuration reads
  *
- * Tests the integration between getConfig and the storage system
+ * Tests the integration between readConfig and the storage system
  */
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
+import {readConfig} from '../../services/config/configService';
 import {ConfigRepositoryError} from '../../storage/ConfigRepository';
 import {StorageFactory} from '../../storage/StorageFactory';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
-import getConfig from '../getConfig';
 
 // Use the global Chrome mock from vitest.setup.ts
 
-describe('getConfig Integration', () => {
+describe('readConfig integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset StorageFactory instance
@@ -55,7 +55,7 @@ describe('getConfig Integration', () => {
       const storageSettings = StorageSettings.getInstance();
       await storageSettings.setStorageType(StorageType.SYNC);
 
-      const result = await getConfig();
+      const result = await readConfig();
 
       expect(result).toEqual(mockConfig);
       expect(chrome.storage.sync.get).toHaveBeenCalled();
@@ -69,9 +69,9 @@ describe('getConfig Integration', () => {
       const storageSettings = StorageSettings.getInstance();
       await storageSettings.setStorageType(StorageType.SYNC);
 
-      const result = await getConfig();
+      const result = await readConfig();
 
-      // getConfig returns default config when storage is empty
+      // readConfig returns default config when storage is empty
       expect(result).toEqual({proxies: []});
       expect(chrome.storage.sync.get).toHaveBeenCalled();
     });
@@ -100,7 +100,7 @@ describe('getConfig Integration', () => {
       const storageSettings = StorageSettings.getInstance();
       await storageSettings.setStorageType(StorageType.SYNC);
 
-      const resultSync = await getConfig();
+      const resultSync = await readConfig();
       expect(resultSync).toEqual(mockConfig);
       expect(chrome.storage.sync.get).toHaveBeenCalled();
 
@@ -114,7 +114,7 @@ describe('getConfig Integration', () => {
       const storageSettings2 = StorageSettings.getInstance();
       await storageSettings2.setStorageType(StorageType.LOCAL);
 
-      const resultLocal = await getConfig();
+      const resultLocal = await readConfig();
       expect(resultLocal).toEqual(mockConfig);
       expect(chrome.storage.local.get).toHaveBeenCalled();
     });
@@ -129,7 +129,7 @@ describe('getConfig Integration', () => {
       const storageSettings = StorageSettings.getInstance();
       await storageSettings.setStorageType(StorageType.SYNC);
 
-      await expect(getConfig()).rejects.toMatchObject<Partial<ConfigRepositoryError>>({
+      await expect(readConfig()).rejects.toMatchObject<Partial<ConfigRepositoryError>>({
         code: 'unavailable',
       });
     });
@@ -146,7 +146,7 @@ describe('getConfig Integration', () => {
       const storageSettings = StorageSettings.getInstance();
       await storageSettings.setStorageType(StorageType.SYNC);
 
-      await expect(getConfig()).rejects.toMatchObject<Partial<ConfigRepositoryError>>({
+      await expect(readConfig()).rejects.toMatchObject<Partial<ConfigRepositoryError>>({
         code: 'corrupt',
       });
     });
@@ -177,7 +177,7 @@ describe('getConfig Integration', () => {
       await storageSettings.setStorageType(StorageType.SYNC);
 
       // Make multiple concurrent calls
-      const promises = [getConfig(), getConfig(), getConfig()];
+      const promises = [readConfig(), readConfig(), readConfig()];
 
       const results = await Promise.all(promises);
 
@@ -186,7 +186,7 @@ describe('getConfig Integration', () => {
         expect(result).toEqual(mockConfig);
       });
 
-      // Storage should be called multiple times (no caching in getConfig)
+      // Storage should be called multiple times (no caching in readConfig)
       expect(mockGet).toHaveBeenCalledTimes(3);
     });
 
@@ -214,7 +214,7 @@ describe('getConfig Integration', () => {
       const storageSettings = StorageSettings.getInstance();
       await storageSettings.setStorageType(StorageType.SYNC);
 
-      const result = await getConfig();
+      const result = await readConfig();
 
       expect(result).toEqual(largeConfig);
       expect(result.proxies).toHaveLength(1000);
@@ -250,7 +250,7 @@ describe('getConfig Integration', () => {
       const storageSettings = StorageSettings.getInstance();
       await storageSettings.setStorageType(StorageType.SYNC);
 
-      const resultSync = await getConfig();
+      const resultSync = await readConfig();
       expect(resultSync).toEqual(mockConfig);
       expect(chrome.storage.sync.get).toHaveBeenCalled();
       // chrome.storage.local.get is called by StorageSettings.initialize() to load storage type preference
@@ -269,7 +269,7 @@ describe('getConfig Integration', () => {
       const storageSettings2 = StorageSettings.getInstance();
       await storageSettings2.setStorageType(StorageType.LOCAL);
 
-      const resultLocal = await getConfig();
+      const resultLocal = await readConfig();
       expect(resultLocal).toEqual(mockConfig);
       expect(chrome.storage.local.get).toHaveBeenCalled();
       // chrome.storage.sync.get is not called for configuration data when using LOCAL storage

@@ -21,16 +21,12 @@ describe('StorageService Interface', () => {
       expect(service).toHaveProperty('get');
       expect(service).toHaveProperty('set');
       expect(service).toHaveProperty('remove');
-      expect(service).toHaveProperty('clear');
-      expect(service).toHaveProperty('getBytesInUse');
     });
 
     it('should have correct method signatures', () => {
       expect(typeof service.get).toBe('function');
       expect(typeof service.set).toBe('function');
       expect(typeof service.remove).toBe('function');
-      expect(typeof service.clear).toBe('function');
-      expect(typeof service.getBytesInUse).toBe('function');
     });
   });
 
@@ -45,16 +41,12 @@ describe('StorageService Interface', () => {
       expect(service).toHaveProperty('get');
       expect(service).toHaveProperty('set');
       expect(service).toHaveProperty('remove');
-      expect(service).toHaveProperty('clear');
-      expect(service).toHaveProperty('getBytesInUse');
     });
 
     it('should have correct method signatures', () => {
       expect(typeof service.get).toBe('function');
       expect(typeof service.set).toBe('function');
       expect(typeof service.remove).toBe('function');
-      expect(typeof service.clear).toBe('function');
-      expect(typeof service.getBytesInUse).toBe('function');
     });
   });
 });
@@ -82,16 +74,6 @@ describe('StorageSettings', () => {
     await settings.setStorageType(StorageType.LOCAL);
     expect(settings.getStorageType()).toBe(StorageType.LOCAL);
   });
-
-  it('should provide helper methods for storage type checking', async () => {
-    await settings.setStorageType(StorageType.SYNC);
-    expect(settings.isSyncStorage()).toBe(true);
-    expect(settings.isLocalStorage()).toBe(false);
-
-    await settings.setStorageType(StorageType.LOCAL);
-    expect(settings.isSyncStorage()).toBe(false);
-    expect(settings.isLocalStorage()).toBe(true);
-  });
 });
 
 describe('StorageFactory', () => {
@@ -115,15 +97,10 @@ describe('StorageFactory', () => {
     expect(service).toBeDefined();
   });
 
-  it('should recreate a cached service when another extension context changes storage type', async () => {
-    vi.mocked(chrome.storage.local.get)
-      .mockResolvedValueOnce({storageType: StorageType.SYNC})
-      .mockResolvedValueOnce({storageType: StorageType.LOCAL});
-
-    await factory.initialize();
+  it('should recreate a cached service when storage type changes', async () => {
     const syncService = factory.getStorageService();
 
-    await factory.initialize();
+    await StorageSettings.getInstance().setStorageType(StorageType.LOCAL);
     const localService = factory.getStorageService();
 
     expect(syncService).toBeInstanceOf(SyncStorageService);
@@ -140,14 +117,5 @@ describe('StorageFactory', () => {
 
     await factory.switchStorageType(StorageType.SYNC);
     expect(factory.getCurrentStorageType()).toBe(StorageType.SYNC);
-  });
-
-  it('should create specific storage services', () => {
-    const syncService = factory.createSpecificStorageService(StorageType.SYNC);
-    const localService = factory.createSpecificStorageService(StorageType.LOCAL);
-
-    expect(syncService).toBeDefined();
-    expect(localService).toBeDefined();
-    expect(syncService).not.toBe(localService);
   });
 });
