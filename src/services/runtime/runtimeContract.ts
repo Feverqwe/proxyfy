@@ -44,7 +44,7 @@ const BackgroundRequestSchema = v.variant('action', [
   v.object({
     action: v.literal(RuntimeAction.MoveProxy),
     proxyId: v.string(),
-    offset: v.union([v.literal(-1), v.literal(1)]),
+    offset: v.pipe(v.number(), v.safeInteger()),
   }),
   v.object({
     action: v.literal(RuntimeAction.SetProxyEnabled),

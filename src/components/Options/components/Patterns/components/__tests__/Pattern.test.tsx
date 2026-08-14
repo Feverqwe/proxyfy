@@ -44,10 +44,15 @@ describe('Pattern', () => {
             pattern={pattern}
             isFirst={false}
             isLast={false}
+            isDragging={false}
             onChange={vi.fn()}
             onCopy={onCopy}
             onDelete={onDelete}
             onMove={onMove}
+            onDragStart={vi.fn()}
+            onDragEnd={vi.fn()}
+            onDragOver={vi.fn()}
+            onDrop={vi.fn()}
           />
         </ThemeProvider>,
       );

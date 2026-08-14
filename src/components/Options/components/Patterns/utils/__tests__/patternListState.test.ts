@@ -7,6 +7,7 @@ import {
   copyPattern,
   initializePatterns,
   movePattern,
+  placePattern,
   removePattern,
   updatePattern,
 } from '../patternListState';
@@ -52,5 +53,21 @@ describe('pattern list state', () => {
     expect(copied.map(({id}) => id)).toEqual(['one', 'copy', 'two']);
     expect(moved.map(({id}) => id)).toEqual(['one', 'two', 'copy']);
     expect(removed.map(({id}) => id)).toEqual(['one', 'two']);
+  });
+
+  it('places a dragged row before or after its target without mutating the source', () => {
+    const source = [
+      {...pattern, id: 'one'},
+      {...pattern, id: 'two'},
+      {...pattern, id: 'three'},
+      {...pattern, id: 'four'},
+    ];
+
+    const movedDown = placePattern(source, 'one', 'three', 'after');
+    const movedUp = placePattern(source, 'four', 'two', 'before');
+
+    expect(movedDown.map(({id}) => id)).toEqual(['two', 'three', 'one', 'four']);
+    expect(movedUp.map(({id}) => id)).toEqual(['one', 'four', 'two', 'three']);
+    expect(source.map(({id}) => id)).toEqual(['one', 'two', 'three', 'four']);
   });
 });

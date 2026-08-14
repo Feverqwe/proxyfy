@@ -46,7 +46,7 @@ export async function removeProxyConfig(proxyId: string): Promise<void> {
   await sendRequest({action: RuntimeAction.RemoveProxy, proxyId});
 }
 
-export async function moveProxyConfig(proxyId: string, offset: -1 | 1): Promise<void> {
+export async function moveProxyConfig(proxyId: string, offset: number): Promise<void> {
   await sendRequest({action: RuntimeAction.MoveProxy, proxyId, offset});
 }
 

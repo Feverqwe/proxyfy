@@ -80,3 +80,21 @@ export function movePattern(
   result.splice(targetIndex, 0, pattern);
   return result;
 }
+
+export function placePattern(
+  patterns: ProxyPattern[],
+  patternId: string | undefined,
+  targetPatternId: string | undefined,
+  position: 'before' | 'after',
+): ProxyPattern[] {
+  const sourceIndex = patterns.findIndex((pattern) => pattern.id === patternId);
+  const targetIndex = patterns.findIndex((pattern) => pattern.id === targetPatternId);
+  if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return patterns;
+
+  const result = patterns.slice();
+  const [pattern] = result.splice(sourceIndex, 1);
+  const adjustedTargetIndex = targetIndex - (sourceIndex < targetIndex ? 1 : 0);
+  const insertionIndex = adjustedTargetIndex + (position === 'after' ? 1 : 0);
+  result.splice(insertionIndex, 0, pattern);
+  return result;
+}

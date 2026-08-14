@@ -23,6 +23,13 @@ describe('runtime contract', () => {
         proxyId: 'office',
         offset: 2,
       }),
+    ).toEqual({action: RuntimeAction.MoveProxy, proxyId: 'office', offset: 2});
+    expect(
+      parseBackgroundRequest({
+        action: RuntimeAction.MoveProxy,
+        proxyId: 'office',
+        offset: 1.5,
+      }),
     ).toBeNull();
     expect(
       parseBackgroundRequest({

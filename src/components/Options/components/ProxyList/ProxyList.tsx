@@ -1,9 +1,8 @@
 import React, {FC, useCallback, useState} from 'react';
 
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
-import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import DragIndicatorRoundedIcon from '@mui/icons-material/DragIndicatorRounded';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import RuleRoundedIcon from '@mui/icons-material/RuleRounded';
 import {
@@ -34,10 +33,17 @@ import {ConfigProxy, getId, getObjectId} from '../../../../tools/index';
 import {CopyIcon, Header, Notification, ProxySelect, useActualProxies} from '../../../index';
 import Menu from '../Menu/Menu';
 
+import {getProxyDropOffset} from './proxyListState';
+
 const ProxyList: FC = () => {
   const proxies = useActualProxies();
   const [deleteTarget, setDeleteTarget] = useState<ConfigProxy | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [draggedProxyId, setDraggedProxyId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<{
+    proxyId: string;
+    position: ProxyDropPosition;
+  } | null>(null);
   const [notify, setNotify] = useState<{
     text: string;
     severity?: 'success' | 'error';
@@ -64,10 +70,62 @@ const ProxyList: FC = () => {
   }, [deleteTarget, runCommand]);
 
   const handleMove = useCallback(
-    (proxy: ConfigProxy, offset: -1 | 1) => {
+    (proxy: ConfigProxy, offset: number) => {
       return runCommand(proxy.id, () => moveProxyConfig(proxy.id, offset));
     },
     [runCommand],
+  );
+
+  const resetDragState = useCallback(() => {
+    setDraggedProxyId(null);
+    setDropTarget(null);
+  }, []);
+
+  const handleDragStart = useCallback((proxy: ConfigProxy, event: React.DragEvent<HTMLElement>) => {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', proxy.id);
+    const row = event.currentTarget.closest('article') as HTMLElement | null;
+    if (row) {
+      const bounds = row.getBoundingClientRect();
+      event.dataTransfer.setDragImage(
+        row,
+        Math.max(0, event.clientX - bounds.left),
+        Math.max(0, event.clientY - bounds.top),
+      );
+    }
+    setDraggedProxyId(proxy.id);
+  }, []);
+
+  const handleDragOver = useCallback(
+    (proxy: ConfigProxy, event: React.DragEvent<HTMLElement>) => {
+      if (!draggedProxyId || proxy.id === draggedProxyId) return;
+
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      const bounds = event.currentTarget.getBoundingClientRect();
+      const position =
+        event.clientY < bounds.top + bounds.height / 2 ? ('before' as const) : ('after' as const);
+      setDropTarget((current) => {
+        if (current?.proxyId === proxy.id && current?.position === position) return current;
+        return {proxyId: proxy.id, position};
+      });
+    },
+    [draggedProxyId],
+  );
+
+  const handleDrop = useCallback(
+    async (proxy: ConfigProxy, event: React.DragEvent<HTMLElement>) => {
+      if (!proxies || !draggedProxyId || proxy.id === draggedProxyId) return;
+
+      event.preventDefault();
+      const bounds = event.currentTarget.getBoundingClientRect();
+      const position = event.clientY < bounds.top + bounds.height / 2 ? 'before' : 'after';
+      const source = proxies.find(({id}) => id === draggedProxyId);
+      const offset = getProxyDropOffset(proxies, draggedProxyId, proxy.id, position);
+      resetDragState();
+      if (source && offset !== 0) await handleMove(source, offset);
+    },
+    [draggedProxyId, handleMove, proxies, resetDragState],
   );
 
   const handleEnabledChange = useCallback(
@@ -145,7 +203,12 @@ const ProxyList: FC = () => {
                   isLast={index === proxies.length - 1}
                   busy={busyId === proxy.id}
                   onDelete={setDeleteTarget}
-                  onMove={handleMove}
+                  isDragging={proxy.id === draggedProxyId}
+                  dropPosition={dropTarget?.proxyId === proxy.id ? dropTarget?.position : undefined}
+                  onDragStart={handleDragStart}
+                  onDragEnd={resetDragState}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
                   onEnabledChange={handleEnabledChange}
                   onClone={handleClone}
                 />
@@ -187,8 +250,13 @@ interface ProxyItemProps {
   isFirst: boolean;
   isLast: boolean;
   busy: boolean;
+  isDragging: boolean;
+  dropPosition?: ProxyDropPosition;
   onDelete: (proxy: ConfigProxy) => unknown;
-  onMove: (proxy: ConfigProxy, pos: -1 | 1) => unknown;
+  onDragStart: (proxy: ConfigProxy, event: React.DragEvent<HTMLElement>) => void;
+  onDragEnd: () => void;
+  onDragOver: (proxy: ConfigProxy, event: React.DragEvent<HTMLElement>) => void;
+  onDrop: (proxy: ConfigProxy, event: React.DragEvent<HTMLElement>) => void;
   onEnabledChange: (state: boolean, proxy: ConfigProxy) => unknown;
   onClone: (proxy: ConfigProxy) => unknown;
 }
@@ -199,8 +267,13 @@ const ProxyItem: FC<ProxyItemProps> = ({
   isFirst,
   isLast,
   busy,
+  isDragging,
+  dropPosition,
   onDelete,
-  onMove,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
   onEnabledChange,
   onClone,
 }) => {
@@ -209,7 +282,13 @@ const ProxyItem: FC<ProxyItemProps> = ({
   return (
     <Box
       component="article"
+      data-proxy-id={proxy.id}
+      data-dragging={isDragging || undefined}
+      data-drop-position={dropPosition}
+      onDragOver={(event) => onDragOver(proxy, event)}
+      onDrop={(event) => onDrop(proxy, event)}
       sx={{
+        position: 'relative',
         display: 'grid',
         gridTemplateColumns: {xs: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr) auto'},
         alignItems: 'center',
@@ -219,11 +298,44 @@ const ProxyItem: FC<ProxyItemProps> = ({
         borderBottom: '1px solid',
         borderColor: 'divider',
         opacity: busy ? 0.6 : proxy.enabled ? 1 : 0.68,
+        '&[data-dragging="true"]': {opacity: 0.45},
+        '&[data-drop-position]::after': {
+          content: '""',
+          position: 'absolute',
+          zIndex: 1,
+          right: 4,
+          left: 4,
+          height: 2,
+          borderRadius: 1,
+          bgcolor: 'primary.main',
+          pointerEvents: 'none',
+        },
+        '&[data-drop-position="before"]::after': {top: -1},
+        '&[data-drop-position="after"]::after': {bottom: -1},
         '&:last-child': {borderBottom: 0},
         '&:hover': {bgcolor: 'action.hover'},
       }}
     >
       <Stack direction="row" spacing={1} sx={{minWidth: 0, alignItems: 'center'}}>
+        <IconButton
+          aria-hidden="true"
+          draggable={!busy}
+          disabled={busy || (isFirst && isLast)}
+          size="small"
+          tabIndex={-1}
+          title="Drag to reorder"
+          onDragStart={(event) => onDragStart(proxy, event)}
+          onDragEnd={onDragEnd}
+          sx={{
+            flex: '0 0 auto',
+            p: 0.5,
+            cursor: busy ? 'default' : 'grab',
+            color: 'text.disabled',
+            '&:active': {cursor: busy ? 'default' : 'grabbing'},
+          }}
+        >
+          <DragIndicatorRoundedIcon fontSize="small" />
+        </IconButton>
         <Box sx={{position: 'relative', flex: '0 0 auto'}}>
           <Box
             sx={{
@@ -318,30 +430,6 @@ const ProxyItem: FC<ProxyItemProps> = ({
             <CopyIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Move up">
-          <span>
-            <IconButton
-              onClick={() => onMove(proxy, -1)}
-              disabled={isFirst || busy}
-              size="small"
-              aria-label={`Move ${proxy.title} up`}
-            >
-              <ArrowUpwardRoundedIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
-        <Tooltip title="Move down">
-          <span>
-            <IconButton
-              onClick={() => onMove(proxy, 1)}
-              disabled={isLast || busy}
-              size="small"
-              aria-label={`Move ${proxy.title} down`}
-            >
-              <ArrowDownwardRoundedIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
         <Tooltip title="Delete">
           <IconButton
             onClick={() => onDelete(proxy)}
@@ -357,5 +445,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
     </Box>
   );
 };
+
+type ProxyDropPosition = 'before' | 'after';
 
 export default ProxyList;

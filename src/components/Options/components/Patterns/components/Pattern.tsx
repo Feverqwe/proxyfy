@@ -3,6 +3,7 @@ import React, {FC, useCallback, useState} from 'react';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DragIndicatorRoundedIcon from '@mui/icons-material/DragIndicatorRounded';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import {
   Box,
@@ -27,20 +28,34 @@ interface PatternProps {
   pattern: ProxyPattern;
   isFirst: boolean;
   isLast: boolean;
+  isDragging: boolean;
+  dropPosition?: PatternDropPosition;
   onChange: (pattern: ProxyPattern, changes: Partial<Omit<ProxyPattern, 'id'>>) => void;
   onDelete: (pattern: ProxyPattern) => void;
   onCopy: (pattern: ProxyPattern) => void;
   onMove: (pattern: ProxyPattern, offset: -1 | 1) => void;
+  onDragStart: (pattern: ProxyPattern, event: React.DragEvent<HTMLElement>) => void;
+  onDragEnd: () => void;
+  onDragOver: (pattern: ProxyPattern, event: React.DragEvent<HTMLElement>) => void;
+  onDrop: (pattern: ProxyPattern, event: React.DragEvent<HTMLElement>) => void;
 }
+
+type PatternDropPosition = 'before' | 'after';
 
 const Pattern: FC<PatternProps> = ({
   pattern,
   isFirst,
   isLast,
+  isDragging,
+  dropPosition,
   onChange,
   onDelete,
   onCopy,
   onMove,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
 }) => {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
 
@@ -57,7 +72,35 @@ const Pattern: FC<PatternProps> = ({
   }, []);
 
   return (
-    <Box className="pattern-list-grid pattern-row" component="article">
+    <Box
+      className="pattern-list-grid pattern-row"
+      component="article"
+      data-dragging={isDragging || undefined}
+      data-drop-position={dropPosition}
+      onDragOver={(event) => onDragOver(pattern, event)}
+      onDrop={(event) => onDrop(pattern, event)}
+    >
+      <Box className="drag-cell">
+        <IconButton
+          aria-hidden="true"
+          className="drag-handle"
+          draggable
+          disabled={isFirst && isLast}
+          size="small"
+          tabIndex={-1}
+          title="Drag to reorder"
+          onDragStart={(event) => onDragStart(pattern, event)}
+          onDragEnd={onDragEnd}
+          sx={{
+            p: 0.5,
+            cursor: 'grab',
+            color: 'text.disabled',
+            '&:active': {cursor: 'grabbing'},
+          }}
+        >
+          <DragIndicatorRoundedIcon fontSize="small" />
+        </IconButton>
+      </Box>
       <Tooltip title={pattern.enabled ? 'Disable rule' : 'Enable rule'}>
         <Checkbox
           className="small-checkbox toggle-cell"
@@ -155,3 +198,4 @@ const Pattern: FC<PatternProps> = ({
 };
 
 export {Pattern};
+export type {PatternDropPosition};
