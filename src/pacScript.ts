@@ -1,7 +1,7 @@
 import {PacScript} from './services/pac/pacTypes';
-import wildcardToRegexpStr from './tools/wildcardToRegexpStr';
-import splitMultiPattern from './tools/splitMultiPattern';
 import {DirectProxyType} from './tools/ConfigStruct';
+import splitMultiPattern from './tools/splitMultiPattern';
+import wildcardToRegexpStr from './tools/wildcardToRegexpStr';
 
 declare let FindProxyForURL: (url: string) => string;
 declare let Config: PacScript | null;
@@ -10,7 +10,7 @@ FindProxyForURL = (function () {
   const config = Config!;
   Config = null;
 
-  const rules = config.rules.map((rule: any) => {
+  const rules = config.rules.map((rule) => {
     const {type} = rule;
     let address;
     const {whitePatterns} = rule;
@@ -63,7 +63,7 @@ FindProxyForURL = (function () {
     if (m) {
       const origin = m[1];
 
-      const currentRule = rules.find((rule: any) => {
+      const currentRule = rules.find((rule) => {
         const inWhitePattern = rule.whiteRe && rule.whiteRe.test(origin);
         const inBlackPattern = rule.blackRe && rule.blackRe.test(origin);
         return !inBlackPattern && inWhitePattern;

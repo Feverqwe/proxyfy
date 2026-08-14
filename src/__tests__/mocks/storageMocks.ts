@@ -6,6 +6,7 @@
  */
 
 import {vi} from 'vitest';
+
 import {StorageService} from '../../storage/StorageService';
 import {StorageType} from '../../storage/StorageSettings';
 
@@ -143,7 +144,7 @@ export function createMockStorageFactory(
 
     getCurrentStorageType: () => currentStorageType,
 
-    createSpecificStorageService(type: StorageType) {
+    createSpecificStorageService(_type: StorageType) {
       return createMockStorageService();
     },
   };

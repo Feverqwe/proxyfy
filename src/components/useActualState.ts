@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+
 import type {ProxyState} from '../types/index';
 
 const useActualState = () => {
@@ -18,7 +19,9 @@ const useActualState = () => {
 
     function fetchState() {
       getState().then((state) => {
-        mounted && setState(state);
+        if (mounted) {
+          setState(state);
+        }
       });
     }
 

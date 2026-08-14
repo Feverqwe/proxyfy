@@ -5,9 +5,10 @@
  */
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import getConfig from '../getConfig';
+
 import {StorageFactory} from '../../storage/StorageFactory';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
+import getConfig from '../getConfig';
 
 // Use the global Chrome mock from vitest.setup.ts
 

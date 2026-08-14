@@ -1,7 +1,8 @@
 /**
  * Tests for StorageSettings class
  */
-import {beforeEach, describe, expect, it, Mock, vi} from 'vitest';
+import {Mock, beforeEach, describe, expect, it, vi} from 'vitest';
+
 import {StorageSettings, StorageType} from '../StorageSettings';
 
 describe('StorageSettings', () => {

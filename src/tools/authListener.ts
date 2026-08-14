@@ -5,7 +5,7 @@ class AuthListener {
 
   enabled = false;
 
-  public readonly isRequired: boolean;
+  readonly isRequired: boolean;
 
   private proxies: GenericProxy[];
 
@@ -14,7 +14,7 @@ class AuthListener {
       (proxy): proxy is GenericProxy =>
         proxy.type !== 'direct' && 'username' in proxy && Boolean(proxy.username),
     );
-    this.isRequired = !!this.proxies.length;
+    this.isRequired = Boolean(this.proxies.length);
   }
 
   handleAuthRequired = (details: {isProxy: boolean; challenger: {host: string; port: number}}) => {

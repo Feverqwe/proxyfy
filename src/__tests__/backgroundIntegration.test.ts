@@ -5,8 +5,10 @@
  */
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
+
 import {StorageFactory} from '../storage/StorageFactory';
 import {StorageSettings, StorageType} from '../storage/StorageSettings';
+
 import {ChromeStorageMock, createChromeStorageMock} from './mocks/chromeMocks';
 
 // Mock the background script functionality
@@ -80,7 +82,7 @@ describe('Background Script Integration', () => {
   describe('Storage Initialization', () => {
     it('should initialize storage system on startup', async () => {
       // Mock storage type preference
-      const mockGet = vi
+      const _mockGet = vi
         .spyOn(chromeLocalStorage, 'get')
         .mockResolvedValue({storageType: StorageType.SYNC});
 
@@ -93,7 +95,7 @@ describe('Background Script Integration', () => {
 
     it('should handle missing storage type preference gracefully', async () => {
       // Mock empty storage (no preference set)
-      const mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({});
+      const _mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({});
 
       const {storageSettings} = await backgroundScript.initializeStorage();
 
@@ -138,7 +140,7 @@ describe('Background Script Integration', () => {
 
     it('should handle storage errors gracefully', async () => {
       // Mock storage error
-      const mockSet = vi
+      const _mockSet = vi
         .spyOn(chromeSyncStorage, 'set')
         .mockRejectedValue(new Error('Storage error'));
 
@@ -158,11 +160,11 @@ describe('Background Script Integration', () => {
       // Mock storage operations for both storage types
       const mockSyncSet = vi.spyOn(chromeSyncStorage, 'set').mockResolvedValue(undefined);
       const mockLocalSet = vi.spyOn(chromeLocalStorage, 'set').mockResolvedValue(undefined);
-      const mockSyncGet = vi.spyOn(chromeSyncStorage, 'get').mockResolvedValue({});
-      const mockLocalGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({});
+      const _mockSyncGet = vi.spyOn(chromeSyncStorage, 'get').mockResolvedValue({});
+      const _mockLocalGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({});
 
       // Initialize with SYNC storage
-      const {storageSettings} = await backgroundScript.initializeStorage();
+      await backgroundScript.initializeStorage();
 
       // Store data in SYNC storage
       const proxyConfig = {type: 'http', host: 'proxy.example.com', port: 8080};

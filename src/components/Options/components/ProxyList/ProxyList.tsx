@@ -1,13 +1,15 @@
 import React, {FC, useCallback, useEffect, useState} from 'react';
-import {Box, Button, Checkbox, Grid, Paper} from '@mui/material';
-import {Link} from 'react-router-dom';
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
+
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import {ColorIcon, CopyIcon, Header, ProxySelect} from '../../../index';
-import {ConfigProxy, ConfigStruct, getConfig, getId} from '../../../../tools/index';
+import DeleteIcon from '@mui/icons-material/Delete';
+import {Box, Button, Checkbox, Grid, Paper} from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import {Link} from 'react-router-dom';
+
 import {StorageFactory} from '../../../../storage/index';
+import {ConfigProxy, ConfigStruct, getConfig, getId} from '../../../../tools/index';
+import {ColorIcon, CopyIcon, Header, ProxySelect} from '../../../index';
 import Menu from '../Menu/Menu';
 
 const STYLE = {

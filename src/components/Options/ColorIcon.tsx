@@ -1,4 +1,5 @@
 import React, {FC, useMemo} from 'react';
+
 import {getExtensionIcon, getUrlFromImageData} from '../../tools/index';
 
 const colorIconStyle = {

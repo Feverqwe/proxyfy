@@ -6,6 +6,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
+
+import InfoIcon from '@mui/icons-material/Info';
 import {
   Table,
   TableBody,
@@ -16,8 +18,9 @@ import {
   Tooltip,
 } from '@mui/material';
 import {styled} from '@mui/system';
-import InfoIcon from '@mui/icons-material/Info';
+
 import {ProxyPattern, ProxyPatternType} from '../../../../../tools/index';
+
 import {Pattern} from './Pattern';
 
 const TableContainerS = styled(TableContainer)(({theme}) => {
@@ -173,5 +176,7 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
     </TableContainerS>
   );
 });
+
+PatternList.displayName = 'PatternList';
 
 export {PatternList};

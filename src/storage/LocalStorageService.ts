@@ -2,8 +2,9 @@
  * Local Storage Service Implementation
  * Wrapper around chrome.storage.local
  */
-import {StorageService} from './StorageService';
 import type {StorageKeys, StorageSetItems} from '../types/storage';
+
+import {StorageService} from './StorageService';
 
 export class LocalStorageService implements StorageService {
   /**
@@ -17,7 +18,7 @@ export class LocalStorageService implements StorageService {
    * Sets one or more items in chrome.storage.local
    */
   async set(items: StorageSetItems): Promise<void> {
-    await chrome.storage.local.set(items);
+    await chrome.storage.local.set(items as Record<string, unknown>);
   }
 
   /**

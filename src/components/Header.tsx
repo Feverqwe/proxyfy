@@ -1,5 +1,7 @@
 import React, {FC, useMemo} from 'react';
+
 import {Box, Grid, Paper, Typography} from '@mui/material';
+
 import {getExtensionIcon, getUrlFromImageData} from '../tools/index';
 
 interface HeaderProps {

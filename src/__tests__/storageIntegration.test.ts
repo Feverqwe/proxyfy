@@ -8,8 +8,10 @@
  */
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
+
 import {StorageFactory} from '../storage/StorageFactory';
 import {StorageSettings, StorageType} from '../storage/StorageSettings';
+
 import {ChromeStorageMock, createChromeStorageMock} from './mocks/chromeMocks';
 
 // Use type-safe Chrome mocks
@@ -44,7 +46,7 @@ describe('Storage System Integration', () => {
   describe('Storage Type Switching', () => {
     it('should switch between sync and local storage types', async () => {
       // Mock the storage type preference loading
-      const mockGet = vi
+      const _mockGet = vi
         .spyOn(chromeLocalStorage, 'get')
         .mockResolvedValue({storageType: StorageType.SYNC});
       const mockSet = vi.spyOn(chromeLocalStorage, 'set').mockResolvedValue();
@@ -76,7 +78,7 @@ describe('Storage System Integration', () => {
 
     it('should persist storage type preference across instances', async () => {
       // Mock initial storage type preference
-      const mockGet = vi
+      const _mockGet = vi
         .spyOn(chromeLocalStorage, 'get')
         .mockResolvedValue({storageType: StorageType.LOCAL});
 
@@ -95,7 +97,7 @@ describe('Storage System Integration', () => {
   describe('StorageFactory Integration', () => {
     it('should create correct storage service based on settings', async () => {
       // Mock storage type preference
-      const mockGet = vi
+      const _mockGet = vi
         .spyOn(chromeLocalStorage, 'get')
         .mockResolvedValue({storageType: StorageType.SYNC});
 
@@ -139,7 +141,7 @@ describe('Storage System Integration', () => {
   describe('Error Handling and Edge Cases', () => {
     it('should handle missing storage type preference gracefully', async () => {
       // Mock empty storage (no preference set)
-      const mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({});
+      const _mockGet = vi.spyOn(chromeLocalStorage, 'get').mockResolvedValue({});
 
       await storageSettings.initialize();
 
@@ -149,7 +151,7 @@ describe('Storage System Integration', () => {
 
     it('should handle storage operation errors gracefully', async () => {
       // Mock storage operation failure
-      const mockSet = vi
+      const _mockSet = vi
         .spyOn(chromeSyncStorage, 'set')
         .mockRejectedValue(new Error('Storage error'));
 
@@ -188,7 +190,7 @@ describe('Storage System Integration', () => {
     it('should handle configuration storage and retrieval', async () => {
       // Mock storage operations
       const mockSet = vi.spyOn(chromeSyncStorage, 'set').mockResolvedValue(undefined);
-      const mockGet = vi.spyOn(chromeSyncStorage, 'get').mockResolvedValue({
+      const _mockGet = vi.spyOn(chromeSyncStorage, 'get').mockResolvedValue({
         proxies: {
           type: 'http',
           host: 'proxy.example.com',
@@ -215,7 +217,7 @@ describe('Storage System Integration', () => {
     });
 
     it('should support multiple configuration keys', async () => {
-      const mockGet = vi.spyOn(chromeSyncStorage, 'get').mockResolvedValue({
+      const _mockGet = vi.spyOn(chromeSyncStorage, 'get').mockResolvedValue({
         proxyConfig: {type: 'http'},
         patterns: ['*.example.com'],
         settings: {autoEnable: true},

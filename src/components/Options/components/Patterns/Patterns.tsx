@@ -1,7 +1,10 @@
 import React, {useEffect, useState} from 'react';
+
 import {useLocation, useNavigate} from 'react-router';
+
 import {ConfigProxy, getConfig} from '../../../../tools/index';
 import {Header} from '../../../index';
+
 import {PatternsLoaded} from './components/PatternsLoaded';
 
 const Patterns = () => {

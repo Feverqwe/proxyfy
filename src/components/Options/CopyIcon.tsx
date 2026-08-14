@@ -1,4 +1,5 @@
 import React, {FC} from 'react';
+
 import {SvgIcon, SvgIconProps} from '@mui/material';
 
 const CopyIcon: FC<SvgIconProps> = (props) => {

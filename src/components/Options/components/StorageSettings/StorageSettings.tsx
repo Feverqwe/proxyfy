@@ -1,4 +1,5 @@
 import React, {FC, useCallback, useEffect, useState} from 'react';
+
 import {
   Box,
   FormControl,
@@ -10,11 +11,9 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material';
-import {
-  StorageFactory,
-  StorageSettings as StorageSettingsManager,
-} from '../../../../storage/index';
+
 import {StorageType} from '../../../../storage/StorageSettings';
+import {StorageFactory, StorageSettings as StorageSettingsManager} from '../../../../storage/index';
 import {Header, MyColorInput} from '../../../index';
 
 const StorageSettings: FC = () => {

@@ -1,5 +1,6 @@
-import {Button, ButtonProps} from '@mui/material';
 import React, {FC} from 'react';
+
+import {Button, ButtonProps} from '@mui/material';
 
 const MyButton: FC<ButtonProps> = (props) => {
   // @ts-ignore

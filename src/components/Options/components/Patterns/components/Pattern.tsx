@@ -1,4 +1,8 @@
 import React, {FC, useCallback, useEffect, useMemo, useState} from 'react';
+
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Checkbox,
   Grid,
@@ -9,9 +13,7 @@ import {
   TableCell,
   TableRow,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+
 import {ProxyPattern, ProxyPatternType} from '../../../../../tools/index';
 import {CopyIcon, MySelectProps} from '../../../../index';
 import {isValidPattern} from '../utils/validation';

@@ -1,9 +1,12 @@
-import {CssBaseline, GlobalStyles, ThemeProvider} from '@mui/material';
 import React, {FC, ReactNode} from 'react';
+
 import {CacheProvider} from '@emotion/react';
+import {CssBaseline, GlobalStyles, ThemeProvider} from '@mui/material';
 import {GlobalStylesProps} from '@mui/material/GlobalStyles/GlobalStyles';
-import cache from './muiCache';
+
 import {theme} from '../index';
+
+import cache from './muiCache';
 
 interface PageBaseProps {
   children: ReactNode;

@@ -1,5 +1,5 @@
-import {chromeProxySettingsGet} from '../../tools/index';
 import {LocalStorageService} from '../../storage/index';
+import {chromeProxySettingsGet} from '../../tools/index';
 
 export async function getCurrentState(): Promise<{mode: string; id?: string} | null> {
   const proxySettings = await chromeProxySettingsGet({
@@ -24,6 +24,7 @@ export async function getCurrentState(): Promise<{mode: string; id?: string} | n
         result.id = decodeURIComponent(m[1]);
         return true;
       }
+      return false;
     });
   }
   return result;

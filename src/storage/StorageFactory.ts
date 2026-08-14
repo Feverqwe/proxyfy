@@ -2,11 +2,22 @@
  * Storage Factory
  * Creates and manages storage service instances based on settings
  */
-import {LocalStorageService, StorageService, StorageSettings, SyncStorageService} from './index';
 import {StorageType} from './StorageSettings';
+
+import {LocalStorageService, StorageService, StorageSettings, SyncStorageService} from './index';
 
 export class StorageFactory {
   private static instance: StorageFactory;
+
+  /**
+   * Get the singleton instance
+   */
+  static getInstance(): StorageFactory {
+    if (!StorageFactory.instance) {
+      StorageFactory.instance = new StorageFactory();
+    }
+    return StorageFactory.instance;
+  }
 
   private storageSettings: StorageSettings;
 
@@ -14,16 +25,6 @@ export class StorageFactory {
 
   private constructor() {
     this.storageSettings = StorageSettings.getInstance();
-  }
-
-  /**
-   * Get the singleton instance
-   */
-  public static getInstance(): StorageFactory {
-    if (!StorageFactory.instance) {
-      StorageFactory.instance = new StorageFactory();
-    }
-    return StorageFactory.instance;
   }
 
   /**
@@ -41,23 +42,6 @@ export class StorageFactory {
       this.currentStorageService = this.createStorageService();
     }
     return this.currentStorageService;
-  }
-
-  /**
-   * Create a storage service instance based on current settings
-   */
-  private createStorageService(): StorageService {
-    const storageType = this.storageSettings.getStorageType();
-
-    switch (storageType) {
-      case StorageType.SYNC:
-        return new SyncStorageService();
-      case StorageType.LOCAL:
-        return new LocalStorageService();
-      default:
-        console.warn(`Unknown storage type: ${storageType}, falling back to sync storage`);
-        return new SyncStorageService();
-    }
   }
 
   /**
@@ -86,6 +70,23 @@ export class StorageFactory {
         return new LocalStorageService();
       default:
         throw new Error(`Unknown storage type: ${storageType}`);
+    }
+  }
+
+  /**
+   * Create a storage service instance based on current settings
+   */
+  private createStorageService(): StorageService {
+    const storageType = this.storageSettings.getStorageType();
+
+    switch (storageType) {
+      case StorageType.SYNC:
+        return new SyncStorageService();
+      case StorageType.LOCAL:
+        return new LocalStorageService();
+      default:
+        console.warn(`Unknown storage type: ${storageType}, falling back to sync storage`);
+        return new SyncStorageService();
     }
   }
 }

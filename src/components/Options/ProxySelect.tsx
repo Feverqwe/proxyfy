@@ -1,7 +1,9 @@
 import React, {FC, useCallback, useMemo} from 'react';
+
 import {FormControl, MenuItem, Select, SelectProps} from '@mui/material';
-import {useActualProxies, useActualState} from '../index';
+
 import type {ProxyMode} from '../../types/index';
+import {useActualProxies, useActualState} from '../index';
 
 const defaultItems = [
   {title: 'Use enabled proxies by patterns and order', mode: 'pac_script'},

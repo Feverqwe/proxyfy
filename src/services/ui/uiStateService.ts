@@ -1,6 +1,6 @@
-import {authListener as AuthListener, getConfig, getExtensionIcon} from '../../tools/index';
-import {StorageSettings} from '../../storage/index';
 import {AUTH_SUPPORTED} from '../../constants';
+import {StorageSettings} from '../../storage/index';
+import {authListener as AuthListener, getConfig, getExtensionIcon} from '../../tools/index';
 import {getCurrentState} from '../proxy/proxyStateService';
 
 let authListener: AuthListener | null = null;

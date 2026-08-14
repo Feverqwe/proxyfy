@@ -1,5 +1,7 @@
 import type {ChangeEvent} from 'react';
+
 import type {SelectChangeEvent} from '@mui/material';
+
 import type {DirectProxyType, GenericProxyType, ProxyPatternType} from '../tools/index';
 
 export type ChromePickerColor = {

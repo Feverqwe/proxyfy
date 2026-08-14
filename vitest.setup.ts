@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import {vi} from 'vitest';
 
 // Mock escape-string-regexp for Vitest tests
 vi.mock('escape-string-regexp', () => ({

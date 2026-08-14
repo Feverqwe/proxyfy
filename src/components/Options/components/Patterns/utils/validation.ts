@@ -5,7 +5,7 @@ export function isValidPattern(value: string, type: string) {
   let result = true;
   try {
     splitMultiPattern(value).forEach((v: string) => new RegExp(`(?:${v})`));
-  } catch (err) {
+  } catch {
     result = false;
   }
   return result;

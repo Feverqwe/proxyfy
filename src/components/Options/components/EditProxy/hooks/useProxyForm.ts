@@ -1,18 +1,21 @@
 import {RefObject, useCallback, useRef, useState} from 'react';
+
 import {useNavigate} from 'react-router';
+import {assert} from 'superstruct';
+
+import {StorageFactory} from '../../../../../storage/index';
 import {
   ConfigProxy,
   ConfigStruct,
   DirectProxyType,
   GenericProxyType,
+  ProxyPatternType,
   getConfig,
   getId,
-  ProxyPatternType,
 } from '../../../../../tools/index';
-import {StorageFactory} from '../../../../../storage/index';
 import {localhostPresets, matchAllPresets} from '../../Patterns/index';
-import {ChangedProxy, FieldType} from '../types';
 import {noProxyTypes} from '../constants';
+import {ChangedProxy, FieldType} from '../types';
 
 interface UseProxyFormProps {
   proxy: ConfigProxy;
@@ -69,7 +72,7 @@ export const useProxyForm = ({proxy, isNew, refForm}: UseProxyFormProps) => {
     delete data.useMatchAllPreset;
     delete data.useLocalhostPreset;
 
-    if (!noProxyTypes.includes(data.type as any)) {
+    if (!noProxyTypes.includes(data.type as DirectProxyType)) {
       let hasErrors = false;
       if (!data.host) {
         hasErrors = true;
@@ -143,16 +146,14 @@ export const useProxyForm = ({proxy, isNew, refForm}: UseProxyFormProps) => {
       const pos = config.proxies.indexOf(existsProxy);
       config.proxies.splice(pos, 1, changedProxy as ConfigProxy);
     }
-    const _ = ConfigStruct.assert(config);
+    assert(config, ConfigStruct);
     const storageFactory = StorageFactory.getInstance();
     await storageFactory.initialize();
     const storageService = storageFactory.getStorageService();
     await storageService.set(config);
 
-    console.log(config);
-
     return changedProxy.id;
-  }, [isNew, proxy, refFields]);
+  }, [isNew, proxy, refFields, refForm]);
 
   const handleChangeType = useCallback((value: string) => {
     setType(value as GenericProxyType | DirectProxyType);

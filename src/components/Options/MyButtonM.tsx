@@ -1,5 +1,6 @@
-import {styled} from '@mui/system';
 import {Button} from '@mui/material';
+import {styled} from '@mui/system';
+
 import MyButton from './MyButton';
 
 const MyButtonM = styled(MyButton)({

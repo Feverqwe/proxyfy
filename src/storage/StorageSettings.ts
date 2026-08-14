@@ -21,19 +21,19 @@ function isValidStorageType(value: unknown): value is StorageType {
 export class StorageSettings {
   private static instance: StorageSettings;
 
-  private storageType: StorageType = StorageType.SYNC; // Default to sync for backward compatibility
-  private endpointUrl: string = '';
-  private defaultIconColor: string = '#0a77e5'; // Default to the current PAC script color
-
   /**
    * Get the singleton instance
    */
-  public static getInstance(): StorageSettings {
+  static getInstance(): StorageSettings {
     if (!StorageSettings.instance) {
       StorageSettings.instance = new StorageSettings();
     }
     return StorageSettings.instance;
   }
+
+  private storageType: StorageType = StorageType.SYNC; // Default to sync for backward compatibility
+  private endpointUrl = '';
+  private defaultIconColor = '#0a77e5'; // Default to the current PAC script color
 
   /**
    * Initialize the storage settings by loading the preferred storage type

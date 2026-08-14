@@ -1,5 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
+
 import {useLocation, useNavigate} from 'react-router';
+
 import {
   ConfigProxy,
   DefaultProxyStruct,
@@ -7,8 +9,9 @@ import {
   getObjectId,
   getRandomInt,
 } from '../../../../tools/index';
-import {badgeColors} from './constants';
+
 import ProxyForm from './components/ProxyForm';
+import {badgeColors} from './constants';
 
 const EditProxy = () => {
   const location = useLocation();

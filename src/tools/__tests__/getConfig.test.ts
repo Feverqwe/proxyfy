@@ -2,11 +2,12 @@
  * Tests for getConfig function
  */
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import getConfig from '../getConfig';
+
 import {StorageFactory} from '../../storage/StorageFactory';
+import {StorageService} from '../../storage/StorageService';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
 import {DefaultConfigStruct} from '../ConfigStruct';
-import {StorageService} from '../../storage/StorageService';
+import getConfig from '../getConfig';
 
 describe('getConfig', () => {
   let storageFactory: StorageFactory;

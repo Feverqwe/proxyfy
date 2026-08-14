@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Box,
   Checkbox,
@@ -8,17 +9,16 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
+
 import {MyColorInput, MyInput} from '../../../../index';
-import {ConfigProxy} from '../../../../../tools/index';
 import {FieldType} from '../types';
 
 interface BasicInfoFieldsProps {
-  proxy: ConfigProxy;
   isNew: boolean;
   addField: (name: string, options?: {type?: FieldType}) => {name: string; defaultValue?: string};
 }
 
-const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({proxy, isNew, addField}) => {
+const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew, addField}) => {
   return (
     <>
       <MyInput label="Title (optional)" placeholder="title" {...addField('title')} />

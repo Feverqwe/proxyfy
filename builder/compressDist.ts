@@ -1,7 +1,7 @@
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from 'fs';
+import * as path from 'path';
 
-import zipFolder from "./zipFolder";
+import zipFolder from './zipFolder';
 
 let source = path.resolve(process.argv[process.argv.indexOf('--target') + 1]);
 

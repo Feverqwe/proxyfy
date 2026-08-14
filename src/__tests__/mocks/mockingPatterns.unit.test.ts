@@ -6,15 +6,17 @@
  */
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
+
+import {StorageType} from '../../storage/StorageSettings';
+
 import {ChromeMocks, createChromeMocks, resetChromeMocks} from './chromeMocks';
 import {
-  createMockStorageFactory,
-  createMockStorageService,
   MockDataGenerators,
   MockStorageFactory,
   MockStorageService,
+  createMockStorageFactory,
+  createMockStorageService,
 } from './storageMocks';
-import {StorageType} from '../../storage/StorageSettings';
 
 describe('Type-Safe Mocking Patterns', () => {
   describe('Chrome Mocks', () => {

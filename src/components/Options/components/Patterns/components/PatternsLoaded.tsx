@@ -1,11 +1,15 @@
 import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
-import {useNavigate} from 'react-router';
+
 import {Alert, Box, Paper, Typography} from '@mui/material';
-import {ConfigProxy, ConfigStruct, getConfig} from '../../../../../tools/index';
+import {useNavigate} from 'react-router';
+import {assert} from 'superstruct';
+
 import {StorageFactory} from '../../../../../storage/index';
+import {ConfigProxy, ConfigStruct, getConfig} from '../../../../../tools/index';
 import {ActionBox, MyButtonM, Notification} from '../../../../index';
-import {PatternList, PatternListHandler} from './PatternList';
 import {localhostPresets, matchAllPresets} from '../presets';
+
+import {PatternList, PatternListHandler} from './PatternList';
 
 interface PatternsLoadedProps {
   proxy: ConfigProxy;
@@ -42,7 +46,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
 
         existsProxy.whitePatterns = whitePatterns;
         existsProxy.blackPatterns = blackPatterns;
-        const _ = ConfigStruct.assert(config);
+        assert(config, ConfigStruct);
         const storageFactory = StorageFactory.getInstance();
         await storageFactory.initialize();
         const storageService = storageFactory.getStorageService();
@@ -67,7 +71,9 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
       if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
         handleSave(undefined, true).then((isSaved) => {
-          isSaved && setNotify({text: 'Patterns saved'});
+          if (isSaved) {
+            setNotify({text: 'Patterns saved'});
+          }
         });
       }
     }
@@ -96,8 +102,8 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
       {notify && <Notification notify={notify} />}
       <Box component={Paper} m={2} p={2}>
         <Alert severity="info" sx={{mb: 2}}>
-          Proxyfy ignores everything on this page unless set to "Use enabled proxies by patterns and
-          order"
+          Proxyfy ignores everything on this page unless set to &quot;Use enabled proxies by
+          patterns and order&quot;
         </Alert>
 
         <ActionBox>
@@ -118,8 +124,8 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
             size="small"
             color="secondary"
           >
-            Add black patterns to prevent this proxy being used for localhost & intranet/private
-            IP addresses
+            Add black patterns to prevent this proxy being used for localhost & intranet/private IP
+            addresses
           </MyButtonM>
         </ActionBox>
 

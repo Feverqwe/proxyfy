@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+
 import {ConfigProxy, getConfig} from '../tools/index';
 
 const useActualProxies = () => {
@@ -18,7 +19,9 @@ const useActualProxies = () => {
 
     function fetchState() {
       getConfig().then(({proxies}) => {
-        mounted && setProxies(proxies);
+        if (mounted) {
+          setProxies(proxies);
+        }
       });
     }
 

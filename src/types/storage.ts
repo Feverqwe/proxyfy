@@ -3,8 +3,8 @@
  * Provides type-safe interfaces for storage operations
  */
 
-export type StorageKeys = string | string[] | Record<string, any> | null;
+export type StorageKeys = string | string[] | Record<string, unknown> | null;
 
-export type StorageGetResult = Record<string, any>;
+export type StorageGetResult = Record<string, unknown>;
 
-export type StorageSetItems = Record<string, any>;
+export type StorageSetItems = object;

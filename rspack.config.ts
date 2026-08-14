@@ -1,10 +1,14 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import { DefinePlugin, rspack } from '@rspack/core';
 import * as path from 'path';
+
+import {DefinePlugin, rspack} from '@rspack/core';
 
 const outputPath = path.resolve('./dist/chrome/');
 
-const getOptions = (env: any, argv: any) => ({
+interface RspackCliArguments {
+  mode?: string;
+}
+
+const getOptions = (_env: unknown, argv: RspackCliArguments) => ({
   entry: {
     pacScript: './src/pacScript',
     background: './src/background',
@@ -44,10 +48,7 @@ const getOptions = (env: any, argv: any) => ({
   },
   plugins: [
     new rspack.CopyRspackPlugin({
-      patterns: [
-        { from: './src/assets/manifest.json' },
-        { from: './src/assets/icons', to: './icons' },
-      ],
+      patterns: [{from: './src/assets/manifest.json'}, {from: './src/assets/icons', to: './icons'}],
     }),
     new rspack.HtmlRspackPlugin({
       filename: 'popup.html',

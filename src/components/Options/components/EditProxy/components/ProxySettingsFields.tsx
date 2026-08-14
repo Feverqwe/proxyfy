@@ -1,12 +1,13 @@
 import React from 'react';
+
 import {MenuItem} from '@mui/material';
+
+import {DirectProxyType, GenericProxyType} from '../../../../../tools/index';
 import {MyInput, MySelect} from '../../../../index';
-import {ConfigProxy, DirectProxyType, GenericProxyType} from '../../../../../tools/index';
-import {FieldType} from '../types';
 import {authProxyTypes, noProxyTypes} from '../constants';
+import {FieldType} from '../types';
 
 interface ProxySettingsFieldsProps {
-  proxy: ConfigProxy;
   type: string;
   isValidHost: boolean;
   isValidPort: boolean;
@@ -15,7 +16,6 @@ interface ProxySettingsFieldsProps {
 }
 
 const ProxySettingsFields: React.FC<ProxySettingsFieldsProps> = ({
-  proxy,
   type,
   isValidHost,
   isValidPort,

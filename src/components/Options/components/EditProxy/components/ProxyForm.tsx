@@ -1,10 +1,13 @@
 import React, {FC, useCallback, useEffect, useRef} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+
 import {Box, Grid, Paper} from '@mui/material';
+import {Link, useNavigate} from 'react-router-dom';
+
+import {getObjectId} from '../../../../../tools/index';
 import {ActionBox, Header, MyButtonM, Notification} from '../../../../index';
 import {useProxyForm} from '../hooks/useProxyForm';
-import {getObjectId} from '../../../../../tools/index';
 import {ProxyFormProps} from '../types';
+
 import BasicInfoFields from './BasicInfoFields';
 import ProxySettingsFields from './ProxySettingsFields';
 
@@ -25,7 +28,6 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
     handleChangeType,
     handleSave,
     handleSaveAndEditPatterns,
-    handleSaveAndAddAnother,
     saveForm,
   } = useProxyForm({proxy, isNew, refForm});
 
@@ -86,13 +88,12 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
           <Grid container>
             <Grid size={{xs: 6}}>
               <Box m={2}>
-                <BasicInfoFields proxy={proxy} isNew={isNew} addField={addField} />
+                <BasicInfoFields isNew={isNew} addField={addField} />
               </Box>
             </Grid>
             <Grid size={{xs: 6}}>
               <Box m={2}>
                 <ProxySettingsFields
-                  proxy={proxy}
                   type={type}
                   isValidHost={isValidHost}
                   isValidPort={isValidPort}

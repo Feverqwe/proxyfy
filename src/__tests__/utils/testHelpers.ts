@@ -93,7 +93,7 @@ export function createStorageTestFixture() {
       mockData: {},
       storageType: 'sync' as const,
     }),
-    (fixture) => {
+    (_fixture) => {
       // Teardown logic
       vi.clearAllMocks();
     },

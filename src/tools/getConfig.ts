@@ -1,5 +1,6 @@
-import {Config, DefaultConfigStruct} from './index';
 import {StorageFactory} from '../storage/index';
+
+import {Config, DefaultConfigStruct} from './index';
 
 async function getConfig(): Promise<Config> {
   const storageFactory = StorageFactory.getInstance();

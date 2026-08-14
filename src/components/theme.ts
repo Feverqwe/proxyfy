@@ -1,9 +1,10 @@
+import {createTheme} from '@mui/material';
+import {amber, blue} from '@mui/material/colors';
+
 import '@fontsource/roboto/latin-300.css';
 import '@fontsource/roboto/latin-400.css';
 import '@fontsource/roboto/latin-500.css';
 import '@fontsource/roboto/latin-700.css';
-import {createTheme} from '@mui/material';
-import {amber, blue} from '@mui/material/colors';
 
 const theme = createTheme({
   palette: {

@@ -1,5 +1,5 @@
-import {GenericProxy, getConfig} from '../../tools/index';
 import {LocalStorageService} from '../../storage/index';
+import {GenericProxy, getConfig} from '../../tools/index';
 import {getPacScript} from '../pac/pacService';
 
 export async function setProxy(mode: string, id?: string): Promise<void> {

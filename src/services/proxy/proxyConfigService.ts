@@ -1,6 +1,7 @@
+import {syncUiState} from '../ui/uiStateService';
+
 import {setProxy} from './proxyService';
 import {getCurrentState} from './proxyStateService';
-import {syncUiState} from '../ui/uiStateService';
 
 export async function applyProxy(mode: string, id?: string): Promise<void> {
   await setProxy(mode, id);

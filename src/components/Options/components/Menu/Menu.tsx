@@ -1,12 +1,14 @@
+import React, {FC, useCallback, useEffect, useRef} from 'react';
+
+import AddIcon from '@mui/icons-material/Add';
+import RestoreIcon from '@mui/icons-material/Restore';
+import SaveIcon from '@mui/icons-material/Save';
+import SettingsIcon from '@mui/icons-material/Settings';
 import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
 import {Link} from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import React, {FC, useCallback, useEffect, useRef} from 'react';
-import SaveIcon from '@mui/icons-material/Save';
-import RestoreIcon from '@mui/icons-material/Restore';
-import SettingsIcon from '@mui/icons-material/Settings';
-import {ConfigStruct, downloadBlob, readBlobAsText} from '../../../../tools/index';
+
 import {StorageFactory} from '../../../../storage/index';
+import {ConfigStruct, downloadBlob, readBlobAsText} from '../../../../tools/index';
 
 const Menu: FC = () => {
   const refFileInput = useRef<HTMLInputElement | null>(null);

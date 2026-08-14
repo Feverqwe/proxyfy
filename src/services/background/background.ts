@@ -1,16 +1,18 @@
-import {syncUiState} from '../ui/uiStateService';
-import {getCurrentState} from '../proxy/proxyStateService';
-import {applyConfig, applyProxy} from '../proxy/proxyConfigService';
-import {StorageFactory} from '../../storage/index';
 import {StorageType} from '../../storage/StorageSettings';
+import {StorageFactory} from '../../storage/index';
 import {asyncResponse} from '../../tools/index';
+import {applyConfig, applyProxy} from '../proxy/proxyConfigService';
+import {getCurrentState} from '../proxy/proxyStateService';
+import {syncUiState} from '../ui/uiStateService';
+
+type BackgroundMessage = {action: 'set'; mode: string; id?: string} | {action: 'get'};
 
 export async function initBackgroundService() {
   chrome.runtime.onMessage.addListener(
     (
-      message: any,
-      sender: chrome.runtime.MessageSender,
-      sendResponse: (response?: any) => void,
+      message: BackgroundMessage,
+      _sender: chrome.runtime.MessageSender,
+      sendResponse: (response?: unknown) => void,
     ) => {
       switch (message.action) {
         case 'set': {
@@ -61,7 +63,7 @@ export async function initBackgroundService() {
     },
   );
 
-  chrome.proxy.settings.onChange.addListener(async (details: any) => {
+  chrome.proxy.settings.onChange.addListener(async (details) => {
     if (details.levelOfControl === 'controlled_by_this_extension') return;
     try {
       await syncUiState();

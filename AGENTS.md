@@ -107,4 +107,3 @@ Before handing off a code change:
   permission changes.
 - For user-visible extension changes, describe a short manual Chrome verification path when it was
   not possible to load the unpacked extension in a browser.
-

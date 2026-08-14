@@ -1,4 +1,6 @@
 import React, {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+
+import ColorizeIcon from '@mui/icons-material/Colorize';
 import {
   Box,
   FormControl,
@@ -8,8 +10,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import ColorizeIcon from '@mui/icons-material/Colorize';
 import {ChromePicker} from 'react-color';
+
 import {getCircleIcon, getExtensionIcon} from '../../tools/index';
 import type {ChromePickerColor} from '../../types/index';
 
