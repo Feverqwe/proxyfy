@@ -21,7 +21,7 @@ A Chrome extension for managing proxy configurations with support for multiple p
 - **Build Tool**: Rspack 2
 - **Component Development**: Storybook 10 with Vite
 - **Testing**: Vitest 4 with `jsdom`
-- **Validation**: Superstruct 2
+- **Validation**: Valibot 1
 - **Storage**: Chrome Extension Storage API
 
 ## Project Structure

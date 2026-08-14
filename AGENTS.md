@@ -52,7 +52,8 @@ The extension has four build entry points:
 9. Follow the existing TypeScript style: single quotes, no spaces inside braces, trailing commas,
    and a 100-column target. Let Prettier decide formatting.
 10. Use explicit types at Chrome API, storage, message, and configuration boundaries. Avoid adding
-    `any`; validate untrusted or persisted configuration with the existing Superstruct schemas.
+    `any`; validate untrusted or persisted configuration with the existing Valibot schemas and
+    parsing helpers in `src/tools/ConfigSchema.ts`.
 11. Keep Storybook-only data and Chrome API mocks isolated from production entry points. Reuse
     `.storybook/chromeMock.ts` for stories that render extension UI.
 
