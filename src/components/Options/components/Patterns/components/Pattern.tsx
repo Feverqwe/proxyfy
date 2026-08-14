@@ -12,6 +12,7 @@ import {
   Select,
   TableCell,
   TableRow,
+  Tooltip,
 } from '@mui/material';
 
 import {ProxyPattern, ProxyPatternType} from '../../../../../tools/index';
@@ -56,6 +57,8 @@ const Pattern: FC<PatternProps> = ({
           value={pattern.name}
           fullWidth
           autoComplete="off"
+          placeholder="Rule name"
+          inputProps={{'aria-label': 'Rule name'}}
         />
       </TableCell>
       <TableCell padding="none" className="pattern-cell">
@@ -67,6 +70,8 @@ const Pattern: FC<PatternProps> = ({
           fullWidth
           autoComplete="off"
           error={!isValidPattern(pattern.pattern, pattern.type)}
+          placeholder="*.example.com"
+          inputProps={{'aria-label': 'URL pattern'}}
         />
       </TableCell>
       <TableCell padding="none" className="type-cell">
@@ -76,6 +81,7 @@ const Pattern: FC<PatternProps> = ({
           fullWidth
           input={<InputBase size="small" />}
           inputProps={selectInputProps}
+          aria-label="Pattern type"
         >
           <MenuItem value="wildcard">Wildcard</MenuItem>
           <MenuItem value="regexp">RegExp</MenuItem>
@@ -88,27 +94,55 @@ const Pattern: FC<PatternProps> = ({
               className="small-checkbox"
               onChange={(event) => onChange(pattern, {enabled: event.target.checked})}
               checked={pattern.enabled}
+              slotProps={{input: {'aria-label': `Enable ${pattern.name || 'rule'}`}}}
             />
           </Grid>
           <Grid>
-            <IconButton onClick={() => onMove(pattern, -1)} disabled={isFirst} size="small">
-              <ArrowUpwardIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Move up">
+              <span>
+                <IconButton
+                  aria-label="Move rule up"
+                  onClick={() => onMove(pattern, -1)}
+                  disabled={isFirst}
+                  size="small"
+                >
+                  <ArrowUpwardIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
           </Grid>
           <Grid>
-            <IconButton onClick={() => onMove(pattern, 1)} disabled={isLast} size="small">
-              <ArrowDownwardIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Move down">
+              <span>
+                <IconButton
+                  aria-label="Move rule down"
+                  onClick={() => onMove(pattern, 1)}
+                  disabled={isLast}
+                  size="small"
+                >
+                  <ArrowDownwardIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
           </Grid>
           <Grid>
-            <IconButton onClick={() => onCopy(pattern)} size="small">
-              <CopyIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Duplicate">
+              <IconButton aria-label="Duplicate rule" onClick={() => onCopy(pattern)} size="small">
+                <CopyIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Grid>
           <Grid>
-            <IconButton onClick={() => onDelete(pattern)} size="small">
-              <DeleteIcon fontSize="small" />
-            </IconButton>
+            <Tooltip title="Delete">
+              <IconButton
+                aria-label="Delete rule"
+                onClick={() => onDelete(pattern)}
+                size="small"
+                color="error"
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Grid>
         </Grid>
       </TableCell>

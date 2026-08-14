@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
+import {Alert, Box, CircularProgress} from '@mui/material';
 import {useLocation, useNavigate} from 'react-router';
 
 import {getConfigFromBackground} from '../../../../services/runtime/runtimeClient';
@@ -12,6 +13,7 @@ const Patterns = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [proxy, setProxy] = useState<ConfigProxy>();
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -33,6 +35,7 @@ const Patterns = () => {
         }
       } catch (err) {
         console.error('getConfig error: %O', err);
+        if (isMounted) setLoadError(true);
       }
     })();
 
@@ -44,7 +47,19 @@ const Patterns = () => {
   return (
     <>
       <Header title="Patterns" />
-      {proxy ? <PatternsLoaded proxy={proxy} /> : null}
+      {loadError ? (
+        <Box sx={{maxWidth: 1180, mx: 'auto', px: 3}}>
+          <Alert severity="error">
+            Could not load routing patterns. Return to the list and try again.
+          </Alert>
+        </Box>
+      ) : proxy ? (
+        <PatternsLoaded proxy={proxy} />
+      ) : (
+        <Box sx={{display: 'grid', placeItems: 'center', minHeight: 240}}>
+          <CircularProgress size={28} aria-label="Loading patterns" />
+        </Box>
+      )}
     </>
   );
 };

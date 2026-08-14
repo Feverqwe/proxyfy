@@ -25,7 +25,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew}) => {
         {({input}) => (
           <MyInput
             label="Title (optional)"
-            placeholder="title"
+            placeholder="Office network"
             name={input.name}
             value={input.value}
             onBlur={() => input.onBlur()}
@@ -70,8 +70,10 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew}) => {
       </Field>
       {isNew && (
         <FormControl fullWidth margin="dense">
-          <Typography variant="subtitle1">Pattern Shortcuts</Typography>
-          <Box component={Paper} variant="outlined" sx={{p: 1}}>
+          <Typography variant="overline" color="text.secondary" sx={{mt: 2, mb: 0.75}}>
+            Automatic routing shortcuts
+          </Typography>
+          <Box component={Paper} variant="outlined" sx={{p: 1.25, bgcolor: 'background.default'}}>
             <FormGroup>
               <FormControlLabel
                 control={
@@ -85,7 +87,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew}) => {
                     )}
                   </Field>
                 }
-                label="Enabled"
+                label="Enable for automatic routing"
               />
               <FormControlLabel
                 control={
@@ -102,7 +104,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew}) => {
                     )}
                   </Field>
                 }
-                label="Add whitelist pattern to match all URLs"
+                label="Use for all URLs"
               />
               <FormControlLabel
                 control={
@@ -119,7 +121,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew}) => {
                     )}
                   </Field>
                 }
-                label="Do not use for localhost and intranet/private IP addresses"
+                label="Exclude local and private addresses"
               />
             </FormGroup>
           </Box>

@@ -35,6 +35,7 @@ const ProxySettingsFields: React.FC<ProxySettingsFieldsProps> = ({type}) => {
                 label="Proxy IP address or DNS name"
                 placeholder="111.111.111.111, www.example.com"
                 isError={Boolean(meta.error && (meta.touched || meta.submitFailed))}
+                errorMessage={meta.error}
                 name={input.name}
                 value={input.value}
                 onBlur={() => input.onBlur()}
@@ -49,6 +50,7 @@ const ProxySettingsFields: React.FC<ProxySettingsFieldsProps> = ({type}) => {
                 label="Port"
                 placeholder="3128"
                 isError={Boolean(meta.error && (meta.touched || meta.submitFailed))}
+                errorMessage={meta.error}
                 type="number"
                 name={input.name}
                 value={input.value}

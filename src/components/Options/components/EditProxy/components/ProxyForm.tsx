@@ -1,6 +1,6 @@
 import React, {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {Box, Grid, Paper} from '@mui/material';
+import {Alert, Box, Button, Grid, Paper, Stack, Typography} from '@mui/material';
 import {FORM_ERROR, FormApi} from 'final-form';
 import {Form} from 'react-final-form';
 import {Link, useNavigate} from 'react-router';
@@ -77,13 +77,13 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
   return (
     <>
       <Header title={isNew ? 'Add Proxy' : 'Edit proxy'} />
-      <Box component={Paper} sx={{m: 2}}>
+      <Box component="main" sx={{maxWidth: 980, mx: 'auto', px: {xs: 2, sm: 3}, pb: 5}}>
         <Form<ProxyFormValues>
           initialValues={initialValues}
           onSubmit={handleFormSubmit}
           validate={validateProxyForm}
         >
-          {({form, handleSubmit, submitting, values}) => {
+          {({form, handleSubmit, submitError, submitting, values}) => {
             formRef.current = form;
             return (
               <form
@@ -92,50 +92,85 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
                   return handleSubmit(event);
                 }}
               >
-                <Grid container>
-                  <Grid size={{xs: 6}}>
-                    <Box sx={{m: 2}}>
+                {submitError && (
+                  <Alert severity="error" sx={{mb: 2}}>
+                    {submitError}. Check your connection and try again.
+                  </Alert>
+                )}
+                <Grid container spacing={2.5}>
+                  <Grid size={{xs: 12, md: 6}}>
+                    <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}, height: '100%'}}>
+                      <Typography component="h2" variant="h5">
+                        Identity
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{mt: 0.5, mb: 1}}>
+                        Name the connection and choose how it appears in the toolbar.
+                      </Typography>
                       <BasicInfoFields isNew={isNew} />
-                    </Box>
+                    </Paper>
                   </Grid>
-                  <Grid size={{xs: 6}}>
-                    <Box sx={{m: 2}}>
+                  <Grid size={{xs: 12, md: 6}}>
+                    <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}, height: '100%'}}>
+                      <Typography component="h2" variant="h5">
+                        Connection
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{mt: 0.5, mb: 1}}>
+                        Enter the server details used when this route is active.
+                      </Typography>
                       <ProxySettingsFields type={values.type} />
-                    </Box>
+                    </Paper>
                   </Grid>
                   <Grid size={{xs: 12}}>
-                    <ActionBox sx={{mx: 2, mb: 2}}>
-                      <MyButtonM component={Link} to="/" variant="contained" color="inherit">
-                        Cancel
-                      </MyButtonM>
-                      <MyButtonM
-                        type="button"
-                        disabled={submitting}
-                        onClick={() => submit('save-and-add')}
-                        variant="contained"
-                        color="secondary"
+                    <Paper
+                      variant="outlined"
+                      sx={{
+                        p: 2,
+                        position: 'sticky',
+                        bottom: 12,
+                        zIndex: 2,
+                        boxShadow: '0 8px 30px rgba(21,38,58,0.08)',
+                      }}
+                    >
+                      <Stack
+                        direction={{xs: 'column', sm: 'row'}}
+                        spacing={1.5}
+                        sx={{justifyContent: 'space-between'}}
                       >
-                        Save & Add another
-                      </MyButtonM>
-                      <MyButtonM
-                        type="button"
-                        disabled={submitting}
-                        onClick={() => submit('save-and-edit-patterns')}
-                        variant="contained"
-                        color="secondary"
-                      >
-                        Save & Edit patterns
-                      </MyButtonM>
-                      <MyButtonM
-                        type="button"
-                        disabled={submitting}
-                        onClick={() => submit('save')}
-                        variant="contained"
-                        color="primary"
-                      >
-                        Save
-                      </MyButtonM>
-                    </ActionBox>
+                        <Button component={Link} to="/" color="inherit">
+                          Cancel
+                        </Button>
+                        <ActionBox>
+                          <MyButtonM
+                            type="button"
+                            disabled={submitting}
+                            onClick={() => submit('save-and-add')}
+                            variant="outlined"
+                          >
+                            Save & add another
+                          </MyButtonM>
+                          <MyButtonM
+                            type="button"
+                            disabled={submitting}
+                            onClick={() => submit('save-and-edit-patterns')}
+                            variant="outlined"
+                          >
+                            Save & edit patterns
+                          </MyButtonM>
+                          <MyButtonM
+                            type="button"
+                            disabled={submitting}
+                            onClick={() => submit('save')}
+                            variant="contained"
+                          >
+                            {submitting ? 'Saving…' : 'Save connection'}
+                          </MyButtonM>
+                        </ActionBox>
+                      </Stack>
+                    </Paper>
+                    {/* Keep form submission accessible to keyboard and assistive technology. */}
+                    <Box sx={{display: 'none'}}>
+                      <MyButtonM type="submit">Save</MyButtonM>
+                    </Box>
                   </Grid>
                 </Grid>
               </form>

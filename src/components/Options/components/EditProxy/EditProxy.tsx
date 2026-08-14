@@ -1,9 +1,11 @@
 import React, {useCallback, useEffect, useState} from 'react';
 
+import {Alert, Box, CircularProgress} from '@mui/material';
 import {useLocation, useNavigate} from 'react-router';
 
 import {getConfigFromBackground} from '../../../../services/runtime/runtimeClient';
 import {ConfigProxy, createDefaultProxy, getObjectId, getRandomInt} from '../../../../tools/index';
+import {Header} from '../../../index';
 
 import ProxyForm from './components/ProxyForm';
 import {badgeColors} from './constants';
@@ -12,6 +14,7 @@ const EditProxy = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [proxy, setProxy] = useState<ConfigProxy | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   const handleNewProxy = useCallback(() => {
     const newProxy = createDefaultProxy({
@@ -44,6 +47,7 @@ const EditProxy = () => {
         }
       } catch (err) {
         console.error('getConfig error: %O', err);
+        if (isMounted) setLoadError(true);
       }
     })();
 
@@ -52,7 +56,26 @@ const EditProxy = () => {
     };
   }, [location.search, navigate, handleNewProxy]);
 
-  if (!proxy) return null;
+  if (loadError) {
+    return (
+      <>
+        <Header title="Connection" />
+        <Box sx={{maxWidth: 980, mx: 'auto', px: 3}}>
+          <Alert severity="error">
+            Could not load this connection. Return to the list and try again.
+          </Alert>
+        </Box>
+      </>
+    );
+  }
+
+  if (!proxy) {
+    return (
+      <Box sx={{display: 'grid', placeItems: 'center', minHeight: 240}}>
+        <CircularProgress size={28} aria-label="Loading connection" />
+      </Box>
+    );
+  }
 
   return <ProxyForm key={getObjectId(proxy)} proxy={proxy} onReset={handleNewProxy} />;
 };

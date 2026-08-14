@@ -1,10 +1,10 @@
 import React, {FC, useCallback, useEffect, useRef} from 'react';
 
 import AddIcon from '@mui/icons-material/Add';
-import RestoreIcon from '@mui/icons-material/Restore';
-import SaveIcon from '@mui/icons-material/Save';
+import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import SettingsIcon from '@mui/icons-material/Settings';
-import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
+import {Divider, List, ListItemButton, ListItemIcon, ListItemText, Typography} from '@mui/material';
 import {Link} from 'react-router';
 
 import {getExportConfig, replaceConfig} from '../../../../services/runtime/runtimeClient';
@@ -29,6 +29,8 @@ const Menu: FC = () => {
         location.reload();
       } catch (err) {
         console.error('Import settings error: %O', err);
+      } finally {
+        target.value = '';
       }
     });
   }, []);
@@ -52,31 +54,35 @@ const Menu: FC = () => {
   }, []);
 
   return (
-    <List component="nav" disablePadding>
-      <ListItemButton component={Link} to="/proxy">
+    <List component="nav" aria-label="Connection settings" disablePadding sx={{mt: 0.75}}>
+      <ListItemButton component={Link} to="/proxy" sx={{borderRadius: 2}}>
         <ListItemIcon>
           <AddIcon />
         </ListItemIcon>
-        <ListItemText primary="Add" />
+        <ListItemText primary="New connection" />
       </ListItemButton>
-      <ListItemButton onClick={handleExportSettings}>
-        <ListItemIcon>
-          <SaveIcon />
-        </ListItemIcon>
-        <ListItemText primary="Export settings" />
-      </ListItemButton>
-      <ListItemButton onClick={handleImportSettings}>
-        <ListItemIcon>
-          <RestoreIcon />
-        </ListItemIcon>
-        <ListItemText primary="Import settings" />
-        <input ref={refFileInput} type="file" accept=".json" hidden />
-      </ListItemButton>
-      <ListItemButton component={Link} to="/storage">
+      <ListItemButton component={Link} to="/storage" sx={{borderRadius: 2}}>
         <ListItemIcon>
           <SettingsIcon />
         </ListItemIcon>
-        <ListItemText primary="Storage Settings" />
+        <ListItemText primary="Storage & icon" />
+      </ListItemButton>
+      <Divider sx={{my: 1.5}} />
+      <Typography variant="overline" color="text.secondary" sx={{px: 1}}>
+        Configuration
+      </Typography>
+      <ListItemButton onClick={handleExportSettings} sx={{borderRadius: 2, mt: 0.75}}>
+        <ListItemIcon>
+          <CloudDownloadOutlinedIcon />
+        </ListItemIcon>
+        <ListItemText primary="Export" secondary="Save a JSON backup" />
+      </ListItemButton>
+      <ListItemButton onClick={handleImportSettings} sx={{borderRadius: 2}}>
+        <ListItemIcon>
+          <CloudUploadOutlinedIcon />
+        </ListItemIcon>
+        <ListItemText primary="Import" secondary="Replace from JSON" />
+        <input ref={refFileInput} type="file" accept="application/json,.json" hidden />
       </ListItemButton>
     </List>
   );

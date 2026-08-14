@@ -18,7 +18,8 @@ const PageBase: FC<PageBaseProps> = ({children, rootStyles}) => {
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <GlobalStyles styles={rootStyles} />
+        <GlobalStyles styles={{'html, body, #root': {minHeight: '100%'}, body: {margin: 0}}} />
+        {rootStyles && <GlobalStyles styles={rootStyles} />}
         {children}
       </ThemeProvider>
     </CacheProvider>

@@ -1,16 +1,9 @@
 import React, {FC, ReactNode, useEffect, useState} from 'react';
 
-import {Box, Paper, Zoom} from '@mui/material';
-import {styled} from '@mui/system';
-
-const NotifyBox = styled(Box)({
-  position: 'fixed',
-  top: '30px',
-  right: '30px',
-});
+import {Alert, AlertColor, Snackbar} from '@mui/material';
 
 interface NotificationProps {
-  notify: {text: ReactNode};
+  notify: {text: ReactNode; severity?: AlertColor};
 }
 
 const Notification: FC<NotificationProps> = ({notify}) => {
@@ -28,13 +21,20 @@ const Notification: FC<NotificationProps> = ({notify}) => {
   if (!show) return null;
 
   return (
-    <Zoom in={show}>
-      <NotifyBox>
-        <Box component={Paper} elevation={3} sx={{p: 1, px: 2}}>
-          {notify.text}
-        </Box>
-      </NotifyBox>
-    </Zoom>
+    <Snackbar
+      open={show}
+      anchorOrigin={{vertical: 'top', horizontal: 'right'}}
+      onClose={() => setShow(false)}
+    >
+      <Alert
+        elevation={6}
+        variant="filled"
+        severity={notify.severity || 'success'}
+        onClose={() => setShow(false)}
+      >
+        {notify.text}
+      </Alert>
+    </Snackbar>
   );
 };
 

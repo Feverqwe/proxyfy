@@ -1,6 +1,8 @@
 import React, {FC, useCallback, useEffect, useState} from 'react';
 
-import {Alert, Box, Paper, Typography} from '@mui/material';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import AutoFixHighRoundedIcon from '@mui/icons-material/AutoFixHighRounded';
+import {Alert, Box, Button, Paper, Stack, Typography} from '@mui/material';
 import {useNavigate} from 'react-router';
 
 import {replaceProxyPatterns as replaceProxyPatternsConfig} from '../../../../../services/runtime/runtimeClient';
@@ -20,7 +22,10 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   const navigate = useNavigate();
   const [whitePatterns, setWhitePatterns] = useState(() => initializePatterns(proxy.whitePatterns));
   const [blackPatterns, setBlackPatterns] = useState(() => initializePatterns(proxy.blackPatterns));
-  const [notify, setNotify] = useState<{text: string} | null>(null);
+  const [notify, setNotify] = useState<{
+    text: string;
+    severity?: 'success' | 'error';
+  } | null>(null);
 
   const handleNewWhite = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -36,7 +41,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
     async (e?: React.MouseEvent, noRedirect = false) => {
       e?.preventDefault();
       if (!arePatternsValid([...whitePatterns, ...blackPatterns])) {
-        setNotify({text: 'Fix invalid regular expressions before saving'});
+        setNotify({text: 'Fix invalid regular expressions before saving', severity: 'error'});
         return false;
       }
 
@@ -49,7 +54,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         return true;
       } catch (err) {
         console.error('Save proxy error: %O', err);
-        setNotify({text: 'Failed to save patterns'});
+        setNotify({text: 'Failed to save patterns', severity: 'error'});
         return false;
       }
     },
@@ -59,7 +64,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.ctrlKey && e.key === 's') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault();
         handleSave(undefined, true).then((isSaved) => {
           if (isSaved) {
@@ -85,60 +90,94 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   }, []);
 
   return (
-    <Box>
+    <Box component="main" sx={{maxWidth: 1180, mx: 'auto', px: {xs: 2, sm: 3}, pb: 5}}>
       {notify && <Notification notify={notify} />}
-      <Box component={Paper} sx={{m: 2, p: 2}}>
-        <Alert severity="info" sx={{mb: 2}}>
-          Proxyfy ignores everything on this page unless set to &quot;Use enabled proxies by
-          patterns and order&quot;
-        </Alert>
+      <Alert severity="info" sx={{mb: 2.5}}>
+        These rules run only when the active route is set to <b>Automatic routing</b>. Rules are
+        evaluated from top to bottom.
+      </Alert>
 
-        <ActionBox>
-          <MyButtonM
+      <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}, mb: 2.5}}>
+        <Stack
+          direction={{xs: 'column', sm: 'row'}}
+          spacing={2}
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: {xs: 'stretch', sm: 'flex-start'},
+          }}
+        >
+          <Box>
+            <Typography component="h2" variant="h5">
+              Use this connection when…
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{mt: 0.5}}>
+              A URL matching any enabled rule below may use “{proxy.title}”.
+            </Typography>
+          </Box>
+          <Button
             onClick={handleWhitelistMatchAll}
-            variant="contained"
-            size="small"
-            color="secondary"
+            variant="outlined"
+            startIcon={<AutoFixHighRoundedIcon />}
           >
-            Add whitelist pattern to match all URLs
-          </MyButtonM>
-        </ActionBox>
-
-        <ActionBox>
-          <MyButtonM
-            onClick={handleBlacklistLocalhost}
-            variant="contained"
-            size="small"
-            color="secondary"
-          >
-            Add black patterns to prevent this proxy being used for localhost & intranet/private IP
-            addresses
-          </MyButtonM>
-        </ActionBox>
-
-        <Typography variant="h5">White Patterns</Typography>
+            Match all URLs
+          </Button>
+        </Stack>
         <PatternList patterns={whitePatterns} onChange={setWhitePatterns} />
+        <Button onClick={handleNewWhite} startIcon={<AddRoundedIcon />} sx={{mt: 1.5}}>
+          Add “use” rule
+        </Button>
+      </Paper>
 
-        <Typography variant="h5" sx={{mt: 4}}>
-          Black Patterns
-        </Typography>
+      <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}, mb: 2.5}}>
+        <Stack
+          direction={{xs: 'column', sm: 'row'}}
+          spacing={2}
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: {xs: 'stretch', sm: 'flex-start'},
+          }}
+        >
+          <Box>
+            <Typography component="h2" variant="h5">
+              Except when…
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{mt: 0.5}}>
+              Matching URLs skip this connection, even if a rule above includes them.
+            </Typography>
+          </Box>
+          <Button
+            onClick={handleBlacklistLocalhost}
+            variant="outlined"
+            startIcon={<AutoFixHighRoundedIcon />}
+          >
+            Exclude local addresses
+          </Button>
+        </Stack>
         <PatternList patterns={blackPatterns} onChange={setBlackPatterns} />
+        <Button onClick={handleNewBlack} startIcon={<AddRoundedIcon />} sx={{mt: 1.5}}>
+          Add exception
+        </Button>
+      </Paper>
 
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 2,
+          position: 'sticky',
+          bottom: 12,
+          zIndex: 2,
+          boxShadow: '0 8px 30px rgba(21,38,58,0.08)',
+        }}
+      >
         <ActionBox>
-          <MyButtonM onClick={() => navigate('/')} variant="outlined" size="small">
+          <MyButtonM onClick={() => navigate('/')} color="inherit">
             Cancel
           </MyButtonM>
-          <MyButtonM onClick={handleNewWhite} variant="outlined" size="small">
-            New White
-          </MyButtonM>
-          <MyButtonM onClick={handleNewBlack} variant="outlined" size="small">
-            New Black
-          </MyButtonM>
-          <MyButtonM onClick={handleSave} variant="contained" size="small">
-            Save
+          <MyButtonM onClick={handleSave} variant="contained">
+            Save rules
           </MyButtonM>
         </ActionBox>
-      </Box>
+      </Paper>
     </Box>
   );
 };

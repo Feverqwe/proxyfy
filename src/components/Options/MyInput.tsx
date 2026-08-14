@@ -1,19 +1,27 @@
 import React, {FC, ReactNode} from 'react';
 
-import {FormControl, TextField, TextFieldProps, Typography} from '@mui/material';
+import {TextField, TextFieldProps} from '@mui/material';
 
 type MyInputProps = {
   label: ReactNode;
   isError?: boolean;
+  errorMessage?: ReactNode;
   hidden?: boolean;
 } & TextFieldProps;
 
-const MyInput: FC<MyInputProps> = ({label, isError = false, hidden, ...props}) => {
+const MyInput: FC<MyInputProps> = ({label, isError = false, errorMessage, hidden, ...props}) => {
   return (
-    <FormControl fullWidth margin="dense" style={{visibility: hidden ? 'hidden' : undefined}}>
-      <Typography variant="subtitle1">{label}</Typography>
-      <TextField variant="outlined" size="small" error={isError} autoComplete="off" {...props} />
-    </FormControl>
+    <TextField
+      fullWidth
+      margin="normal"
+      label={label}
+      variant="outlined"
+      error={isError}
+      helperText={isError ? errorMessage : props.helperText}
+      autoComplete="off"
+      sx={{visibility: hidden ? 'hidden' : undefined}}
+      {...props}
+    />
   );
 };
 

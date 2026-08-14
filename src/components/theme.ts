@@ -1,5 +1,4 @@
 import {createTheme} from '@mui/material';
-import {amber, blue} from '@mui/material/colors';
 
 import '@fontsource/roboto/latin-300.css';
 import '@fontsource/roboto/latin-400.css';
@@ -9,14 +8,124 @@ import '@fontsource/roboto/latin-700.css';
 const theme = createTheme({
   palette: {
     mode: 'light',
-    primary: blue,
-    secondary: amber,
+    primary: {
+      main: '#2864dc',
+      dark: '#1649ad',
+      light: '#eaf1ff',
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#087f75',
+      dark: '#08635c',
+      light: '#e5f6f3',
+      contrastText: '#ffffff',
+    },
+    error: {
+      main: '#c93c37',
+    },
     background: {
-      default: '#607d8b',
+      default: '#f3f6fa',
+      paper: '#ffffff',
     },
     text: {
-      primary: '#000',
-      secondary: '#000000d9',
+      primary: '#15263a',
+      secondary: '#5d6d7e',
+    },
+    divider: '#dce4ed',
+    action: {
+      hover: '#f1f5fa',
+      selected: '#eaf1ff',
+    },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  typography: {
+    fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    h4: {
+      fontSize: '1.75rem',
+      fontWeight: 700,
+      letterSpacing: '-0.03em',
+    },
+    h5: {
+      fontSize: '1.2rem',
+      fontWeight: 700,
+      letterSpacing: '-0.015em',
+    },
+    h6: {
+      fontSize: '1rem',
+      fontWeight: 700,
+    },
+    button: {
+      fontWeight: 600,
+      textTransform: 'none',
+    },
+    overline: {
+      fontSize: '0.68rem',
+      fontWeight: 700,
+      letterSpacing: '0.12em',
+      lineHeight: 1.5,
+    },
+  },
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        root: {
+          minHeight: 40,
+          borderRadius: 10,
+          paddingInline: 16,
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 9,
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
+        rounded: {
+          borderRadius: 16,
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+          backgroundColor: '#ffffff',
+        },
+        notchedOutline: {
+          borderColor: '#cbd6e2',
+        },
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          borderRadius: 8,
+          padding: '8px 10px',
+        },
+      },
+    },
+    MuiCssBaseline: {
+      styleOverrides: {
+        '::selection': {
+          backgroundColor: '#cdddff',
+        },
+        '*:focus-visible': {
+          outline: '3px solid rgba(40, 100, 220, 0.28)',
+          outlineOffset: 2,
+        },
+      },
     },
   },
 });

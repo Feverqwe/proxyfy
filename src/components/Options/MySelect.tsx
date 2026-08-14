@@ -1,6 +1,6 @@
 import React, {FC, ReactNode} from 'react';
 
-import {FormControl, Select, SelectProps, Typography} from '@mui/material';
+import {FormControl, InputLabel, Select, SelectProps} from '@mui/material';
 
 export type MySelectProps = {
   label: ReactNode;
@@ -8,10 +8,11 @@ export type MySelectProps = {
 } & SelectProps;
 
 const MySelect: FC<MySelectProps> = ({label, children, ...props}) => {
+  const labelId = `${String(props.name || 'proxyfy-select')}-label`;
   return (
-    <FormControl fullWidth margin="dense">
-      <Typography variant="subtitle1">{label}</Typography>
-      <Select variant="outlined" size="small" {...props}>
+    <FormControl fullWidth margin="normal">
+      <InputLabel id={labelId}>{label}</InputLabel>
+      <Select labelId={labelId} label={label} variant="outlined" {...props}>
         {children}
       </Select>
     </FormControl>

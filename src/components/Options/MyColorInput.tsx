@@ -1,15 +1,7 @@
 import React, {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import ColorizeIcon from '@mui/icons-material/Colorize';
-import {
-  Box,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  Popper,
-  TextField,
-  Typography,
-} from '@mui/material';
+import {Box, IconButton, InputAdornment, Popper, TextField} from '@mui/material';
 import {ChromePicker} from 'react-color';
 
 import {getCircleIcon, getExtensionIcon} from '../../tools/index';
@@ -117,7 +109,12 @@ const MyColorInput: FC<MyColorInputProps> = ({
     return {
       endAdornment: (
         <InputAdornment position="end">
-          <IconButton ref={refPickerBtn} onClick={handleClickPick} edge="end">
+          <IconButton
+            ref={refPickerBtn}
+            onClick={handleClickPick}
+            edge="end"
+            aria-label={`Choose ${label || 'color'}`}
+          >
             <ColorizeIcon />
           </IconButton>
         </InputAdornment>
@@ -128,24 +125,23 @@ const MyColorInput: FC<MyColorInputProps> = ({
         </InputAdornment>
       ),
     };
-  }, [handleClickPick]);
+  }, [handleClickPick, label]);
 
   return (
     <>
-      <FormControl fullWidth margin="dense">
-        <Typography variant="subtitle1">{label}</Typography>
-        <TextField
-          variant="outlined"
-          size="small"
-          value={color}
-          onChange={handleChange}
-          autoComplete="off"
-          slotProps={{input: inputProps}}
-          name={name}
-        />
-      </FormControl>
-      <Popper open={showPicker} anchorEl={anchorEl}>
-        <Box ref={refPickerBody}>
+      <TextField
+        fullWidth
+        margin="normal"
+        label={label}
+        variant="outlined"
+        value={color}
+        onChange={handleChange}
+        autoComplete="off"
+        slotProps={{input: inputProps}}
+        name={name}
+      />
+      <Popper open={showPicker} anchorEl={anchorEl} sx={{zIndex: 'tooltip'}}>
+        <Box ref={refPickerBody} sx={{mt: 0.75, boxShadow: 8}}>
           <ChromePicker
             color={color}
             onChange={handleChangeColor}

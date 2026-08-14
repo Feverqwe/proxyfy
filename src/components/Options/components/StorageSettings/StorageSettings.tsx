@@ -1,7 +1,11 @@
 import React, {FC, useCallback, useEffect, useState} from 'react';
 
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import {
+  Alert,
   Box,
+  Button,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   FormHelperText,
@@ -11,6 +15,7 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material';
+import {Link} from 'react-router';
 
 import type {ConfigStorageSettings} from '../../../../services/runtime/runtimeClient';
 import {
@@ -25,6 +30,8 @@ const StorageSettings: FC = () => {
   const [defaultIconColor, setDefaultIconColor] = useState<string>('#0a77e5');
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     const initialize = async () => {
@@ -46,32 +53,42 @@ const StorageSettings: FC = () => {
   const handleStorageTypeChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const newStorageType = event.target.value as ConfigStorageSettings['storageType'];
+      setIsSaving(true);
+      setSaveError(null);
       try {
         await switchConfigStorage(newStorageType);
         setStorageType(newStorageType);
       } catch (err) {
         console.error('Switch storage type error: %O', err);
+        setSaveError('Could not change storage. Your previous setting is still active.');
+      } finally {
+        setIsSaving(false);
       }
     },
     [],
   );
 
   const handleDefaultIconColorChange = useCallback(async (color: string) => {
+    setIsSaving(true);
+    setSaveError(null);
     try {
       await persistDefaultIconColor(color);
       setDefaultIconColor(color);
     } catch (err) {
       console.error('Set default icon color error: %O', err);
+      setSaveError('Could not save the icon color. Try again.');
+    } finally {
+      setIsSaving(false);
     }
   }, []);
 
   if (!isInitialized) {
     return (
       <Box>
-        <Header title="Storage Settings" />
-        <Paper sx={{p: 2}}>
-          <Typography>Loading...</Typography>
-        </Paper>
+        <Header title="Preferences" />
+        <Box sx={{display: 'grid', placeItems: 'center', py: 8}}>
+          <CircularProgress size={28} aria-label="Loading preferences" />
+        </Box>
       </Box>
     );
   }
@@ -79,71 +96,108 @@ const StorageSettings: FC = () => {
   if (initializationError) {
     return (
       <Box>
-        <Header title="Storage Settings" />
-        <Paper sx={{p: 2}}>
-          <Typography color="error">Unable to load storage settings</Typography>
-        </Paper>
+        <Header title="Preferences" />
+        <Box sx={{maxWidth: 760, mx: 'auto', px: 3}}>
+          <Alert severity="error">Unable to load preferences. Reload the page to try again.</Alert>
+        </Box>
       </Box>
     );
   }
 
   return (
     <>
-      <Header title="Storage Settings" />
-      <Box component={Paper} sx={{m: 2, p: 4}}>
-        <Grid container>
-          <Grid component="div">
-            <FormControl component="fieldset">
-              <Typography variant="h6" gutterBottom>
-                Storage Type
-              </Typography>
-              <FormHelperText sx={{mb: 2}}>
-                Choose where to store your proxy configurations
-              </FormHelperText>
-              <RadioGroup value={storageType} onChange={handleStorageTypeChange}>
-                <FormControlLabel
-                  value="sync"
-                  control={<Radio />}
-                  label={
-                    <Box>
-                      <Typography variant="body1">Sync Storage</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Settings will be synchronized across your Chrome browsers
-                      </Typography>
-                    </Box>
-                  }
-                />
-                <FormControlLabel
-                  value="local"
-                  control={<Radio />}
-                  label={
-                    <Box>
-                      <Typography variant="body1">Local Storage</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Settings will be stored only on this device
-                      </Typography>
-                    </Box>
-                  }
-                />
-              </RadioGroup>
-
-              <Box sx={{mt: 3}}>
-                <Typography variant="h6" gutterBottom>
-                  Default Icon Color
+      <Header title="Preferences" />
+      <Box component="main" sx={{maxWidth: 760, mx: 'auto', px: {xs: 2, sm: 3}, pb: 5}}>
+        <Button
+          component={Link}
+          to="/"
+          startIcon={<ArrowBackRoundedIcon />}
+          color="inherit"
+          sx={{mb: 2}}
+        >
+          Back to connections
+        </Button>
+        {saveError && (
+          <Alert severity="error" onClose={() => setSaveError(null)} sx={{mb: 2}}>
+            {saveError}
+          </Alert>
+        )}
+        <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}}}>
+          <Grid container spacing={4}>
+            <Grid size={{xs: 12}}>
+              <FormControl component="fieldset">
+                <Typography component="h2" variant="h5">
+                  Configuration storage
                 </Typography>
-                <FormHelperText sx={{mb: 2}}>
-                  Choose the default color for extension icons when no proxy-specific color is set
+                <FormHelperText sx={{mt: 0.75, mb: 2, ml: 0}}>
+                  Credentials always remain on this device. Choose where non-sensitive connection
+                  settings are stored.
+                </FormHelperText>
+                <RadioGroup value={storageType} onChange={handleStorageTypeChange} sx={{gap: 1}}>
+                  <FormControlLabel
+                    value="sync"
+                    disabled={isSaving}
+                    control={<Radio sx={{ml: 0.5}} />}
+                    sx={{
+                      m: 0,
+                      p: 1.5,
+                      border: '1px solid',
+                      borderColor: storageType === 'sync' ? 'primary.main' : 'divider',
+                      borderRadius: 2.5,
+                      alignItems: 'flex-start',
+                    }}
+                    label={
+                      <Box>
+                        <Typography sx={{fontWeight: 700}}>Sync across Chrome</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Keep connection settings available in Chrome browsers signed into your
+                          account.
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel
+                    value="local"
+                    disabled={isSaving}
+                    control={<Radio sx={{ml: 0.5}} />}
+                    sx={{
+                      m: 0,
+                      p: 1.5,
+                      border: '1px solid',
+                      borderColor: storageType === 'local' ? 'primary.main' : 'divider',
+                      borderRadius: 2.5,
+                      alignItems: 'flex-start',
+                    }}
+                    label={
+                      <Box>
+                        <Typography sx={{fontWeight: 700}}>This device only</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Keep all connection settings in this browser profile.
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+            <Grid size={{xs: 12}}>
+              <Box>
+                <Typography component="h2" variant="h5">
+                  Default toolbar icon
+                </Typography>
+                <FormHelperText sx={{mt: 0.75, mb: 1, ml: 0}}>
+                  Used when the active route does not have its own color.
                 </FormHelperText>
                 <MyColorInput
-                  label=""
+                  label="Icon color"
                   defaultValue={defaultIconColor}
                   onChange={handleDefaultIconColorChange}
                   name="defaultIconColor"
                 />
               </Box>
-            </FormControl>
+            </Grid>
           </Grid>
-        </Grid>
+        </Paper>
       </Box>
     </>
   );

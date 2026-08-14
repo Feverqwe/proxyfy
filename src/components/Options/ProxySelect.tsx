@@ -7,9 +7,8 @@ import type {ProxyMode} from '../../types/index';
 import {useActualProxies, useActualState} from '../index';
 
 const defaultItems = [
-  {title: 'Use enabled proxies by patterns and order', mode: 'pac_script'},
-  /* {title: 'Off (use auto detect)', mode: 'auto_detect'}, */
-  {title: 'Off (use system settings)', mode: 'system'},
+  {title: 'Automatic routing — use rules in priority order', mode: 'pac_script'},
+  {title: 'System settings — turn Proxyfy routing off', mode: 'system'},
 ];
 
 const ProxySelect = () => {
@@ -80,11 +79,10 @@ const ProxySelect = () => {
 
 type MySelectNoLabelProps = SelectProps;
 
-const mySelectNoLabelStyle = {width: '350px'};
 const MySelectNoLabel: FC<MySelectNoLabelProps> = ({children, ...props}) => {
   return (
-    <FormControl style={mySelectNoLabelStyle} margin="dense">
-      <Select variant="outlined" size="small" {...props}>
+    <FormControl fullWidth>
+      <Select variant="outlined" {...props} aria-label="Active proxy route">
         {children}
       </Select>
     </FormControl>
