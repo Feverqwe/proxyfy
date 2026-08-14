@@ -1,9 +1,4 @@
 {
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs"
-    }
-  },
   "compilerOptions": {
     "allowJs": true,
     "strict": true,
@@ -11,14 +6,13 @@
     "target": "ES2017",
     "module": "ES2020",
     "jsx": "react-jsx",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "skipLibCheck": true,
     "outDir": "./dist/",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
-    "types": ["vitest/globals", "@types/chrome", "@types/react"],
-    "ignoreDeprecations": "6.0"
+    "types": ["vitest/globals", "@types/chrome", "@types/react"]
   },
   "include": ["src"],
   "exclude": ["src/**/__tests__/**"]

@@ -2,7 +2,7 @@ import React, {FC, ReactNode} from 'react';
 
 import {CacheProvider} from '@emotion/react';
 import {CssBaseline, GlobalStyles, ThemeProvider} from '@mui/material';
-import {GlobalStylesProps} from '@mui/material/GlobalStyles/GlobalStyles';
+import {GlobalStylesProps} from '@mui/material/GlobalStyles';
 
 import {theme} from '../index';
 
