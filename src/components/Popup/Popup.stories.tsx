@@ -7,7 +7,11 @@ import type {ProxyState} from '../../types/index';
 
 import Popup from './Popup';
 
-const PopupPage = (state: ProxyState) => {
+interface PopupPageProps {
+  state: ProxyState | null;
+}
+
+const PopupPage = ({state}: PopupPageProps) => {
   configureChromeMock({state});
   return <Popup />;
 };
@@ -24,13 +28,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const AutomaticRouting: Story = {
-  render: () => <PopupPage mode="pac_script" />,
+  render: () => <PopupPage state={{mode: 'pac_script'}} />,
 };
 
 export const SelectedProxy: Story = {
-  render: () => <PopupPage mode="fixed_servers" id="office" />,
+  render: () => <PopupPage state={{mode: 'fixed_servers', id: 'office'}} />,
 };
 
 export const SystemSettings: Story = {
-  render: () => <PopupPage mode="system" />,
+  render: () => <PopupPage state={{mode: 'system'}} />,
+};
+
+export const BrowserSettings: Story = {
+  render: () => <PopupPage state={null} />,
 };

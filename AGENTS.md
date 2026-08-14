@@ -58,6 +58,9 @@ The extension has four build entry points:
   the public configuration. Preserve that ordering and retry-safe behavior.
 - Configuration imports may contain legacy credentials and must pass through the background write
   path. Exports must use the dedicated `config.getExport` request and never include credentials.
+- `getProxyState()` may legitimately return `null` when Chrome proxy settings are not controlled by
+  this extension. UI loading state must be represented separately; do not treat a resolved `null`
+  proxy state as a request that is still pending.
 
 ## Working rules
 
@@ -127,6 +130,12 @@ npm test -- --run src/tools/__tests__/wildcardToRegexpStr.test.ts
 Run `npm run release` only when the task explicitly concerns a production archive or release. It
 rebuilds generated output and creates a zip in `dist/`.
 
+Rspack writes the unpacked extension to `dist/chrome/`. Rebuilding or running watch mode updates
+files on disk but does not reload the Manifest V3 service worker. After runtime-contract or
+background changes, reload Proxyfy from `chrome://extensions` before manual verification; otherwise
+an old worker may ignore new action names and `chrome.runtime.sendMessage()` can resolve to
+`undefined`.
+
 ## Testing expectations
 
 - Add or update a test for every behavior change and regression fix.
@@ -134,6 +143,8 @@ rebuilds generated output and creates a zip in `dist/`.
   spanning multiple subsystems.
 - Reuse the Chrome mocks in `src/__tests__/mocks/` and reset mock/singleton state between tests.
 - Reuse `.storybook/chromeMock.ts` and realistic, non-sensitive fixture data in page stories.
+- Cover the valid `null` proxy-state case in popup or proxy-selector tests and stories whenever their
+  loading or active-route behavior changes.
 - Test success, error, and storage-switching paths when changing asynchronous Chrome API code.
 - When changing configuration persistence, test credential separation, legacy migration, rollback,
   and exported-data sanitization. Never put real credentials in fixtures.

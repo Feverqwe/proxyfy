@@ -38,7 +38,7 @@ const Popup = () => {
   const [error, setError] = useState<string | null>(null);
 
   const activeTitle = useMemo(() => {
-    if (!state) return 'Reading route…';
+    if (!state) return 'Browser settings';
     if (state.mode === 'pac_script') return 'Automatic routing';
     if (state.mode === 'system') return 'System settings';
     return proxies?.find(({id}) => id === state.id)?.title || 'Direct connection';
@@ -71,7 +71,7 @@ const Popup = () => {
     }
   }, []);
 
-  const isLoading = !proxies || !state;
+  const isLoading = proxies === null;
 
   return (
     <Box sx={{width: 372, bgcolor: 'background.paper', overflow: 'hidden'}}>
@@ -152,7 +152,7 @@ const Popup = () => {
                 <ProxyItem
                   key={item.mode}
                   item={item}
-                  checked={state.mode === item.mode}
+                  checked={state?.mode === item.mode}
                   mode={item.mode}
                   pending={pendingKey === item.mode}
                   disabled={Boolean(pendingKey)}
@@ -172,7 +172,7 @@ const Popup = () => {
               <ProxyItem
                 key={item.id}
                 item={item}
-                checked={state.id === item.id}
+                checked={state?.id === item.id}
                 mode="fixed_servers"
                 pending={pendingKey === item.id}
                 disabled={Boolean(pendingKey)}

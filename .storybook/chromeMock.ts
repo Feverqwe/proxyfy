@@ -20,7 +20,7 @@ const localData: StorageData = new Map();
 const syncData: StorageData = new Map();
 const messageListeners = new Set<RuntimeMessageListener>();
 
-let proxyState: ProxyState = {mode: 'pac_script'};
+let proxyState: ProxyState | null = {mode: 'pac_script'};
 let activeStorageType: 'sync' | 'local' = 'sync';
 
 export const storyProxies: ConfigProxy[] = [
@@ -160,7 +160,7 @@ const setActiveConfig = (config: {proxies: ConfigProxy[]}) => {
 const handleRuntimeRequest = (request: BackgroundRequest) => {
   switch (request.action) {
     case RuntimeAction.GetState:
-      return {...proxyState};
+      return proxyState ? {...proxyState} : null;
     case RuntimeAction.SetProxy:
       proxyState = {mode: request.mode, id: request.id};
       emitMessage({action: RuntimeAction.StateChanged});
@@ -236,7 +236,7 @@ const chromeMock = {
 
 interface ConfigureChromeMockOptions {
   proxies?: ConfigProxy[];
-  state?: ProxyState;
+  state?: ProxyState | null;
 }
 
 export const configureChromeMock = ({
@@ -255,7 +255,7 @@ export const configureChromeMock = ({
     localData.set(key, structuredClone(value));
     syncData.set(key, structuredClone(value));
   });
-  proxyState = {...state};
+  proxyState = state ? {...state} : null;
   activeStorageType = 'sync';
 };
 
