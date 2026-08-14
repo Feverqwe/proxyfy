@@ -20,12 +20,60 @@ interface PatternsLoadedProps {
 }
 
 const patternHelp = (
-  <div>
-    <div>Separate patterns with commas or new lines. Lines starting with # are ignored.</div>
-    <div style={{marginTop: '6px'}}>
-      Matching uses <b>scheme://host:port</b>. Credentials, paths, and query strings are ignored.
-    </div>
-  </div>
+  <Box sx={{fontSize: '0.75rem'}}>
+    <Box sx={{fontWeight: 600, mb: 0.5}}>Wildcard examples</Box>
+    <Box
+      component="dl"
+      sx={{display: 'grid', gridTemplateColumns: 'max-content 1fr', gap: '2px 10px', m: 0}}
+    >
+      <Box component="dt">
+        <code>*</code>
+      </Box>
+      <Box component="dd" sx={{m: 0}}>
+        Any URL
+      </Box>
+      <Box component="dt">
+        <code>example.com</code>
+      </Box>
+      <Box component="dd" sx={{m: 0}}>
+        Exact host
+      </Box>
+      <Box component="dt">
+        <code>*.example.com</code>
+      </Box>
+      <Box component="dd" sx={{m: 0}}>
+        Host and subdomains
+      </Box>
+      <Box component="dt">
+        <code>**.example.com</code>
+      </Box>
+      <Box component="dd" sx={{m: 0}}>
+        Subdomains only
+      </Box>
+      <Box component="dt">
+        <code>https://*.example.com</code>
+      </Box>
+      <Box component="dd" sx={{m: 0}}>
+        HTTPS only
+      </Box>
+      <Box component="dt">
+        <code>?</code>
+      </Box>
+      <Box component="dd" sx={{m: 0}}>
+        Exactly one character
+      </Box>
+    </Box>
+    <Box sx={{mt: 1}}>
+      <b>Regular expression:</b> JavaScript syntax, for example{' '}
+      <code>{String.raw`^https://example\.com(?::\d+)?$`}</code>.
+    </Box>
+    <Box sx={{mt: 1}}>
+      Separate patterns with commas or new lines. Lines starting with <code>#</code> are ignored.
+    </Box>
+    <Box sx={{mt: 1}}>
+      Matching uses <b>scheme://host[:port]</b>. Credentials, paths, and query strings are ignored.
+    </Box>
+  </Box>
 );
 
 const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
@@ -108,7 +156,11 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
             <Typography variant="body2" color="text.secondary" sx={{flex: 1}}>
               Used only in <b>Automatic routing</b>. Rules are checked from top to bottom.
             </Typography>
-            <Tooltip placement="bottom-end" title={patternHelp}>
+            <Tooltip
+              placement="bottom-end"
+              title={patternHelp}
+              slotProps={{tooltip: {sx: {maxWidth: 400}}}}
+            >
               <IconButton aria-label="Pattern format help" size="small" sx={{p: 0.25}}>
                 <InfoOutlinedIcon sx={{fontSize: 18}} />
               </IconButton>
