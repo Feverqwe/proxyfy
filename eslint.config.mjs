@@ -5,7 +5,7 @@ import reactConfig from '@gravity-ui/eslint-config/react';
 
 export default [
   {
-    ignores: ['dist/**'],
+    ignores: ['dist/**', 'storybook-static/**'],
   },
   ...gravityConfig,
   ...reactConfig,

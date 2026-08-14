@@ -10,6 +10,8 @@
     "build": "npm run _build -- --mode development",
     "watch": "npm run _build -- --mode development --watch",
     "release": "npm run _build -- --mode production && npm run _compress",
+    "storybook": "storybook dev -p 6006 --no-open --no-version-updates",
+    "build-storybook": "storybook build",
     "tsc": "tsc --noEmit",
     "lint": "eslint . && npm run prettier && npm run typecheck",
     "prettier": "prettier --check .",
@@ -48,6 +50,7 @@
     "@gravity-ui/prettier-config": "^1.1.1",
     "@rspack/cli": "^2.1.10",
     "@rspack/core": "^2.1.10",
+    "@storybook/react-vite": "^10.5.7",
     "@types/archiver": "^8.0.0",
     "@types/chrome": "^0.2.6",
     "@types/offscreencanvas": "^2019.7.3",
@@ -64,7 +67,9 @@
     "jsdom": "^29.1.1",
     "prettier": "^3.9.6",
     "style-loader": "^4.0.0",
+    "storybook": "^10.5.7",
     "typescript": "^6.0.3",
+    "vite": "^8.2.1",
     "vitest": "^4.1.10"
   },
   "overrides": {
