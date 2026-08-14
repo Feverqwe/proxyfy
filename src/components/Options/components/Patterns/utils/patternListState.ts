@@ -66,21 +66,6 @@ export function copyPattern(
   return result;
 }
 
-export function movePattern(
-  patterns: ProxyPattern[],
-  patternId: string | undefined,
-  offset: -1 | 1,
-): ProxyPattern[] {
-  const index = patterns.findIndex((pattern) => pattern.id === patternId);
-  const targetIndex = index + offset;
-  if (index === -1 || targetIndex < 0 || targetIndex >= patterns.length) return patterns;
-
-  const result = patterns.slice();
-  const [pattern] = result.splice(index, 1);
-  result.splice(targetIndex, 0, pattern);
-  return result;
-}
-
 export function placePattern(
   patterns: ProxyPattern[],
   patternId: string | undefined,

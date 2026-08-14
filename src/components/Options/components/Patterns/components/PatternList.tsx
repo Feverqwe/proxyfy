@@ -4,13 +4,7 @@ import {Box, Typography} from '@mui/material';
 import {styled} from '@mui/system';
 
 import {ProxyPattern} from '../../../../../tools/index';
-import {
-  copyPattern,
-  movePattern,
-  placePattern,
-  removePattern,
-  updatePattern,
-} from '../utils/patternListState';
+import {copyPattern, placePattern, removePattern, updatePattern} from '../utils/patternListState';
 
 import {Pattern, type PatternDropPosition} from './Pattern';
 
@@ -176,7 +170,6 @@ const PatternList: FC<PatternListProps> = ({patterns, onChange}) => {
             key={pattern.id}
             pattern={pattern}
             onChange={handlePatternChange}
-            onMove={(item, offset) => onChange(movePattern(patterns, item.id, offset))}
             onCopy={(item) => onChange(copyPattern(patterns, item.id))}
             onDelete={(item) => onChange(removePattern(patterns, item.id))}
             isFirst={index === 0}

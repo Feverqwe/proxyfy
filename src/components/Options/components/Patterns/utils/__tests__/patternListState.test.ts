@@ -6,7 +6,6 @@ import {
   clonePattern,
   copyPattern,
   initializePatterns,
-  movePattern,
   placePattern,
   removePattern,
   updatePattern,
@@ -42,16 +41,14 @@ describe('pattern list state', () => {
     expect(source[0].name).toBe('Example');
   });
 
-  it('adds, copies, moves, and removes rows immutably', () => {
+  it('adds, copies, and removes rows immutably', () => {
     const first = addPattern([], {name: 'First'}, () => 'one');
     const second = addPattern(first, {name: 'Second'}, () => 'two');
     const copied = copyPattern(second, 'one', () => 'copy');
-    const moved = movePattern(copied, 'two', -1);
-    const removed = removePattern(moved, 'copy');
+    const removed = removePattern(copied, 'copy');
 
     expect(first.map(({id}) => id)).toEqual(['one']);
     expect(copied.map(({id}) => id)).toEqual(['one', 'copy', 'two']);
-    expect(moved.map(({id}) => id)).toEqual(['one', 'two', 'copy']);
     expect(removed.map(({id}) => id)).toEqual(['one', 'two']);
   });
 

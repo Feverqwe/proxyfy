@@ -1,7 +1,5 @@
 import React, {FC, useCallback, useState} from 'react';
 
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DragIndicatorRoundedIcon from '@mui/icons-material/DragIndicatorRounded';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
@@ -33,7 +31,6 @@ interface PatternProps {
   onChange: (pattern: ProxyPattern, changes: Partial<Omit<ProxyPattern, 'id'>>) => void;
   onDelete: (pattern: ProxyPattern) => void;
   onCopy: (pattern: ProxyPattern) => void;
-  onMove: (pattern: ProxyPattern, offset: -1 | 1) => void;
   onDragStart: (pattern: ProxyPattern, event: React.DragEvent<HTMLElement>) => void;
   onDragEnd: () => void;
   onDragOver: (pattern: ProxyPattern, event: React.DragEvent<HTMLElement>) => void;
@@ -51,7 +48,6 @@ const Pattern: FC<PatternProps> = ({
   onChange,
   onDelete,
   onCopy,
-  onMove,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -167,18 +163,6 @@ const Pattern: FC<PatternProps> = ({
           open={Boolean(menuAnchor)}
           onClose={() => setMenuAnchor(null)}
         >
-          <MenuItem onClick={() => runAction(() => onMove(pattern, -1))} disabled={isFirst}>
-            <ListItemIcon>
-              <ArrowUpwardIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Move up</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={() => runAction(() => onMove(pattern, 1))} disabled={isLast}>
-            <ListItemIcon>
-              <ArrowDownwardIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Move down</ListItemText>
-          </MenuItem>
           <MenuItem onClick={() => runAction(() => onCopy(pattern))}>
             <ListItemIcon>
               <CopyIcon fontSize="small" />

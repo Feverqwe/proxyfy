@@ -35,7 +35,6 @@ describe('Pattern', () => {
   it('keeps secondary rule actions in a menu', async () => {
     const onCopy = vi.fn();
     const onDelete = vi.fn();
-    const onMove = vi.fn();
 
     await act(async () => {
       root.render(
@@ -48,7 +47,6 @@ describe('Pattern', () => {
             onChange={vi.fn()}
             onCopy={onCopy}
             onDelete={onDelete}
-            onMove={onMove}
             onDragStart={vi.fn()}
             onDragEnd={vi.fn()}
             onDragOver={vi.fn()}
@@ -70,7 +68,8 @@ describe('Pattern', () => {
 
     await act(async () => duplicateItem?.click());
     expect(onCopy).toHaveBeenCalledWith(pattern);
-    expect(onMove).not.toHaveBeenCalled();
     expect(onDelete).not.toHaveBeenCalled();
+    expect(document.body.textContent).not.toContain('Move up');
+    expect(document.body.textContent).not.toContain('Move down');
   });
 });
