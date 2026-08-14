@@ -3,7 +3,7 @@ import React, {FC, useCallback, useEffect, useState} from 'react';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {Box, Button, Checkbox, Grid, Paper} from '@mui/material';
+import {Box, Button, Checkbox, Grid, Paper, Stack} from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import {Link} from 'react-router-dom';
 
@@ -112,35 +112,34 @@ const ProxyList: FC = () => {
   return (
     <>
       <Header title="Options" />
-      <Box component={Paper} m={2}>
+      <Box component={Paper} sx={{m: 2}}>
         <Grid container>
           <Grid>
-            <Box m={2}>
+            <Box sx={{m: 2}}>
               <Menu />
             </Box>
           </Grid>
-          <Grid flexGrow={1}>
-            <Box m={2} minHeight={STYLE.mainBox.minHeight}>
+          <Grid sx={{flexGrow: 1}}>
+            <Box sx={{m: 2, minHeight: STYLE.mainBox.minHeight}}>
               <ProxySelect />
-              <Grid container direction="column">
+              <Stack>
                 {proxies.map((proxy, index) => {
                   const isFirst = index === 0;
                   const isLast = index === proxies.length - 1;
                   return (
-                    <Grid key={proxy.id}>
-                      <ProxyItem
-                        proxy={proxy}
-                        isFirst={isFirst}
-                        isLast={isLast}
-                        onDelete={handleProxyDelete}
-                        onMove={handleMove}
-                        onEnabledChange={handleEnabledChange}
-                        onClone={handleClone}
-                      />
-                    </Grid>
+                    <ProxyItem
+                      key={proxy.id}
+                      proxy={proxy}
+                      isFirst={isFirst}
+                      isLast={isLast}
+                      onDelete={handleProxyDelete}
+                      onMove={handleMove}
+                      onEnabledChange={handleEnabledChange}
+                      onClone={handleClone}
+                    />
                   );
                 })}
-              </Grid>
+              </Stack>
             </Box>
           </Grid>
         </Grid>
@@ -208,14 +207,14 @@ const ProxyItem: FC<ProxyItemProps> = ({
   );
 
   return (
-    <Grid container spacing={1} direction="row" justifyContent="space-between" alignItems="center">
+    <Grid container spacing={1} sx={{justifyContent: 'space-between', alignItems: 'center'}}>
       <Grid>
         <ColorIcon color={proxy.color} />
       </Grid>
-      <Grid flexGrow={1}>{proxy.title}</Grid>
-      <Grid flexGrow={1}>{'host' in proxy ? proxy.host : ''}</Grid>
+      <Grid sx={{flexGrow: 1}}>{proxy.title}</Grid>
+      <Grid sx={{flexGrow: 1}}>{'host' in proxy ? proxy.host : ''}</Grid>
       <Grid>
-        <Grid container spacing={1} alignItems="center" justifyContent="space-around">
+        <Grid container spacing={1} sx={{alignItems: 'center', justifyContent: 'space-around'}}>
           <Grid>
             <Checkbox
               color="primary"

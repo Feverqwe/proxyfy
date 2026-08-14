@@ -100,7 +100,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   return (
     <Box>
       {notify && <Notification notify={notify} />}
-      <Box component={Paper} m={2} p={2}>
+      <Box component={Paper} sx={{m: 2, p: 2}}>
         <Alert severity="info" sx={{mb: 2}}>
           Proxyfy ignores everything on this page unless set to &quot;Use enabled proxies by
           patterns and order&quot;

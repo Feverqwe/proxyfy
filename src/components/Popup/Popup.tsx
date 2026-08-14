@@ -59,7 +59,7 @@ const Popup = () => {
   if (!proxies) return null;
 
   return (
-    <Box component={Paper} elevation={0} square minWidth={350}>
+    <Box component={Paper} elevation={0} square sx={{minWidth: 350}}>
       <List component="nav" disablePadding>
         {defaultItems.map((item, index) => {
           const checked = Boolean(state?.mode === item.mode);

@@ -83,16 +83,16 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
   return (
     <>
       <Header title={isNew ? 'Add Proxy' : 'Edit proxy'} />
-      <Box component={Paper} m={2}>
+      <Box component={Paper} sx={{m: 2}}>
         <form ref={refForm} onSubmit={handleSubmit}>
           <Grid container>
             <Grid size={{xs: 6}}>
-              <Box m={2}>
+              <Box sx={{m: 2}}>
                 <BasicInfoFields isNew={isNew} addField={addField} />
               </Box>
             </Grid>
             <Grid size={{xs: 6}}>
-              <Box m={2}>
+              <Box sx={{m: 2}}>
                 <ProxySettingsFields
                   type={type}
                   isValidHost={isValidHost}
@@ -103,7 +103,7 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
               </Box>
             </Grid>
             <Grid size={{xs: 12}}>
-              <ActionBox mx={2} mb={2}>
+              <ActionBox sx={{mx: 2, mb: 2}}>
                 <MyButtonM component={Link} to="/" variant="contained" color="inherit">
                   Cancel
                 </MyButtonM>

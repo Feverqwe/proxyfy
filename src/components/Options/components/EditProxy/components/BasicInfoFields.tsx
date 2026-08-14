@@ -28,7 +28,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew, addField}) => {
       {isNew && (
         <FormControl fullWidth margin="dense">
           <Typography variant="subtitle1">Pattern Shortcuts</Typography>
-          <Box component={Paper} p={1} variant="outlined">
+          <Box component={Paper} variant="outlined" sx={{p: 1}}>
             <FormGroup>
               <FormControlLabel
                 control={

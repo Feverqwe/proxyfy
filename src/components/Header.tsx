@@ -12,8 +12,8 @@ const Header: FC<HeaderProps> = ({title}) => {
   const logoUrl = useMemo(() => getUrlFromImageData('#0a77e5', 50, getExtensionIcon), []);
 
   return (
-    <Box component={Paper} mx={2} mt={2} p={1}>
-      <Grid container alignItems="center" spacing={2}>
+    <Box component={Paper} sx={{mx: 2, mt: 2, p: 1}}>
+      <Grid container spacing={2} sx={{alignItems: 'center'}}>
         <Grid>
           <img src={logoUrl} width={50} height={50} alt="Proxyfy" />
         </Grid>

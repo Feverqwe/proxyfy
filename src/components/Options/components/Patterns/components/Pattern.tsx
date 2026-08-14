@@ -146,7 +146,7 @@ const Pattern: FC<PatternProps> = ({pattern, isFirst, isLast, onDelete, onCopy, 
         </Select>
       </TableCell>
       <TableCell padding="none" className="enabled-cell">
-        <Grid container alignItems="center">
+        <Grid container sx={{alignItems: 'center'}}>
           <Grid>
             <Checkbox
               className="small-checkbox"

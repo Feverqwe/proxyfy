@@ -71,7 +71,7 @@ const StorageSettings: FC = () => {
   return (
     <>
       <Header title="Storage Settings" />
-      <Box component={Paper} m={2} p={4}>
+      <Box component={Paper} sx={{m: 2, p: 4}}>
         <Grid container>
           <Grid component="div">
             <FormControl component="fieldset">

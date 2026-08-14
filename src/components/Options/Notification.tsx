@@ -30,7 +30,7 @@ const Notification: FC<NotificationProps> = ({notify}) => {
   return (
     <Zoom in={show}>
       <NotifyBox>
-        <Box component={Paper} elevation={3} p={1} px={2}>
+        <Box component={Paper} elevation={3} sx={{p: 1, px: 2}}>
           {notify.text}
         </Box>
       </NotifyBox>

@@ -134,7 +134,7 @@ const MyColorInput: FC<MyColorInputProps> = ({
           value={color}
           onChange={handleChange}
           autoComplete="off"
-          InputProps={inputProps}
+          slotProps={{input: inputProps}}
           name={name}
         />
       </FormControl>
