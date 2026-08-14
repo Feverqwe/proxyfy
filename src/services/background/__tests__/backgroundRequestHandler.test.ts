@@ -65,4 +65,32 @@ describe('background request handler', () => {
       proxies: [directProxy('before-migration')],
     });
   });
+
+  it('exports public config without locally migrated credentials', async () => {
+    await chrome.storage.sync.set({
+      proxies: [
+        {
+          id: 'office',
+          enabled: true,
+          title: 'Office',
+          color: '#123456',
+          type: 'http',
+          host: 'proxy.example.com',
+          port: 8080,
+          username: 'alice',
+          password: 'secret',
+          whitePatterns: [],
+          blackPatterns: [],
+        },
+      ],
+    });
+
+    const exported = await handleBackgroundRequest({action: RuntimeAction.GetExportConfig});
+
+    expect(JSON.stringify(exported)).not.toContain('alice');
+    expect(JSON.stringify(exported)).not.toContain('secret');
+    await expect(chrome.storage.local.get('proxyCredentials')).resolves.toEqual({
+      proxyCredentials: [{proxyId: 'office', username: 'alice', password: 'secret'}],
+    });
+  });
 });

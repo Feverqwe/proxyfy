@@ -6,6 +6,7 @@ import {
   saveProxy,
   setProxyEnabled,
 } from '../src/domain/proxy/configMutations';
+import {stripProxyCredentials} from '../src/domain/proxy/proxyCredentials';
 import type {BackgroundRequest} from '../src/services/runtime/runtimeContract';
 import {RuntimeAction, parseBackgroundRequest} from '../src/services/runtime/runtimeContract';
 import type {ConfigProxy} from '../src/tools/index';
@@ -166,6 +167,8 @@ const handleRuntimeRequest = (request: BackgroundRequest) => {
       return;
     case RuntimeAction.GetConfig:
       return getActiveConfig();
+    case RuntimeAction.GetExportConfig:
+      return stripProxyCredentials(getActiveConfig());
     case RuntimeAction.GetStorageSettings:
       return {
         storageType: activeStorageType,

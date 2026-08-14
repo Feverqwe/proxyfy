@@ -7,6 +7,7 @@ export const RuntimeAction = {
   GetState: 'proxy.getState',
   SetProxy: 'proxy.set',
   GetConfig: 'config.get',
+  GetExportConfig: 'config.getExport',
   ReplaceConfig: 'config.replace',
   SaveProxy: 'config.proxy.save',
   RemoveProxy: 'config.proxy.remove',
@@ -29,6 +30,7 @@ const BackgroundRequestSchema = v.variant('action', [
     id: v.optional(v.string()),
   }),
   v.object({action: v.literal(RuntimeAction.GetConfig)}),
+  v.object({action: v.literal(RuntimeAction.GetExportConfig)}),
   v.object({
     action: v.literal(RuntimeAction.ReplaceConfig),
     config: ConfigSchema,
@@ -79,6 +81,7 @@ const backgroundRequestActions = new Set<string>([
   RuntimeAction.GetState,
   RuntimeAction.SetProxy,
   RuntimeAction.GetConfig,
+  RuntimeAction.GetExportConfig,
   RuntimeAction.ReplaceConfig,
   RuntimeAction.SaveProxy,
   RuntimeAction.RemoveProxy,

@@ -6,6 +6,7 @@ import {
   saveProxy,
   setProxyEnabled,
 } from '../../domain/proxy/configMutations';
+import {stripProxyCredentials} from '../../domain/proxy/proxyCredentials';
 import {StorageFactory} from '../../storage/StorageFactory';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
 import {readConfig, updateConfig, writeConfig} from '../config/configService';
@@ -36,6 +37,8 @@ async function executeBackgroundRequest(request: BackgroundRequest): Promise<unk
       return applyProxy(request.mode, request.id);
     case RuntimeAction.GetConfig:
       return readConfig();
+    case RuntimeAction.GetExportConfig:
+      return stripProxyCredentials(await readConfig());
     case RuntimeAction.ReplaceConfig:
       await writeConfig(request.config);
       return;

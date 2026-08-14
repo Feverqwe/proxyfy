@@ -23,6 +23,8 @@ describe('storage migration', () => {
         type: 'http' as const,
         host: 'proxy.example.com',
         port: 8080,
+        username: 'alice',
+        password: 'secret',
         whitePatterns: [],
         blackPatterns: [],
       },
@@ -32,7 +34,25 @@ describe('storage migration', () => {
 
     await factory.switchStorageType(StorageType.LOCAL);
 
-    await expect(chrome.storage.local.get('proxies')).resolves.toEqual({proxies});
+    await expect(chrome.storage.local.get('proxies')).resolves.toEqual({
+      proxies: [
+        {
+          id: 'office',
+          enabled: true,
+          title: 'Office',
+          color: '#123456',
+          type: 'http',
+          host: 'proxy.example.com',
+          port: 8080,
+          whitePatterns: [],
+          blackPatterns: [],
+        },
+      ],
+    });
+    await expect(chrome.storage.local.get('proxyCredentials')).resolves.toEqual({
+      proxyCredentials: [{proxyId: 'office', username: 'alice', password: 'secret'}],
+    });
+    await expect(factory.getConfigRepository().read()).resolves.toEqual({proxies});
     expect(factory.getCurrentStorageType()).toBe(StorageType.LOCAL);
   });
 

@@ -19,10 +19,14 @@ The extension has four build entry points:
 ## Repository map
 
 - `src/components/` — React UI, page layouts, hooks, and theme configuration.
+- `src/domain/proxy/` — pure proxy state, configuration mutations, and credential split/merge logic.
 - `src/services/background/` — Chrome event listeners and background orchestration.
+- `src/services/config/` — serialized configuration reads and mutations through the active repository.
 - `src/services/proxy/` — proxy selection, application, and current-state logic.
 - `src/services/pac/` — PAC configuration and script construction.
-- `src/storage/` — local/sync Chrome storage abstractions and selection.
+- `src/services/runtime/` — validated messages shared by extension UIs and the background worker.
+- `src/storage/` — public config, local credential and selection repositories, storage abstractions,
+  and sync/local selection.
 - `src/tools/` — configuration schemas and focused utilities.
 - `src/types/` — shared TypeScript declarations.
 - `src/**/__tests__/` — unit and integration tests; shared Chrome mocks live under
@@ -33,6 +37,28 @@ The extension has four build entry points:
 - `builder/` and `rspack.config.mts` — packaging and build configuration.
 - `dist/` and `storybook-static/` — generated build outputs; never edit or commit them.
 
+## Architecture boundaries
+
+- The background service worker is the single writer for proxy configuration and storage settings.
+  Extension UIs use `src/services/runtime/runtimeClient.ts`; they do not mutate repositories or
+  `chrome.storage` directly.
+- Keep the request schema, background handler, runtime client, and Storybook Chrome mock aligned when
+  changing the runtime contract. All configuration commands are serialized by the background
+  request queue, while `src/services/config/configService.ts` serializes repository mutations.
+- Keep proxy configuration mutations pure in `src/domain/proxy/configMutations.ts`. Persistence,
+  Chrome API effects, and UI state do not belong in those functions.
+- `StorageFactory.getConfigRepository()` is the application configuration boundary. It returns a
+  `SecureConfigRepository`, which combines the selected public configuration storage with the
+  local-only credential repository.
+- Public proxy configuration may live in sync or local storage under `proxies`. Proxy usernames and
+  passwords live only in local storage under `proxyCredentials`; active proxy selection is also
+  local-only. `ConfigRepository` must never persist embedded credentials.
+- Application reads receive credentials merged into the in-memory `Config`. Legacy configurations
+  containing embedded credentials are migrated automatically: save credentials locally, then clean
+  the public configuration. Preserve that ordering and retry-safe behavior.
+- Configuration imports may contain legacy credentials and must pass through the background write
+  path. Exports must use the dedicated `config.getExport` request and never include credentials.
+
 ## Working rules
 
 1. Read the nearest relevant source and tests before changing behavior. Keep patches scoped; do not
@@ -41,12 +67,14 @@ The extension has four build entry points:
 3. Preserve Chrome extension boundaries. UI code communicates through Chrome APIs; service-worker
    code cannot depend on a DOM; PAC code runs in a constrained, separate runtime.
 4. When changing messages, stored configuration, or proxy modes, update every producer and consumer
-   together. Preserve compatibility with existing stored user data unless a migration is included.
+   together, including the Storybook mock. Preserve compatibility with existing stored user data
+   unless a migration is included.
 5. Keep `src/assets/manifest.json` permissions minimal. Explain and test any new permission.
 6. Never log proxy credentials, complete private configurations, or other sensitive storage values.
-7. Prefer the existing storage services and `StorageFactory` over direct `chrome.storage` access.
-   The selected proxy configuration may use sync or local storage, while storage preferences and
-   UI-only state can intentionally remain local.
+7. Use `SecureConfigRepository` through `StorageFactory` for application configuration. Use the raw
+   `ConfigRepository` only inside storage composition and migrations; its defensive credential
+   stripping must remain intact. Storage preferences, credentials, active selection, and UI-only
+   state intentionally remain local.
 8. Keep PAC generation deterministic and browser-compatible. Add tests for wildcard/regexp matching,
    exclusions, ordering, and fallbacks when those semantics change.
 9. Follow the existing TypeScript style: single quotes, no spaces inside braces, trailing commas,
@@ -107,6 +135,8 @@ rebuilds generated output and creates a zip in `dist/`.
 - Reuse the Chrome mocks in `src/__tests__/mocks/` and reset mock/singleton state between tests.
 - Reuse `.storybook/chromeMock.ts` and realistic, non-sensitive fixture data in page stories.
 - Test success, error, and storage-switching paths when changing asynchronous Chrome API code.
+- When changing configuration persistence, test credential separation, legacy migration, rollback,
+  and exported-data sanitization. Never put real credentials in fixtures.
 - Snapshot changes must be intentional and reviewed, not accepted merely to make a test pass.
 - `npm run typecheck` follows `tsconfig.json`, which excludes test directories; passing it does not
   prove that test-only code is type-correct.

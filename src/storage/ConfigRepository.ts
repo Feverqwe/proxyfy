@@ -1,3 +1,4 @@
+import {stripProxyCredentials} from '../domain/proxy/proxyCredentials';
 import type {Config} from '../tools/ConfigSchema';
 import {assertConfig, parseStoredConfig} from '../tools/ConfigSchema';
 
@@ -45,7 +46,7 @@ export class ConfigRepository {
     assertConfig(config);
 
     try {
-      await this.storage.set({proxies: config.proxies});
+      await this.storage.set({proxies: stripProxyCredentials(config).proxies});
     } catch (cause) {
       throw new ConfigRepositoryError('unavailable', 'Unable to write proxy configuration', {
         cause,

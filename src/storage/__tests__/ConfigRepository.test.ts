@@ -47,4 +47,42 @@ describe('ConfigRepository', () => {
 
     expect(storage.set).toHaveBeenCalledWith({proxies: []});
   });
+
+  it('defensively strips credentials before writing config storage', async () => {
+    const repository = new ConfigRepository(storage);
+
+    await repository.write({
+      proxies: [
+        {
+          id: 'office',
+          enabled: true,
+          title: 'Office',
+          color: '#123456',
+          type: 'http',
+          host: 'proxy.example.com',
+          port: 8080,
+          username: 'alice',
+          password: 'secret',
+          whitePatterns: [],
+          blackPatterns: [],
+        },
+      ],
+    });
+
+    expect(storage.set).toHaveBeenCalledWith({
+      proxies: [
+        {
+          id: 'office',
+          enabled: true,
+          title: 'Office',
+          color: '#123456',
+          type: 'http',
+          host: 'proxy.example.com',
+          port: 8080,
+          whitePatterns: [],
+          blackPatterns: [],
+        },
+      ],
+    });
+  });
 });

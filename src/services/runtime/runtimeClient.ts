@@ -29,6 +29,11 @@ export async function getConfigFromBackground(): Promise<Config> {
   return parseConfig(response);
 }
 
+export async function getExportConfig(): Promise<Config> {
+  const response = await sendRequest({action: RuntimeAction.GetExportConfig});
+  return parseConfig(response);
+}
+
 export async function replaceConfig(config: Config): Promise<void> {
   await sendRequest({action: RuntimeAction.ReplaceConfig, config});
 }

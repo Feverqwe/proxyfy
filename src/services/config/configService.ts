@@ -1,4 +1,4 @@
-import {ConfigRepository} from '../../storage/ConfigRepository';
+import type {SecureConfigRepository} from '../../storage/SecureConfigRepository';
 import {StorageFactory} from '../../storage/StorageFactory';
 import type {Config} from '../../tools/ConfigSchema';
 
@@ -6,10 +6,10 @@ type ConfigUpdater = (config: Config) => Config | void;
 
 let updateQueue: Promise<void> = Promise.resolve();
 
-async function createRepository(): Promise<ConfigRepository> {
+async function createRepository(): Promise<SecureConfigRepository> {
   const storageFactory = StorageFactory.getInstance();
   await storageFactory.initialize();
-  return new ConfigRepository(storageFactory.getStorageService());
+  return storageFactory.getConfigRepository();
 }
 
 export async function readConfig(): Promise<Config> {

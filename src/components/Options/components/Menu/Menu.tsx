@@ -7,7 +7,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
 import {Link} from 'react-router';
 
-import {getConfigFromBackground, replaceConfig} from '../../../../services/runtime/runtimeClient';
+import {getExportConfig, replaceConfig} from '../../../../services/runtime/runtimeClient';
 import {downloadBlob, parseConfig, readBlobAsText} from '../../../../tools/index';
 
 const Menu: FC = () => {
@@ -36,7 +36,7 @@ const Menu: FC = () => {
   const handleExportSettings = useCallback(async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     try {
-      const config = await getConfigFromBackground();
+      const config = await getExportConfig();
       const blob = new Blob([JSON.stringify(config, null, 2)]);
       downloadBlob(blob, 'proxyfy.json');
     } catch (err) {

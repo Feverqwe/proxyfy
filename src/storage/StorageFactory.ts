@@ -4,6 +4,8 @@
  */
 import {ConfigRepository} from './ConfigRepository';
 import {LocalStorageService} from './LocalStorageService';
+import {ProxyCredentialsRepository} from './ProxyCredentialsRepository';
+import {SecureConfigRepository} from './SecureConfigRepository';
 import type {StorageService} from './StorageService';
 import {StorageSettings, StorageType} from './StorageSettings';
 import {SyncStorageService} from './SyncStorageService';
@@ -57,10 +59,8 @@ export class StorageFactory {
     const currentStorageType = this.storageSettings.getStorageType();
     if (currentStorageType === storageType) return;
 
-    const sourceRepository = new ConfigRepository(
-      this.createSpecificStorageService(currentStorageType),
-    );
-    const targetRepository = new ConfigRepository(this.createSpecificStorageService(storageType));
+    const sourceRepository = this.createSpecificConfigRepository(currentStorageType);
+    const targetRepository = this.createSpecificConfigRepository(storageType);
     const config = await sourceRepository.read();
 
     await targetRepository.write(config);
@@ -79,6 +79,20 @@ export class StorageFactory {
    */
   getCurrentStorageType(): StorageType {
     return this.storageSettings.getStorageType();
+  }
+
+  getConfigRepository(): SecureConfigRepository {
+    return new SecureConfigRepository(
+      new ConfigRepository(this.getStorageService()),
+      new ProxyCredentialsRepository(new LocalStorageService()),
+    );
+  }
+
+  createSpecificConfigRepository(storageType: StorageType): SecureConfigRepository {
+    return new SecureConfigRepository(
+      new ConfigRepository(this.createSpecificStorageService(storageType)),
+      new ProxyCredentialsRepository(new LocalStorageService()),
+    );
   }
 
   /**
