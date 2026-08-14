@@ -3,28 +3,40 @@ import {StorageFactory} from '../../storage/index';
 import {asyncResponse} from '../../tools/index';
 import {applyConfig, applyProxy} from '../proxy/proxyConfigService';
 import {getCurrentState} from '../proxy/proxyStateService';
+import {RuntimeAction, parseBackgroundRequest} from '../runtime/runtimeContract';
 import {syncUiState} from '../ui/uiStateService';
-
-type BackgroundMessage = {action: 'set'; mode: string; id?: string} | {action: 'get'};
 
 export async function initBackgroundService() {
   chrome.runtime.onMessage.addListener(
     (
-      message: BackgroundMessage,
+      message: unknown,
       _sender: chrome.runtime.MessageSender,
       sendResponse: (response?: unknown) => void,
     ) => {
-      switch (message.action) {
-        case 'set': {
-          return asyncResponse(sendResponse, async () => {
-            const {mode, id} = message;
-            await applyProxy(mode, id);
-          });
-        }
-        case 'get': {
-          return asyncResponse(sendResponse, async () => getCurrentState());
-        }
+      if (
+        !message ||
+        typeof message !== 'object' ||
+        !('action' in message) ||
+        (message.action !== RuntimeAction.GetState && message.action !== RuntimeAction.SetProxy)
+      ) {
+        return;
       }
+
+      return asyncResponse(sendResponse, async () => {
+        const request = parseBackgroundRequest(message);
+        if (!request) throw new Error('Invalid background request');
+
+        switch (request.action) {
+          case RuntimeAction.SetProxy: {
+            const {mode, id} = request;
+            await applyProxy(mode, id);
+            return;
+          }
+          case RuntimeAction.GetState: {
+            return getCurrentState();
+          }
+        }
+      });
     },
   );
 

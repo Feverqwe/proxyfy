@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 
+import {RuntimeAction, hasRuntimeAction} from '../services/runtime/runtimeContract';
 import {ConfigProxy, getConfig} from '../tools/index';
 
 const useActualProxies = () => {
@@ -12,17 +13,24 @@ const useActualProxies = () => {
     fetchState();
 
     function listener(message: Record<string, unknown>) {
-      if (message.action === 'proxiesChanges') {
+      if (hasRuntimeAction(message, RuntimeAction.ProxiesChanged)) {
         fetchState();
       }
     }
 
     function fetchState() {
-      getConfig().then(({proxies}) => {
-        if (mounted) {
-          setProxies(proxies);
-        }
-      });
+      getConfig()
+        .then(({proxies}) => {
+          if (mounted) {
+            setProxies(proxies);
+          }
+        })
+        .catch((err) => {
+          console.error('Get proxies error: %O', err);
+          if (mounted) {
+            setProxies(null);
+          }
+        });
     }
 
     return () => {

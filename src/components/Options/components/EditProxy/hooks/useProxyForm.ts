@@ -2,14 +2,13 @@ import {RefObject, useCallback, useRef, useState} from 'react';
 
 import {useNavigate} from 'react-router';
 
-import {StorageFactory} from '../../../../../storage/index';
+import {saveProxy} from '../../../../../domain/proxy/configMutations';
+import {updateConfig} from '../../../../../services/config/configService';
 import {
   ConfigProxy,
   DirectProxyType,
   GenericProxyType,
   ProxyPatternType,
-  assertConfig,
-  getConfig,
   getId,
 } from '../../../../../tools/index';
 import {localhostPresets, matchAllPresets} from '../../Patterns/index';
@@ -103,7 +102,12 @@ export const useProxyForm = ({proxy, isNew, refForm}: UseProxyFormProps) => {
       }
     }
 
-    const changedProxy: ChangedProxy = {...proxy, ...data};
+    const changedProxy: ChangedProxy = {
+      ...proxy,
+      ...data,
+      whitePatterns: proxy.whitePatterns.map((pattern) => ({...pattern})),
+      blackPatterns: proxy.blackPatterns.map((pattern) => ({...pattern})),
+    };
 
     if (useMatchAllPreset) {
       matchAllPresets.forEach(
@@ -133,23 +137,11 @@ export const useProxyForm = ({proxy, isNew, refForm}: UseProxyFormProps) => {
       );
     }
 
-    const config = await getConfig();
     if (isNew) {
       changedProxy.id = getId();
-      config.proxies.push(changedProxy as ConfigProxy);
-    } else {
-      const existsProxy = config.proxies.find((p) => p.id === proxy.id);
-      if (!existsProxy) {
-        throw new Error('Proxy is not found');
-      }
-      const pos = config.proxies.indexOf(existsProxy);
-      config.proxies.splice(pos, 1, changedProxy as ConfigProxy);
     }
-    assertConfig(config);
-    const storageFactory = StorageFactory.getInstance();
-    await storageFactory.initialize();
-    const storageService = storageFactory.getStorageService();
-    await storageService.set(config);
+
+    await updateConfig((config) => saveProxy(config, changedProxy as ConfigProxy, isNew));
 
     return changedProxy.id;
   }, [isNew, proxy, refFields, refForm]);

@@ -7,7 +7,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
 import {Link} from 'react-router';
 
-import {StorageFactory} from '../../../../storage/index';
+import {readConfig, writeConfig} from '../../../../services/config/configService';
 import {downloadBlob, parseConfig, readBlobAsText} from '../../../../tools/index';
 
 const Menu: FC = () => {
@@ -24,11 +24,8 @@ const Menu: FC = () => {
 
       try {
         const data = await readBlobAsText(file);
-        const storage = parseConfig(JSON.parse(data as string));
-        const storageFactory = StorageFactory.getInstance();
-        await storageFactory.initialize();
-        const storageService = storageFactory.getStorageService();
-        await storageService.set(storage);
+        const config = parseConfig(JSON.parse(data as string));
+        await writeConfig(config);
         location.reload();
       } catch (err) {
         console.error('Import settings error: %O', err);
@@ -39,11 +36,8 @@ const Menu: FC = () => {
   const handleExportSettings = useCallback(async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     try {
-      const storageFactory = StorageFactory.getInstance();
-      await storageFactory.initialize();
-      const storageService = storageFactory.getStorageService();
-      const storage = await storageService.get();
-      const blob = new Blob([JSON.stringify(storage, null, 2)]);
+      const config = await readConfig();
+      const blob = new Blob([JSON.stringify(config, null, 2)]);
       downloadBlob(blob, 'proxyfy.json');
     } catch (err) {
       console.error('Export settings error: %O', err);

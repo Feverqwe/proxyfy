@@ -2,9 +2,11 @@
  * Storage Factory
  * Creates and manages storage service instances based on settings
  */
-import {StorageType} from './StorageSettings';
-
-import {LocalStorageService, StorageService, StorageSettings, SyncStorageService} from './index';
+import {ConfigRepository} from './ConfigRepository';
+import {LocalStorageService} from './LocalStorageService';
+import type {StorageService} from './StorageService';
+import {StorageSettings, StorageType} from './StorageSettings';
+import {SyncStorageService} from './SyncStorageService';
 
 export class StorageFactory {
   private static instance: StorageFactory;
@@ -52,8 +54,23 @@ export class StorageFactory {
    * Switch to a different storage type and recreate the service
    */
   async switchStorageType(storageType: StorageType): Promise<void> {
+    const currentStorageType = this.storageSettings.getStorageType();
+    if (currentStorageType === storageType) return;
+
+    const sourceRepository = new ConfigRepository(
+      this.createSpecificStorageService(currentStorageType),
+    );
+    const targetRepository = new ConfigRepository(this.createSpecificStorageService(storageType));
+    const config = await sourceRepository.read();
+
+    await targetRepository.write(config);
+    const migratedConfig = await targetRepository.read();
+    if (JSON.stringify(migratedConfig.proxies) !== JSON.stringify(config.proxies)) {
+      throw new Error('Unable to verify migrated proxy configuration');
+    }
+
     await this.storageSettings.setStorageType(storageType);
-    this.currentStorageService = this.createStorageService();
+    this.currentStorageService = this.createSpecificStorageService(storageType);
     this.currentStorageType = storageType;
   }
 

@@ -42,10 +42,13 @@ const StorageSettings: FC = () => {
   const handleStorageTypeChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const newStorageType = event.target.value as StorageType;
-      setStorageType(newStorageType);
-
-      const storageFactory = StorageFactory.getInstance();
-      await storageFactory.switchStorageType(newStorageType);
+      try {
+        const storageFactory = StorageFactory.getInstance();
+        await storageFactory.switchStorageType(newStorageType);
+        setStorageType(newStorageType);
+      } catch (err) {
+        console.error('Switch storage type error: %O', err);
+      }
     },
     [],
   );

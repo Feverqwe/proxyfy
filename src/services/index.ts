@@ -1,6 +1,7 @@
 // Service exports
 
 export * from './background/background';
+export * from './config/configService';
 export * from './pac/pacService';
 export * from './pac/pacTypes';
 export * from './proxy/proxyConfigService';

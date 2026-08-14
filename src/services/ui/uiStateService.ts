@@ -2,6 +2,7 @@ import {AUTH_SUPPORTED} from '../../constants';
 import {StorageSettings} from '../../storage/index';
 import {authListener as AuthListener, getConfig, getExtensionIcon} from '../../tools/index';
 import {getCurrentState} from '../proxy/proxyStateService';
+import {RuntimeAction} from '../runtime/runtimeContract';
 
 let authListener: AuthListener | null = null;
 
@@ -101,7 +102,7 @@ export async function syncUiState(): Promise<void> {
   }
 
   try {
-    await chrome.runtime.sendMessage({action: 'stateChanges'});
+    await chrome.runtime.sendMessage({action: RuntimeAction.StateChanged});
   } catch (_err) {
     // pass
   }

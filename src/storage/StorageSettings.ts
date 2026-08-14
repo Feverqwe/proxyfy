@@ -5,7 +5,6 @@
 export enum StorageType {
   SYNC = 'sync',
   LOCAL = 'local',
-  ENDPOINT = 'endpoint',
 }
 
 const STORAGE_TYPE_KEY = 'storageType';
@@ -32,7 +31,6 @@ export class StorageSettings {
   }
 
   private storageType: StorageType = StorageType.SYNC; // Default to sync for backward compatibility
-  private endpointUrl = '';
   private defaultIconColor = '#0a77e5'; // Default to the current PAC script color
 
   /**
@@ -63,9 +61,9 @@ export class StorageSettings {
    * Set the storage type and persist it
    */
   async setStorageType(storageType: StorageType): Promise<void> {
-    this.storageType = storageType;
     try {
       await chrome.storage.local.set({[STORAGE_TYPE_KEY]: storageType});
+      this.storageType = storageType;
     } catch (error) {
       console.error('Failed to save storage type preference:', error);
       throw error;
@@ -97,9 +95,9 @@ export class StorageSettings {
    * Set the default icon color and persist it
    */
   async setDefaultIconColor(color: string): Promise<void> {
-    this.defaultIconColor = color;
     try {
       await chrome.storage.local.set({[DEFAULT_ICON_COLOR_KEY]: color});
+      this.defaultIconColor = color;
     } catch (error) {
       console.error('Failed to save default icon color preference:', error);
       throw error;

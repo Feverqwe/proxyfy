@@ -2,7 +2,10 @@ import type {ChangeEvent} from 'react';
 
 import type {SelectChangeEvent} from '@mui/material';
 
+import type {ProxyMode} from '../domain/proxy/proxyState';
 import type {DirectProxyType, GenericProxyType, ProxyPatternType} from '../tools/index';
+
+export type {ProxyMode, ProxyState} from '../domain/proxy/proxyState';
 
 export type ChromePickerColor = {
   hex: string;
@@ -20,15 +23,9 @@ export type ChromePickerColor = {
   };
 };
 
-export type ProxyMode = 'pac_script' | 'system' | 'fixed_servers' | 'direct' | 'auto_detect';
 export type StorageType = 'sync' | 'local';
 
 export type ProxySelectChangeEvent = SelectChangeEvent<string>;
-
-export type ProxyState = {
-  mode: ProxyMode;
-  id?: string;
-};
 
 // Event handler types for improved type safety
 export type SelectChangeEventHandler = (event: SelectChangeEvent<string>) => void;
@@ -52,5 +49,5 @@ export type PatternItem = {
 export type MenuItem = {
   id?: string;
   title: string;
-  mode: string;
+  mode: ProxyMode;
 };

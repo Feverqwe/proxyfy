@@ -4,7 +4,9 @@ import {Box, Divider, List, ListItemButton, ListItemText, Paper} from '@mui/mate
 import {styled} from '@mui/system';
 
 import {AUTH_SUPPORTED} from '../../constants';
-import {ConfigProxy, throwIfResponseError} from '../../tools/index';
+import type {ProxyMode} from '../../domain/proxy/proxyState';
+import {selectProxy} from '../../services/runtime/runtimeClient';
+import {ConfigProxy} from '../../tools/index';
 import type {MenuItem} from '../../types/index';
 import {useActualProxies, useActualState} from '../index';
 
@@ -31,7 +33,7 @@ const Popup = () => {
   const state = useActualState();
   const proxies = useActualProxies();
 
-  const handleClick = useCallback(async (mode: string, item: MenuItem | ConfigProxy) => {
+  const handleClick = useCallback(async (mode: ProxyMode, item: MenuItem | ConfigProxy) => {
     const {id} = item;
 
     if (AUTH_SUPPORTED && 'username' in item && item.username) {
@@ -46,12 +48,7 @@ const Popup = () => {
     }
 
     try {
-      const response = await chrome.runtime.sendMessage({
-        action: 'set',
-        mode,
-        id,
-      });
-      throwIfResponseError(response);
+      await selectProxy(mode, id);
     } catch (err) {
       console.error('Set proxy error: %O', err);
     }
@@ -97,9 +94,9 @@ const Popup = () => {
 
 interface ProxyItemProps {
   item: MenuItem | ConfigProxy;
-  mode: string;
+  mode: ProxyMode;
   checked: boolean;
-  onClick: (mode: string, item: MenuItem | ConfigProxy) => void;
+  onClick: (mode: ProxyMode, item: MenuItem | ConfigProxy) => void;
 }
 
 const ProxyItem: FC<ProxyItemProps> = ({item, mode, checked, onClick}) => {

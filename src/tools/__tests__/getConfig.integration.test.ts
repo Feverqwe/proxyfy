@@ -6,6 +6,7 @@
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
+import {ConfigRepositoryError} from '../../storage/ConfigRepository';
 import {StorageFactory} from '../../storage/StorageFactory';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
 import getConfig from '../getConfig';
@@ -120,7 +121,7 @@ describe('getConfig Integration', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle storage errors gracefully', async () => {
+    it('should report storage errors without returning an empty config', async () => {
       // Mock storage error
       const mockGet = vi.fn().mockRejectedValue(new Error('Storage error'));
       (chrome.storage.sync.get as any) = mockGet;
@@ -128,12 +129,12 @@ describe('getConfig Integration', () => {
       const storageSettings = StorageSettings.getInstance();
       await storageSettings.setStorageType(StorageType.SYNC);
 
-      // Should return default config on error
-      const result = await getConfig();
-      expect(result).toEqual({proxies: []});
+      await expect(getConfig()).rejects.toMatchObject<Partial<ConfigRepositoryError>>({
+        code: 'unavailable',
+      });
     });
 
-    it('should handle invalid configuration data', async () => {
+    it('should report invalid configuration data', async () => {
       // Mock invalid configuration data
       const invalidConfig = {
         proxies: 'invalid', // Should be an array
@@ -145,9 +146,9 @@ describe('getConfig Integration', () => {
       const storageSettings = StorageSettings.getInstance();
       await storageSettings.setStorageType(StorageType.SYNC);
 
-      // The getConfig function should handle invalid data by returning default config
-      const result = await getConfig();
-      expect(result).toEqual({proxies: []});
+      await expect(getConfig()).rejects.toMatchObject<Partial<ConfigRepositoryError>>({
+        code: 'corrupt',
+      });
     });
   });
 

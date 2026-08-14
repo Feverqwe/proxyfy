@@ -7,8 +7,14 @@ import {Box, Button, Checkbox, Grid, Paper, Stack} from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import {Link} from 'react-router';
 
-import {StorageFactory} from '../../../../storage/index';
-import {ConfigProxy, assertConfig, getConfig, getId} from '../../../../tools/index';
+import {
+  cloneProxy,
+  moveProxy,
+  removeProxy,
+  setProxyEnabled,
+} from '../../../../domain/proxy/configMutations';
+import {updateConfig} from '../../../../services/config/configService';
+import {ConfigProxy, getConfig, getId} from '../../../../tools/index';
 import {ColorIcon, CopyIcon, Header, ProxySelect} from '../../../index';
 import Menu from '../Menu/Menu';
 
@@ -44,13 +50,9 @@ const ProxyList: FC = () => {
     fetchProxies();
   }, [fetchProxies]);
 
-  const saveProxies = useCallback(
-    async (newProxies: ConfigProxy[]) => {
-      assertConfig({proxies: newProxies});
-      const storageFactory = StorageFactory.getInstance();
-      await storageFactory.initialize();
-      const storageService = storageFactory.getStorageService();
-      await storageService.set({proxies: newProxies});
+  const saveChange = useCallback(
+    async (change: Parameters<typeof updateConfig>[0]) => {
+      await updateConfig(change);
       await fetchProxies();
     },
     [fetchProxies],
@@ -58,55 +60,30 @@ const ProxyList: FC = () => {
 
   const handleProxyDelete = useCallback(
     async (proxy: ConfigProxy) => {
-      const newProxies = proxies.slice(0);
-      const pos = newProxies.indexOf(proxy);
-      if (pos === -1) return;
-      newProxies.splice(pos, 1);
-
-      await saveProxies(newProxies);
+      await saveChange((config) => removeProxy(config, proxy.id));
     },
-    [proxies, saveProxies],
+    [saveChange],
   );
 
   const handleMove = useCallback(
     async (proxy: ConfigProxy, offset: number) => {
-      const newProxies = proxies.slice(0);
-      const pos = newProxies.indexOf(proxy);
-      if (pos === -1) return;
-      newProxies.splice(pos, 1);
-      newProxies.splice(pos + offset, 0, proxy);
-
-      await saveProxies(newProxies);
+      await saveChange((config) => moveProxy(config, proxy.id, offset));
     },
-    [proxies, saveProxies],
+    [saveChange],
   );
 
   const handleEnabledChange = useCallback(
     async (isEnabled: boolean, proxy: ConfigProxy) => {
-      const newProxies = proxies.slice(0);
-      const pos = newProxies.indexOf(proxy);
-      if (pos === -1) return;
-      newProxies.splice(pos, 1, {
-        ...proxy,
-        enabled: isEnabled,
-      });
-
-      await saveProxies(newProxies);
+      await saveChange((config) => setProxyEnabled(config, proxy.id, isEnabled));
     },
-    [proxies, saveProxies],
+    [saveChange],
   );
 
   const handleClone = useCallback(
     async (proxy: ConfigProxy) => {
-      const newProxies = proxies.slice(0);
-      const clone = JSON.parse(JSON.stringify(proxy));
-      clone.id = getId();
-      clone.title = `Copy of ${proxy.title}`;
-      newProxies.push(clone);
-
-      await saveProxies(newProxies);
+      await saveChange((config) => cloneProxy(config, proxy.id, getId()));
     },
-    [proxies, saveProxies],
+    [saveChange],
   );
 
   return (

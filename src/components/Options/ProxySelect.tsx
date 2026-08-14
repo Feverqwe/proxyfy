@@ -2,7 +2,7 @@ import React, {FC, useCallback, useMemo} from 'react';
 
 import {FormControl, MenuItem, Select, SelectProps} from '@mui/material';
 
-import {throwIfResponseError} from '../../tools/index';
+import {selectProxy} from '../../services/runtime/runtimeClient';
 import type {ProxyMode} from '../../types/index';
 import {useActualProxies, useActualState} from '../index';
 
@@ -30,12 +30,7 @@ const ProxySelect = () => {
       }
 
       try {
-        const response = await chrome.runtime.sendMessage({
-          action: 'set',
-          mode,
-          id: proxy?.id,
-        });
-        throwIfResponseError(response);
+        await selectProxy(mode, proxy?.id);
       } catch (err) {
         console.error('Set proxy error: %O', err);
       }

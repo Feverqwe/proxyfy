@@ -3,8 +3,9 @@ import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {Alert, Box, Paper, Typography} from '@mui/material';
 import {useNavigate} from 'react-router';
 
-import {StorageFactory} from '../../../../../storage/index';
-import {ConfigProxy, assertConfig, getConfig} from '../../../../../tools/index';
+import {replaceProxyPatterns} from '../../../../../domain/proxy/configMutations';
+import {updateConfig} from '../../../../../services/config/configService';
+import {ConfigProxy} from '../../../../../tools/index';
 import {ActionBox, MyButtonM, Notification} from '../../../../index';
 import {localhostPresets, matchAllPresets} from '../presets';
 import {arePatternsValid} from '../utils/validation';
@@ -43,19 +44,9 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
       }
 
       try {
-        const config = await getConfig();
-        const existsProxy = config.proxies.find((p) => p.id === proxy.id);
-        if (!existsProxy) {
-          throw new Error('Proxy is not found');
-        }
-
-        existsProxy.whitePatterns = whitePatterns;
-        existsProxy.blackPatterns = blackPatterns;
-        assertConfig(config);
-        const storageFactory = StorageFactory.getInstance();
-        await storageFactory.initialize();
-        const storageService = storageFactory.getStorageService();
-        await storageService.set(config);
+        await updateConfig((config) =>
+          replaceProxyPatterns(config, proxy.id, whitePatterns, blackPatterns),
+        );
 
         if (!noRedirect) {
           navigate('/');

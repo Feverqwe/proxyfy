@@ -78,10 +78,20 @@ describe('StorageSettings', () => {
       const mockSet = chrome.storage.local.set as Mock;
       mockSet.mockResolvedValue(undefined);
 
-      await storageSettings.setStorageType(StorageType.ENDPOINT);
+      await storageSettings.setStorageType(StorageType.LOCAL);
 
-      expect(mockSet).toHaveBeenCalledWith({storageType: StorageType.ENDPOINT});
-      expect(storageSettings.getStorageType()).toBe(StorageType.ENDPOINT);
+      expect(mockSet).toHaveBeenCalledWith({storageType: StorageType.LOCAL});
+      expect(storageSettings.getStorageType()).toBe(StorageType.LOCAL);
+    });
+
+    it('should retain the active type when persistence fails', async () => {
+      const mockSet = chrome.storage.local.set as Mock;
+      mockSet.mockRejectedValue(new Error('Storage error'));
+
+      await expect(storageSettings.setStorageType(StorageType.LOCAL)).rejects.toThrow(
+        'Storage error',
+      );
+      expect(storageSettings.getStorageType()).toBe(StorageType.SYNC);
     });
 
     it('should check storage type correctly', async () => {
@@ -92,10 +102,6 @@ describe('StorageSettings', () => {
       await storageSettings.setStorageType(StorageType.LOCAL);
       expect(storageSettings.isSyncStorage()).toBe(false);
       expect(storageSettings.isLocalStorage()).toBe(true);
-
-      await storageSettings.setStorageType(StorageType.ENDPOINT);
-      expect(storageSettings.isSyncStorage()).toBe(false);
-      expect(storageSettings.isLocalStorage()).toBe(false);
     });
   });
 
@@ -115,6 +121,7 @@ describe('StorageSettings', () => {
       mockSet.mockRejectedValue(new Error('Storage error'));
 
       await expect(storageSettings.setDefaultIconColor('#ff0000')).rejects.toThrow('Storage error');
+      expect(storageSettings.getDefaultIconColor()).toBe('#0a77e5');
     });
 
     it('should use default color when not set', () => {

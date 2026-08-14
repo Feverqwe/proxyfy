@@ -3,6 +3,7 @@
  */
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
+import {ConfigRepositoryError} from '../../storage/ConfigRepository';
 import {StorageFactory} from '../../storage/StorageFactory';
 import {StorageService} from '../../storage/StorageService';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
@@ -23,6 +24,7 @@ describe('getConfig', () => {
 
     // Clear all mocks
     vi.clearAllMocks();
+    vi.mocked(chrome.storage.local.get).mockResolvedValue({});
   });
 
   it('should initialize storage factory and get config from storage service', async () => {
@@ -85,7 +87,7 @@ describe('getConfig', () => {
     expect(config.proxies).toEqual(mockStorageData.proxies);
   });
 
-  it('should handle validation errors and return default config', async () => {
+  it('should report invalid stored configuration without replacing it', async () => {
     const invalidStorageData = {
       proxies: 'invalid', // Should be an array
       patterns: 123, // Should be an array
@@ -102,16 +104,10 @@ describe('getConfig', () => {
 
     vi.spyOn(storageFactory, 'getStorageService').mockReturnValue(mockStorageService);
 
-    // Mock console.error to avoid test output noise
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
-
-    const config = await getConfig();
-
+    await expect(getConfig()).rejects.toMatchObject<Partial<ConfigRepositoryError>>({
+      code: 'corrupt',
+    });
     expect(mockGet).toHaveBeenCalled();
-    expect(consoleErrorSpy).toHaveBeenCalled();
-    expect(config).toEqual(parseStoredConfig({}));
-
-    consoleErrorSpy.mockRestore();
   });
 
   it('should work with different storage types', async () => {

@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
 
-import {throwIfResponseError} from '../tools/index';
-import type {ProxyState} from '../types/index';
+import type {ProxyState} from '../domain/proxy/proxyState';
+import {getProxyState} from '../services/runtime/runtimeClient';
+import {RuntimeAction, hasRuntimeAction} from '../services/runtime/runtimeContract';
 
 const useActualState = () => {
   const [state, setState] = useState<null | ProxyState>(null);
@@ -13,13 +14,13 @@ const useActualState = () => {
     fetchState();
 
     function listener(message: Record<string, unknown>) {
-      if (message.action === 'stateChanges') {
+      if (hasRuntimeAction(message, RuntimeAction.StateChanged)) {
         fetchState();
       }
     }
 
     function fetchState() {
-      getState()
+      getProxyState()
         .then((state) => {
           if (mounted) {
             setState(state);
@@ -41,19 +42,5 @@ const useActualState = () => {
 
   return state;
 };
-
-async function getState() {
-  const result = await chrome.runtime.sendMessage({
-    action: 'get',
-  });
-  throwIfResponseError(result);
-
-  if (result && typeof result === 'object' && 'mode' in result && typeof result.mode === 'string') {
-    const state = result as ProxyState;
-    return state;
-  }
-
-  return null;
-}
 
 export default useActualState;

@@ -83,12 +83,12 @@ describe('StorageSettings', () => {
     expect(settings.getStorageType()).toBe(StorageType.LOCAL);
   });
 
-  it('should provide helper methods for storage type checking', () => {
-    settings.setStorageType(StorageType.SYNC);
+  it('should provide helper methods for storage type checking', async () => {
+    await settings.setStorageType(StorageType.SYNC);
     expect(settings.isSyncStorage()).toBe(true);
     expect(settings.isLocalStorage()).toBe(false);
 
-    settings.setStorageType(StorageType.LOCAL);
+    await settings.setStorageType(StorageType.LOCAL);
     expect(settings.isSyncStorage()).toBe(false);
     expect(settings.isLocalStorage()).toBe(true);
   });
@@ -132,6 +132,9 @@ describe('StorageFactory', () => {
   });
 
   it('should allow switching storage types', async () => {
+    vi.mocked(chrome.storage.sync.get).mockResolvedValue({});
+    vi.mocked(chrome.storage.local.get).mockResolvedValue({});
+
     await factory.switchStorageType(StorageType.LOCAL);
     expect(factory.getCurrentStorageType()).toBe(StorageType.LOCAL);
 
