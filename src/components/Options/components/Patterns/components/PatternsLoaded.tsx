@@ -3,8 +3,7 @@ import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {Alert, Box, Paper, Typography} from '@mui/material';
 import {useNavigate} from 'react-router';
 
-import {replaceProxyPatterns} from '../../../../../domain/proxy/configMutations';
-import {updateConfig} from '../../../../../services/config/configService';
+import {replaceProxyPatterns as replaceProxyPatternsConfig} from '../../../../../services/runtime/runtimeClient';
 import {ConfigProxy} from '../../../../../tools/index';
 import {ActionBox, MyButtonM, Notification} from '../../../../index';
 import {localhostPresets, matchAllPresets} from '../presets';
@@ -44,9 +43,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
       }
 
       try {
-        await updateConfig((config) =>
-          replaceProxyPatterns(config, proxy.id, whitePatterns, blackPatterns),
-        );
+        await replaceProxyPatternsConfig(proxy.id, whitePatterns, blackPatterns);
 
         if (!noRedirect) {
           navigate('/');

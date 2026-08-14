@@ -2,8 +2,7 @@ import {RefObject, useCallback, useRef, useState} from 'react';
 
 import {useNavigate} from 'react-router';
 
-import {saveProxy} from '../../../../../domain/proxy/configMutations';
-import {updateConfig} from '../../../../../services/config/configService';
+import {saveProxyConfig} from '../../../../../services/runtime/runtimeClient';
 import {
   ConfigProxy,
   DirectProxyType,
@@ -141,7 +140,7 @@ export const useProxyForm = ({proxy, isNew, refForm}: UseProxyFormProps) => {
       changedProxy.id = getId();
     }
 
-    await updateConfig((config) => saveProxy(config, changedProxy as ConfigProxy, isNew));
+    await saveProxyConfig(changedProxy as ConfigProxy, isNew);
 
     return changedProxy.id;
   }, [isNew, proxy, refFields, refForm]);

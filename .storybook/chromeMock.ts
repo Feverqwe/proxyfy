@@ -1,6 +1,16 @@
+import {
+  cloneProxy,
+  moveProxy,
+  removeProxy,
+  replaceProxyPatterns,
+  saveProxy,
+  setProxyEnabled,
+} from '../src/domain/proxy/configMutations';
+import type {BackgroundRequest} from '../src/services/runtime/runtimeContract';
+import {RuntimeAction, parseBackgroundRequest} from '../src/services/runtime/runtimeContract';
 import type {ConfigProxy} from '../src/tools/index';
 import {DirectProxyType, GenericProxyType, ProxyPatternType} from '../src/tools/index';
-import type {ProxyMode, ProxyState} from '../src/types/index';
+import type {ProxyState} from '../src/types/index';
 
 type StorageData = Map<string, unknown>;
 type RuntimeMessageListener = (message: Record<string, unknown>) => unknown;
@@ -10,6 +20,7 @@ const syncData: StorageData = new Map();
 const messageListeners = new Set<RuntimeMessageListener>();
 
 let proxyState: ProxyState = {mode: 'pac_script'};
+let activeStorageType: 'sync' | 'local' = 'sync';
 
 export const storyProxies: ConfigProxy[] = [
   {
@@ -118,7 +129,7 @@ const createStorageArea = (data: StorageData) => {
     set: async (items: Record<string, unknown>) => {
       Object.entries(items).forEach(([key, value]) => data.set(key, value));
       if ('proxies' in items) {
-        emitMessage({action: 'proxiesChanges'});
+        emitMessage({action: RuntimeAction.ProxiesChanged});
       }
     },
     remove: async (keys: string | string[]) => {
@@ -134,8 +145,70 @@ const createStorageArea = (data: StorageData) => {
   };
 };
 
-const isProxyMode = (value: unknown): value is ProxyMode => {
-  return ['pac_script', 'system', 'fixed_servers', 'direct', 'auto_detect'].includes(String(value));
+const getActiveStorage = () => (activeStorageType === 'sync' ? syncData : localData);
+
+const getActiveConfig = () => ({
+  proxies: cloneProxies((getActiveStorage().get('proxies') as ConfigProxy[] | undefined) || []),
+});
+
+const setActiveConfig = (config: {proxies: ConfigProxy[]}) => {
+  getActiveStorage().set('proxies', cloneProxies(config.proxies));
+  emitMessage({action: RuntimeAction.ProxiesChanged});
+};
+
+const handleRuntimeRequest = (request: BackgroundRequest) => {
+  switch (request.action) {
+    case RuntimeAction.GetState:
+      return {...proxyState};
+    case RuntimeAction.SetProxy:
+      proxyState = {mode: request.mode, id: request.id};
+      emitMessage({action: RuntimeAction.StateChanged});
+      return;
+    case RuntimeAction.GetConfig:
+      return getActiveConfig();
+    case RuntimeAction.GetStorageSettings:
+      return {
+        storageType: activeStorageType,
+        defaultIconColor: String(localData.get('defaultIconColor') || '#0a77e5'),
+      };
+    case RuntimeAction.SetDefaultIconColor:
+      localData.set('defaultIconColor', request.color);
+      return;
+    case RuntimeAction.ReplaceConfig:
+      setActiveConfig(request.config);
+      return;
+    case RuntimeAction.SaveProxy:
+      setActiveConfig(saveProxy(getActiveConfig(), request.proxy, request.isNew));
+      return;
+    case RuntimeAction.RemoveProxy:
+      setActiveConfig(removeProxy(getActiveConfig(), request.proxyId));
+      return;
+    case RuntimeAction.MoveProxy:
+      setActiveConfig(moveProxy(getActiveConfig(), request.proxyId, request.offset));
+      return;
+    case RuntimeAction.SetProxyEnabled:
+      setActiveConfig(setProxyEnabled(getActiveConfig(), request.proxyId, request.enabled));
+      return;
+    case RuntimeAction.CloneProxy:
+      setActiveConfig(cloneProxy(getActiveConfig(), request.proxyId, request.cloneId));
+      return;
+    case RuntimeAction.ReplaceProxyPatterns:
+      setActiveConfig(
+        replaceProxyPatterns(
+          getActiveConfig(),
+          request.proxyId,
+          request.whitePatterns,
+          request.blackPatterns,
+        ),
+      );
+      return;
+    case RuntimeAction.SwitchStorage: {
+      const previousConfig = getActiveConfig();
+      activeStorageType = request.storageType;
+      localData.set('storageType', activeStorageType);
+      setActiveConfig(previousConfig);
+    }
+  }
 };
 
 const chromeMock = {
@@ -149,21 +222,8 @@ const chromeMock = {
       removeListener: (listener: RuntimeMessageListener) => messageListeners.delete(listener),
     },
     sendMessage: async (message: unknown) => {
-      if (!message || typeof message !== 'object') return undefined;
-
-      const request = message as Record<string, unknown>;
-      if (request.action === 'get') {
-        return {...proxyState};
-      }
-      if (request.action === 'set' && isProxyMode(request.mode)) {
-        proxyState = {
-          mode: request.mode,
-          id: typeof request.id === 'string' ? request.id : undefined,
-        };
-        emitMessage({action: 'stateChanges'});
-      }
-
-      return undefined;
+      const request = parseBackgroundRequest(message);
+      return request ? handleRuntimeRequest(request) : undefined;
     },
   },
   permissions: {
@@ -193,6 +253,7 @@ export const configureChromeMock = ({
     syncData.set(key, structuredClone(value));
   });
   proxyState = {...state};
+  activeStorageType = 'sync';
 };
 
 export const installChromeMock = () => {

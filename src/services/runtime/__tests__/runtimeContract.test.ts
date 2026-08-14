@@ -15,4 +15,27 @@ describe('runtime contract', () => {
       parseBackgroundRequest({action: RuntimeAction.SetProxy, mode: 'system', id: 42}),
     ).toBeNull();
   });
+
+  it('validates config commands at the background boundary', () => {
+    expect(
+      parseBackgroundRequest({
+        action: RuntimeAction.MoveProxy,
+        proxyId: 'office',
+        offset: 2,
+      }),
+    ).toBeNull();
+    expect(
+      parseBackgroundRequest({
+        action: RuntimeAction.SaveProxy,
+        proxy: {id: 'broken'},
+        isNew: true,
+      }),
+    ).toBeNull();
+    expect(
+      parseBackgroundRequest({
+        action: RuntimeAction.SwitchStorage,
+        storageType: 'endpoint',
+      }),
+    ).toBeNull();
+  });
 });

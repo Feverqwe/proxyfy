@@ -1,38 +1,109 @@
-import type {ProxyMode} from '../../domain/proxy/proxyState';
-import {isProxyMode} from '../../domain/proxy/proxyState';
+import * as v from 'valibot';
+
+import {proxyModes} from '../../domain/proxy/proxyState';
+import {ConfigSchema, ProxyPatternSchema, ProxySchema} from '../../tools/ConfigSchema';
 
 export const RuntimeAction = {
-  GetState: 'get',
-  SetProxy: 'set',
-  StateChanged: 'stateChanges',
-  ProxiesChanged: 'proxiesChanges',
+  GetState: 'proxy.getState',
+  SetProxy: 'proxy.set',
+  GetConfig: 'config.get',
+  ReplaceConfig: 'config.replace',
+  SaveProxy: 'config.proxy.save',
+  RemoveProxy: 'config.proxy.remove',
+  MoveProxy: 'config.proxy.move',
+  SetProxyEnabled: 'config.proxy.setEnabled',
+  CloneProxy: 'config.proxy.clone',
+  ReplaceProxyPatterns: 'config.proxy.replacePatterns',
+  GetStorageSettings: 'config.storage.getSettings',
+  SwitchStorage: 'config.storage.switch',
+  SetDefaultIconColor: 'config.storage.setDefaultIconColor',
+  StateChanged: 'proxy.stateChanged',
+  ProxiesChanged: 'config.changed',
 } as const;
 
-export type BackgroundRequest =
-  | {action: typeof RuntimeAction.GetState}
-  | {action: typeof RuntimeAction.SetProxy; mode: ProxyMode; id?: string};
+const BackgroundRequestSchema = v.variant('action', [
+  v.object({action: v.literal(RuntimeAction.GetState)}),
+  v.object({
+    action: v.literal(RuntimeAction.SetProxy),
+    mode: v.picklist(proxyModes),
+    id: v.optional(v.string()),
+  }),
+  v.object({action: v.literal(RuntimeAction.GetConfig)}),
+  v.object({
+    action: v.literal(RuntimeAction.ReplaceConfig),
+    config: ConfigSchema,
+  }),
+  v.object({
+    action: v.literal(RuntimeAction.SaveProxy),
+    proxy: ProxySchema,
+    isNew: v.boolean(),
+  }),
+  v.object({action: v.literal(RuntimeAction.RemoveProxy), proxyId: v.string()}),
+  v.object({
+    action: v.literal(RuntimeAction.MoveProxy),
+    proxyId: v.string(),
+    offset: v.union([v.literal(-1), v.literal(1)]),
+  }),
+  v.object({
+    action: v.literal(RuntimeAction.SetProxyEnabled),
+    proxyId: v.string(),
+    enabled: v.boolean(),
+  }),
+  v.object({
+    action: v.literal(RuntimeAction.CloneProxy),
+    proxyId: v.string(),
+    cloneId: v.string(),
+  }),
+  v.object({
+    action: v.literal(RuntimeAction.ReplaceProxyPatterns),
+    proxyId: v.string(),
+    whitePatterns: v.array(ProxyPatternSchema),
+    blackPatterns: v.array(ProxyPatternSchema),
+  }),
+  v.object({
+    action: v.literal(RuntimeAction.GetStorageSettings),
+  }),
+  v.object({
+    action: v.literal(RuntimeAction.SwitchStorage),
+    storageType: v.picklist(['sync', 'local']),
+  }),
+  v.object({
+    action: v.literal(RuntimeAction.SetDefaultIconColor),
+    color: v.string(),
+  }),
+]);
+
+export type BackgroundRequest = v.InferOutput<typeof BackgroundRequestSchema>;
+
+const backgroundRequestActions = new Set<string>([
+  RuntimeAction.GetState,
+  RuntimeAction.SetProxy,
+  RuntimeAction.GetConfig,
+  RuntimeAction.ReplaceConfig,
+  RuntimeAction.SaveProxy,
+  RuntimeAction.RemoveProxy,
+  RuntimeAction.MoveProxy,
+  RuntimeAction.SetProxyEnabled,
+  RuntimeAction.CloneProxy,
+  RuntimeAction.ReplaceProxyPatterns,
+  RuntimeAction.GetStorageSettings,
+  RuntimeAction.SwitchStorage,
+  RuntimeAction.SetDefaultIconColor,
+]);
+
+export function isBackgroundRequestMessage(message: unknown): boolean {
+  return Boolean(
+    message &&
+    typeof message === 'object' &&
+    'action' in message &&
+    typeof message.action === 'string' &&
+    backgroundRequestActions.has(message.action),
+  );
+}
 
 export function parseBackgroundRequest(message: unknown): BackgroundRequest | null {
-  if (!message || typeof message !== 'object' || !('action' in message)) return null;
-
-  if (message.action === RuntimeAction.GetState) {
-    return {action: RuntimeAction.GetState};
-  }
-
-  if (
-    message.action !== RuntimeAction.SetProxy ||
-    !('mode' in message) ||
-    !isProxyMode(message.mode)
-  ) {
-    return null;
-  }
-  if ('id' in message && message.id !== undefined && typeof message.id !== 'string') return null;
-
-  return {
-    action: RuntimeAction.SetProxy,
-    mode: message.mode,
-    ...('id' in message && typeof message.id === 'string' ? {id: message.id} : {}),
-  };
+  const result = v.safeParse(BackgroundRequestSchema, message);
+  return result.success ? result.output : null;
 }
 
 export function hasRuntimeAction(

@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useEffect, useState} from 'react';
+import React, {FC, useCallback} from 'react';
 
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
@@ -8,14 +8,13 @@ import IconButton from '@mui/material/IconButton';
 import {Link} from 'react-router';
 
 import {
-  cloneProxy,
-  moveProxy,
-  removeProxy,
-  setProxyEnabled,
-} from '../../../../domain/proxy/configMutations';
-import {updateConfig} from '../../../../services/config/configService';
-import {ConfigProxy, getConfig, getId} from '../../../../tools/index';
-import {ColorIcon, CopyIcon, Header, ProxySelect} from '../../../index';
+  cloneProxyConfig,
+  moveProxyConfig,
+  removeProxyConfig,
+  setProxyConfigEnabled,
+} from '../../../../services/runtime/runtimeClient';
+import {ConfigProxy, getId} from '../../../../tools/index';
+import {ColorIcon, CopyIcon, Header, ProxySelect, useActualProxies} from '../../../index';
 import Menu from '../Menu/Menu';
 
 const STYLE = {
@@ -34,56 +33,42 @@ const STYLE = {
 };
 
 const ProxyList: FC = () => {
-  const [proxies, setProxies] = useState<ConfigProxy[]>([]);
+  const proxies = useActualProxies() || [];
 
-  const fetchProxies = useCallback(async () => {
+  const runCommand = useCallback(async (command: () => Promise<void>) => {
     try {
-      const {proxies} = await getConfig();
-
-      setProxies(proxies);
+      await command();
     } catch (err) {
-      console.error('getConfig error: %O', err);
+      console.error('Update proxy config error: %O', err);
     }
   }, []);
 
-  useEffect(() => {
-    fetchProxies();
-  }, [fetchProxies]);
-
-  const saveChange = useCallback(
-    async (change: Parameters<typeof updateConfig>[0]) => {
-      await updateConfig(change);
-      await fetchProxies();
-    },
-    [fetchProxies],
-  );
-
   const handleProxyDelete = useCallback(
-    async (proxy: ConfigProxy) => {
-      await saveChange((config) => removeProxy(config, proxy.id));
+    (proxy: ConfigProxy) => {
+      return runCommand(() => removeProxyConfig(proxy.id));
     },
-    [saveChange],
+    [runCommand],
   );
 
   const handleMove = useCallback(
-    async (proxy: ConfigProxy, offset: number) => {
-      await saveChange((config) => moveProxy(config, proxy.id, offset));
+    (proxy: ConfigProxy, offset: -1 | 1) => {
+      return runCommand(() => moveProxyConfig(proxy.id, offset));
     },
-    [saveChange],
+    [runCommand],
   );
 
   const handleEnabledChange = useCallback(
-    async (isEnabled: boolean, proxy: ConfigProxy) => {
-      await saveChange((config) => setProxyEnabled(config, proxy.id, isEnabled));
+    (isEnabled: boolean, proxy: ConfigProxy) => {
+      return runCommand(() => setProxyConfigEnabled(proxy.id, isEnabled));
     },
-    [saveChange],
+    [runCommand],
   );
 
   const handleClone = useCallback(
-    async (proxy: ConfigProxy) => {
-      await saveChange((config) => cloneProxy(config, proxy.id, getId()));
+    (proxy: ConfigProxy) => {
+      return runCommand(() => cloneProxyConfig(proxy.id, getId()));
     },
-    [saveChange],
+    [runCommand],
   );
 
   return (
@@ -130,7 +115,7 @@ interface ProxyItemProps {
   isFirst: boolean;
   isLast: boolean;
   onDelete: (proxy: ConfigProxy) => unknown;
-  onMove: (proxy: ConfigProxy, pos: number) => unknown;
+  onMove: (proxy: ConfigProxy, pos: -1 | 1) => unknown;
   onEnabledChange: (state: boolean, proxy: ConfigProxy) => unknown;
   onClone: (proxy: ConfigProxy) => unknown;
 }

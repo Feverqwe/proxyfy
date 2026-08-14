@@ -2,7 +2,8 @@ import React, {useEffect, useState} from 'react';
 
 import {useLocation, useNavigate} from 'react-router';
 
-import {ConfigProxy, getConfig} from '../../../../tools/index';
+import {getConfigFromBackground} from '../../../../services/runtime/runtimeClient';
+import {ConfigProxy} from '../../../../tools/index';
 import {Header} from '../../../index';
 
 import {PatternsLoaded} from './components/PatternsLoaded';
@@ -20,7 +21,7 @@ const Patterns = () => {
       try {
         let proxy: ConfigProxy | undefined;
         if (query.has('id')) {
-          const {proxies} = await getConfig();
+          const {proxies} = await getConfigFromBackground();
           proxy = proxies.find((p) => p.id === query.get('id'));
         }
         if (!proxy && isMounted) {

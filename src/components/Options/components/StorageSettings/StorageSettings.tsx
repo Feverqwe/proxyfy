@@ -12,28 +12,32 @@ import {
   Typography,
 } from '@mui/material';
 
-import {StorageType} from '../../../../storage/StorageSettings';
-import {StorageFactory, StorageSettings as StorageSettingsManager} from '../../../../storage/index';
+import type {ConfigStorageSettings} from '../../../../services/runtime/runtimeClient';
+import {
+  getConfigStorageSettings,
+  setDefaultIconColor as persistDefaultIconColor,
+  switchConfigStorage,
+} from '../../../../services/runtime/runtimeClient';
 import {Header, MyColorInput} from '../../../index';
 
 const StorageSettings: FC = () => {
-  const [storageType, setStorageType] = useState<StorageType>(StorageType.SYNC);
+  const [storageType, setStorageType] = useState<ConfigStorageSettings['storageType']>('sync');
   const [defaultIconColor, setDefaultIconColor] = useState<string>('#0a77e5');
   const [isInitialized, setIsInitialized] = useState(false);
+  const [initializationError, setInitializationError] = useState(false);
 
   useEffect(() => {
     const initialize = async () => {
-      const storageFactory = StorageFactory.getInstance();
-      await storageFactory.initialize();
-      const currentType = storageFactory.getCurrentStorageType();
-      setStorageType(currentType);
-
-      const storageSettings = StorageSettingsManager.getInstance();
-
-      const currentDefaultIconColor = storageSettings.getDefaultIconColor();
-      setDefaultIconColor(currentDefaultIconColor);
-
-      setIsInitialized(true);
+      try {
+        const settings = await getConfigStorageSettings();
+        setStorageType(settings.storageType);
+        setDefaultIconColor(settings.defaultIconColor);
+      } catch (err) {
+        console.error('Load storage settings error: %O', err);
+        setInitializationError(true);
+      } finally {
+        setIsInitialized(true);
+      }
     };
 
     initialize();
@@ -41,10 +45,9 @@ const StorageSettings: FC = () => {
 
   const handleStorageTypeChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newStorageType = event.target.value as StorageType;
+      const newStorageType = event.target.value as ConfigStorageSettings['storageType'];
       try {
-        const storageFactory = StorageFactory.getInstance();
-        await storageFactory.switchStorageType(newStorageType);
+        await switchConfigStorage(newStorageType);
         setStorageType(newStorageType);
       } catch (err) {
         console.error('Switch storage type error: %O', err);
@@ -54,10 +57,12 @@ const StorageSettings: FC = () => {
   );
 
   const handleDefaultIconColorChange = useCallback(async (color: string) => {
-    setDefaultIconColor(color);
-
-    const storageSettings = StorageSettingsManager.getInstance();
-    await storageSettings.setDefaultIconColor(color);
+    try {
+      await persistDefaultIconColor(color);
+      setDefaultIconColor(color);
+    } catch (err) {
+      console.error('Set default icon color error: %O', err);
+    }
   }, []);
 
   if (!isInitialized) {
@@ -66,6 +71,17 @@ const StorageSettings: FC = () => {
         <Header title="Storage Settings" />
         <Paper sx={{p: 2}}>
           <Typography>Loading...</Typography>
+        </Paper>
+      </Box>
+    );
+  }
+
+  if (initializationError) {
+    return (
+      <Box>
+        <Header title="Storage Settings" />
+        <Paper sx={{p: 2}}>
+          <Typography color="error">Unable to load storage settings</Typography>
         </Paper>
       </Box>
     );
@@ -86,7 +102,7 @@ const StorageSettings: FC = () => {
               </FormHelperText>
               <RadioGroup value={storageType} onChange={handleStorageTypeChange}>
                 <FormControlLabel
-                  value={StorageType.SYNC}
+                  value="sync"
                   control={<Radio />}
                   label={
                     <Box>
@@ -98,7 +114,7 @@ const StorageSettings: FC = () => {
                   }
                 />
                 <FormControlLabel
-                  value={StorageType.LOCAL}
+                  value="local"
                   control={<Radio />}
                   label={
                     <Box>

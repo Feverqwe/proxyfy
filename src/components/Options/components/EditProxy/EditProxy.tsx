@@ -2,13 +2,8 @@ import React, {useCallback, useEffect, useState} from 'react';
 
 import {useLocation, useNavigate} from 'react-router';
 
-import {
-  ConfigProxy,
-  createDefaultProxy,
-  getConfig,
-  getObjectId,
-  getRandomInt,
-} from '../../../../tools/index';
+import {getConfigFromBackground} from '../../../../services/runtime/runtimeClient';
+import {ConfigProxy, createDefaultProxy, getObjectId, getRandomInt} from '../../../../tools/index';
 
 import ProxyForm from './components/ProxyForm';
 import {badgeColors} from './constants';
@@ -34,7 +29,7 @@ const EditProxy = () => {
       try {
         let proxy: undefined | ConfigProxy | null = null;
         if (query.has('id')) {
-          const {proxies} = await getConfig();
+          const {proxies} = await getConfigFromBackground();
           proxy = proxies.find((p) => p.id === query.get('id'));
         }
         if (!isMounted) return;

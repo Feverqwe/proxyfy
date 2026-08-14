@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
 
+import {getConfigFromBackground} from '../services/runtime/runtimeClient';
 import {RuntimeAction, hasRuntimeAction} from '../services/runtime/runtimeContract';
-import {ConfigProxy, getConfig} from '../tools/index';
+import type {ConfigProxy} from '../tools/index';
 
 const useActualProxies = () => {
   const [proxies, setProxies] = useState<ConfigProxy[] | null>(null);
@@ -19,7 +20,7 @@ const useActualProxies = () => {
     }
 
     function fetchState() {
-      getConfig()
+      getConfigFromBackground()
         .then(({proxies}) => {
           if (mounted) {
             setProxies(proxies);

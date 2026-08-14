@@ -7,7 +7,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
 import {Link} from 'react-router';
 
-import {readConfig, writeConfig} from '../../../../services/config/configService';
+import {getConfigFromBackground, replaceConfig} from '../../../../services/runtime/runtimeClient';
 import {downloadBlob, parseConfig, readBlobAsText} from '../../../../tools/index';
 
 const Menu: FC = () => {
@@ -25,7 +25,7 @@ const Menu: FC = () => {
       try {
         const data = await readBlobAsText(file);
         const config = parseConfig(JSON.parse(data as string));
-        await writeConfig(config);
+        await replaceConfig(config);
         location.reload();
       } catch (err) {
         console.error('Import settings error: %O', err);
@@ -36,7 +36,7 @@ const Menu: FC = () => {
   const handleExportSettings = useCallback(async (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     try {
-      const config = await readConfig();
+      const config = await getConfigFromBackground();
       const blob = new Blob([JSON.stringify(config, null, 2)]);
       downloadBlob(blob, 'proxyfy.json');
     } catch (err) {
