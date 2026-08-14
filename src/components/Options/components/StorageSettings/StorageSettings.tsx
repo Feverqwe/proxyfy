@@ -5,7 +5,6 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   FormControl,
   FormControlLabel,
   FormHelperText,
@@ -13,6 +12,8 @@ import {
   Paper,
   Radio,
   RadioGroup,
+  Skeleton,
+  Stack,
   Typography,
 } from '@mui/material';
 import {Link} from 'react-router';
@@ -84,12 +85,39 @@ const StorageSettings: FC = () => {
 
   if (!isInitialized) {
     return (
-      <Box>
+      <>
         <Header title="Settings" />
-        <Box sx={{display: 'grid', placeItems: 'center', py: 8}}>
-          <CircularProgress size={28} aria-label="Loading preferences" />
+        <Box component="main" sx={{maxWidth: 1040, mx: 'auto', p: 2}}>
+          <Button
+            component={Link}
+            to="/"
+            startIcon={<ArrowBackRoundedIcon />}
+            color="inherit"
+            sx={{mb: 2}}
+          >
+            Back to connections
+          </Button>
+          <Paper variant="outlined" aria-label="Loading preferences" aria-busy="true" sx={{p: 2}}>
+            <Grid container spacing={2.5}>
+              <Grid size={{xs: 12}}>
+                <Stack spacing={1}>
+                  <Skeleton variant="text" width={72} height={24} />
+                  <Skeleton variant="text" width={236} height={20} />
+                  <Skeleton variant="rounded" width={260} height={46} />
+                  <Skeleton variant="rounded" width={260} height={46} />
+                </Stack>
+              </Grid>
+              <Grid size={{xs: 12}}>
+                <Stack spacing={1}>
+                  <Skeleton variant="text" width={48} height={24} />
+                  <Skeleton variant="text" width={310} height={20} sx={{maxWidth: '100%'}} />
+                  <Skeleton variant="rounded" width={220} height={40} />
+                </Stack>
+              </Grid>
+            </Grid>
+          </Paper>
         </Box>
-      </Box>
+      </>
     );
   }
 

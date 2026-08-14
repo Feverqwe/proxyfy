@@ -22,6 +22,7 @@ const messageListeners = new Set<RuntimeMessageListener>();
 
 let proxyState: ProxyState | null = {mode: 'pac_script'};
 let activeStorageType: 'sync' | 'local' = 'sync';
+let storageSettingsPending = false;
 
 export const storyProxies: ConfigProxy[] = [
   {
@@ -226,6 +227,9 @@ const chromeMock = {
     },
     sendMessage: async (message: unknown) => {
       const request = parseBackgroundRequest(message);
+      if (request?.action === RuntimeAction.GetStorageSettings && storageSettingsPending) {
+        return new Promise<never>(() => undefined);
+      }
       return request ? handleRuntimeRequest(request) : undefined;
     },
   },
@@ -237,11 +241,13 @@ const chromeMock = {
 interface ConfigureChromeMockOptions {
   proxies?: ConfigProxy[];
   state?: ProxyState | null;
+  storageSettingsPending?: boolean;
 }
 
 export const configureChromeMock = ({
   proxies = storyProxies,
   state = {mode: 'pac_script'},
+  storageSettingsPending: nextStorageSettingsPending = false,
 }: ConfigureChromeMockOptions = {}) => {
   const storage = {
     proxies: cloneProxies(proxies),
@@ -257,6 +263,7 @@ export const configureChromeMock = ({
   });
   proxyState = state ? {...state} : null;
   activeStorageType = 'sync';
+  storageSettingsPending = nextStorageSettingsPending;
 };
 
 export const installChromeMock = () => {

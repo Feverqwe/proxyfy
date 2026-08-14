@@ -9,10 +9,11 @@ import Options from './Options';
 
 interface OptionsPageProps {
   route: string;
+  storageSettingsPending?: boolean;
 }
 
-const OptionsPage = ({route}: OptionsPageProps) => {
-  configureChromeMock();
+const OptionsPage = ({route, storageSettingsPending}: OptionsPageProps) => {
+  configureChromeMock({storageSettingsPending});
   return (
     <MemoryRouter key={route} initialEntries={[route]}>
       <Options />
@@ -52,4 +53,8 @@ export const Patterns: Story = {
 
 export const StorageSettings: Story = {
   args: {route: '/storage'},
+};
+
+export const StorageSettingsLoading: Story = {
+  args: {route: '/storage', storageSettingsPending: true},
 };

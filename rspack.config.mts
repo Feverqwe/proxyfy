@@ -24,7 +24,7 @@ const getOptions = (_env: unknown, argv: RspackCliArguments) => ({
     rules: [
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: [rspack.CssExtractRspackPlugin.loader, 'css-loader'],
       },
       {
         test: /\.[jt]sx?$/,
@@ -47,6 +47,9 @@ const getOptions = (_env: unknown, argv: RspackCliArguments) => ({
     extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
   plugins: [
+    new rspack.CssExtractRspackPlugin({
+      filename: '[name].css',
+    }),
     new rspack.CopyRspackPlugin({
       patterns: [{from: './src/assets/manifest.json'}, {from: './src/assets/icons', to: './icons'}],
     }),
