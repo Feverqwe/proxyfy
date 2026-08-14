@@ -1,7 +1,7 @@
 import React, {FC, useCallback, useEffect, useRef} from 'react';
 
 import {Box, Grid, Paper} from '@mui/material';
-import {Link, useNavigate} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router';
 
 import {getObjectId} from '../../../../../tools/index';
 import {ActionBox, Header, MyButtonM, Notification} from '../../../../index';

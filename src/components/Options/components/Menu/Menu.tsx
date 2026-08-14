@@ -5,7 +5,7 @@ import RestoreIcon from '@mui/icons-material/Restore';
 import SaveIcon from '@mui/icons-material/Save';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
-import {Link} from 'react-router-dom';
+import {Link} from 'react-router';
 
 import {StorageFactory} from '../../../../storage/index';
 import {ConfigStruct, downloadBlob, readBlobAsText} from '../../../../tools/index';

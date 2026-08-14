@@ -5,7 +5,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {Box, Button, Checkbox, Grid, Paper, Stack} from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import {Link} from 'react-router-dom';
+import {Link} from 'react-router';
 
 import {StorageFactory} from '../../../../storage/index';
 import {ConfigProxy, ConfigStruct, getConfig, getId} from '../../../../tools/index';
