@@ -62,6 +62,33 @@ The extension has four build entry points:
   this extension. UI loading state must be represented separately; do not treat a resolved `null`
   proxy state as a request that is still pending.
 
+## UI and UX constraints
+
+Proxyfy is a compact browser utility, not a product dashboard or marketing surface. Optimize for
+fast scanning and direct manipulation; visual branding is secondary to clarity and density.
+
+- Keep the interface neutral and compact. Prefer small controls, short labels, restrained spacing,
+  and one flat working surface over hero areas, sidebars, nested cards, large headings, decorative
+  copy, or oversized empty regions.
+- Keep all options pages aligned to the same `1040px` maximum-width container with `16px` outer
+  padding. The shared header uses the same width. Do not introduce page-specific widths for forms,
+  rules, settings, loading, or error states.
+- The active-route select on the connections page is intentionally narrow (`260px` on desktop and
+  full-width on small screens). Keep its option labels concise; explanatory sentences do not belong
+  inside the closed select.
+- The toolbar popup is content-sized and `320px` wide. It does not need an extension title, logo, or
+  summary header. Start with the routing controls, mark the current mode or proxy explicitly with
+  visible `Active` text, and let the popup end immediately after its final action without reserved
+  vertical space.
+- Use functional grouping only where it helps complete a task. Preserve clear loading, empty,
+  failure, pending, and destructive-confirmation states, but do not turn those states into large
+  presentation blocks.
+- Keep rows and forms keyboard accessible, retain visible focus, and prevent horizontal overflow at
+  a `390px` viewport. Verify both desktop and narrow layouts in Storybook after UI changes.
+- Prefer plain user language such as `Automatic routing`, `System settings`, `Rules`, `Add`, and
+  `Save`. Avoid implementation terminology and long instructional copy when a label or tooltip is
+  sufficient.
+
 ## Working rules
 
 1. Read the nearest relevant source and tests before changing behavior. Keep patches scoped; do not

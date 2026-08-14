@@ -131,9 +131,10 @@ const MyColorInput: FC<MyColorInputProps> = ({
     <>
       <TextField
         fullWidth
-        margin="normal"
+        margin="dense"
         label={label}
         variant="outlined"
+        size="small"
         value={color}
         onChange={handleChange}
         autoComplete="off"

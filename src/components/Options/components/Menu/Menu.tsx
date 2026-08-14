@@ -1,10 +1,9 @@
 import React, {FC, useCallback, useEffect, useRef} from 'react';
 
-import AddIcon from '@mui/icons-material/Add';
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import SettingsIcon from '@mui/icons-material/Settings';
-import {Divider, List, ListItemButton, ListItemIcon, ListItemText, Typography} from '@mui/material';
+import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
 import {Link} from 'react-router';
 
 import {getExportConfig, replaceConfig} from '../../../../services/runtime/runtimeClient';
@@ -54,34 +53,38 @@ const Menu: FC = () => {
   }, []);
 
   return (
-    <List component="nav" aria-label="Connection settings" disablePadding sx={{mt: 0.75}}>
-      <ListItemButton component={Link} to="/proxy" sx={{borderRadius: 2}}>
-        <ListItemIcon>
-          <AddIcon />
-        </ListItemIcon>
-        <ListItemText primary="New connection" />
-      </ListItemButton>
-      <ListItemButton component={Link} to="/storage" sx={{borderRadius: 2}}>
+    <List
+      component="nav"
+      aria-label="Connection settings"
+      disablePadding
+      sx={{
+        display: 'flex',
+        width: 'auto',
+        flexWrap: 'wrap',
+        gap: 0.25,
+        '& .MuiListItemButton-root': {px: 1, py: 0.5},
+        '& .MuiListItemIcon-root': {minWidth: 28},
+        '& .MuiListItemText-primary': {fontSize: '0.82rem'},
+        '& .MuiSvgIcon-root': {fontSize: 18},
+      }}
+    >
+      <ListItemButton component={Link} to="/storage" sx={{borderRadius: 1, flex: '0 0 auto'}}>
         <ListItemIcon>
           <SettingsIcon />
         </ListItemIcon>
-        <ListItemText primary="Storage & icon" />
+        <ListItemText primary="Settings" />
       </ListItemButton>
-      <Divider sx={{my: 1.5}} />
-      <Typography variant="overline" color="text.secondary" sx={{px: 1}}>
-        Configuration
-      </Typography>
-      <ListItemButton onClick={handleExportSettings} sx={{borderRadius: 2, mt: 0.75}}>
+      <ListItemButton onClick={handleExportSettings} sx={{borderRadius: 1, flex: '0 0 auto'}}>
         <ListItemIcon>
           <CloudDownloadOutlinedIcon />
         </ListItemIcon>
-        <ListItemText primary="Export" secondary="Save a JSON backup" />
+        <ListItemText primary="Export" />
       </ListItemButton>
-      <ListItemButton onClick={handleImportSettings} sx={{borderRadius: 2}}>
+      <ListItemButton onClick={handleImportSettings} sx={{borderRadius: 1, flex: '0 0 auto'}}>
         <ListItemIcon>
           <CloudUploadOutlinedIcon />
         </ListItemIcon>
-        <ListItemText primary="Import" secondary="Replace from JSON" />
+        <ListItemText primary="Import" />
         <input ref={refFileInput} type="file" accept="application/json,.json" hidden />
       </ListItemButton>
     </List>

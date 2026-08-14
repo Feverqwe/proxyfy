@@ -60,7 +60,7 @@ const EditProxy = () => {
     return (
       <>
         <Header title="Connection" />
-        <Box sx={{maxWidth: 980, mx: 'auto', px: 3}}>
+        <Box sx={{maxWidth: 1040, mx: 'auto', p: 2}}>
           <Alert severity="error">
             Could not load this connection. Return to the list and try again.
           </Alert>

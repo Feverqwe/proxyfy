@@ -24,7 +24,7 @@ const theme = createTheme({
       main: '#c93c37',
     },
     background: {
-      default: '#f3f6fa',
+      default: '#f5f6f7',
       paper: '#ffffff',
     },
     text: {
@@ -38,22 +38,21 @@ const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 8,
   },
   typography: {
     fontFamily: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     h4: {
-      fontSize: '1.75rem',
-      fontWeight: 700,
-      letterSpacing: '-0.03em',
-    },
-    h5: {
-      fontSize: '1.2rem',
+      fontSize: '1.25rem',
       fontWeight: 700,
       letterSpacing: '-0.015em',
     },
-    h6: {
+    h5: {
       fontSize: '1rem',
+      fontWeight: 700,
+    },
+    h6: {
+      fontSize: '0.95rem',
       fontWeight: 700,
     },
     button: {
@@ -74,16 +73,16 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          minHeight: 40,
-          borderRadius: 10,
-          paddingInline: 16,
+          minHeight: 34,
+          borderRadius: 7,
+          paddingInline: 12,
         },
       },
     },
     MuiIconButton: {
       styleOverrides: {
         root: {
-          borderRadius: 9,
+          borderRadius: 6,
         },
       },
     },
@@ -93,14 +92,14 @@ const theme = createTheme({
           backgroundImage: 'none',
         },
         rounded: {
-          borderRadius: 16,
+          borderRadius: 9,
         },
       },
     },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
+          borderRadius: 7,
           backgroundColor: '#ffffff',
         },
         notchedOutline: {

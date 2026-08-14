@@ -6,7 +6,7 @@ import {PageBase, Popup} from './components/index';
 
 const root = createRoot(document.getElementById('root')!);
 root.render(
-  <PageBase>
+  <PageBase rootStyles={{'html, body, #root': {minHeight: 0}, body: {width: 'fit-content'}}}>
     <Popup />
   </PageBase>,
 );

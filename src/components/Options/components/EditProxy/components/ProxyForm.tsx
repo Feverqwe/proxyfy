@@ -76,8 +76,8 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
 
   return (
     <>
-      <Header title={isNew ? 'Add Proxy' : 'Edit proxy'} />
-      <Box component="main" sx={{maxWidth: 980, mx: 'auto', px: {xs: 2, sm: 3}, pb: 5}}>
+      <Header title={isNew ? 'Add proxy' : 'Edit proxy'} />
+      <Box component="main" sx={{maxWidth: 1040, mx: 'auto', p: 2}}>
         <Form<ProxyFormValues>
           initialValues={initialValues}
           onSubmit={handleFormSubmit}
@@ -97,40 +97,25 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
                     {submitError}. Check your connection and try again.
                   </Alert>
                 )}
-                <Grid container spacing={2.5}>
+                <Grid container spacing={1.5}>
                   <Grid size={{xs: 12, md: 6}}>
-                    <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}, height: '100%'}}>
+                    <Paper variant="outlined" sx={{p: 2, height: '100%'}}>
                       <Typography component="h2" variant="h5">
-                        Identity
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{mt: 0.5, mb: 1}}>
-                        Name the connection and choose how it appears in the toolbar.
+                        Appearance
                       </Typography>
                       <BasicInfoFields isNew={isNew} />
                     </Paper>
                   </Grid>
                   <Grid size={{xs: 12, md: 6}}>
-                    <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}, height: '100%'}}>
+                    <Paper variant="outlined" sx={{p: 2, height: '100%'}}>
                       <Typography component="h2" variant="h5">
                         Connection
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{mt: 0.5, mb: 1}}>
-                        Enter the server details used when this route is active.
                       </Typography>
                       <ProxySettingsFields type={values.type} />
                     </Paper>
                   </Grid>
                   <Grid size={{xs: 12}}>
-                    <Paper
-                      variant="outlined"
-                      sx={{
-                        p: 2,
-                        position: 'sticky',
-                        bottom: 12,
-                        zIndex: 2,
-                        boxShadow: '0 8px 30px rgba(21,38,58,0.08)',
-                      }}
-                    >
+                    <Paper variant="outlined" sx={{p: 1}}>
                       <Stack
                         direction={{xs: 'column', sm: 'row'}}
                         spacing={1.5}
@@ -146,7 +131,7 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
                             onClick={() => submit('save-and-add')}
                             variant="outlined"
                           >
-                            Save & add another
+                            Save & add
                           </MyButtonM>
                           <MyButtonM
                             type="button"
@@ -154,7 +139,7 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
                             onClick={() => submit('save-and-edit-patterns')}
                             variant="outlined"
                           >
-                            Save & edit patterns
+                            Save & rules
                           </MyButtonM>
                           <MyButtonM
                             type="button"
@@ -162,7 +147,7 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
                             onClick={() => submit('save')}
                             variant="contained"
                           >
-                            {submitting ? 'Saving…' : 'Save connection'}
+                            {submitting ? 'Saving…' : 'Save'}
                           </MyButtonM>
                         </ActionBox>
                       </Stack>

@@ -1,9 +1,7 @@
-import React, {FC, useCallback, useMemo, useState} from 'react';
+import React, {FC, useCallback, useState} from 'react';
 
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import LanOutlinedIcon from '@mui/icons-material/LanOutlined';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import SettingsEthernetRoundedIcon from '@mui/icons-material/SettingsEthernetRounded';
 import {
   Alert,
@@ -37,13 +35,6 @@ const Popup = () => {
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const activeTitle = useMemo(() => {
-    if (!state) return 'Browser settings';
-    if (state.mode === 'pac_script') return 'Automatic routing';
-    if (state.mode === 'system') return 'System settings';
-    return proxies?.find(({id}) => id === state.id)?.title || 'Direct connection';
-  }, [proxies, state]);
-
   const handleClick = useCallback(async (mode: ProxyMode, item: MenuItem | ConfigProxy) => {
     const {id} = item;
     const key = id || mode;
@@ -74,61 +65,20 @@ const Popup = () => {
   const isLoading = proxies === null;
 
   return (
-    <Box sx={{width: 372, bgcolor: 'background.paper', overflow: 'hidden'}}>
-      <Box
-        component="header"
-        sx={{
-          position: 'relative',
-          px: 2.25,
-          pt: 2.25,
-          pb: 2,
-          bgcolor: '#15263a',
-          color: '#fff',
-          overflow: 'hidden',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            right: 30,
-            width: 1,
-            height: '100%',
-            bgcolor: 'rgba(255,255,255,0.12)',
-            boxShadow: '12px 0 0 rgba(255,255,255,0.06), 24px 0 0 rgba(255,255,255,0.03)',
-          },
-        }}
-      >
-        <Stack direction="row" spacing={1.25} sx={{alignItems: 'center'}}>
-          <Box
-            sx={{
-              display: 'grid',
-              placeItems: 'center',
-              width: 36,
-              height: 36,
-              borderRadius: '11px',
-              bgcolor: 'rgba(126, 164, 255, 0.16)',
-              color: '#9ab7ff',
-            }}
-          >
-            <RouteRoundedIcon fontSize="small" />
-          </Box>
-          <Box>
-            <Typography variant="overline" sx={{color: '#9ab7ff'}}>
-              Current route
-            </Typography>
-            <Typography variant="h6" sx={{lineHeight: 1.25}}>
-              {activeTitle}
-            </Typography>
-          </Box>
-        </Stack>
-      </Box>
-
+    <Box sx={{width: 320, height: 'fit-content', bgcolor: 'background.paper', overflow: 'hidden'}}>
       {error && (
-        <Alert severity="error" onClose={() => setError(null)} sx={{m: 1.5, mb: 0}}>
+        <Alert severity="error" onClose={() => setError(null)} sx={{m: 1, mb: 0}}>
           {error}
         </Alert>
       )}
 
-      <Box sx={{px: 1.25, pt: 1.5}}>
+      {!state && !isLoading && (
+        <Alert severity="info" sx={{m: 1, mb: 0, py: 0}}>
+          Browser settings control the proxy.
+        </Alert>
+      )}
+
+      <Box sx={{px: 1, pt: 1}}>
         <Typography variant="overline" color="text.secondary" sx={{px: 1}}>
           Routing mode
         </Typography>
@@ -163,7 +113,7 @@ const Popup = () => {
       </Box>
 
       {!isLoading && proxies.length > 0 && (
-        <Box sx={{px: 1.25, pt: 1}}>
+        <Box sx={{px: 1, pt: 0.5}}>
           <Typography variant="overline" color="text.secondary" sx={{px: 1}}>
             Saved connections
           </Typography>
@@ -184,7 +134,7 @@ const Popup = () => {
       )}
 
       {!isLoading && proxies.length === 0 && (
-        <Box sx={{mx: 2.25, my: 1.5, p: 2, borderRadius: 2, bgcolor: 'background.default'}}>
+        <Box sx={{mx: 1.5, my: 1, p: 1.5, borderRadius: 1, bgcolor: 'background.default'}}>
           <Typography variant="body2" sx={{fontWeight: 600}}>
             No saved connections
           </Typography>
@@ -196,7 +146,7 @@ const Popup = () => {
 
       <Divider sx={{mt: 1}} />
       <List disablePadding>
-        <ListItemButton href="./options.html" target="_blank" sx={{px: 2.25, py: 1.35}}>
+        <ListItemButton href="./options.html" target="_blank" sx={{px: 1.5, py: 1}}>
           <ListItemIcon sx={{minWidth: 38}}>
             <SettingsEthernetRoundedIcon fontSize="small" />
           </ListItemIcon>
@@ -244,25 +194,26 @@ const ProxyItem: FC<ProxyItemProps> = ({item, mode, checked, pending, disabled, 
       disabled={disabled}
       aria-current={checked ? 'true' : undefined}
       sx={{
-        minHeight: 58,
-        mb: 0.5,
-        borderRadius: 2.25,
+        minHeight: 46,
+        mb: 0.25,
+        py: 0.25,
+        borderRadius: 1,
         border: '1px solid',
         borderColor: checked ? 'primary.main' : 'transparent',
         '&.Mui-selected': {bgcolor: 'primary.light'},
       }}
     >
-      <ListItemIcon sx={{minWidth: 42}}>
+      <ListItemIcon sx={{minWidth: 34}}>
         <Box
           sx={{
             display: 'grid',
             placeItems: 'center',
-            width: 30,
-            height: 30,
+            width: 24,
+            height: 24,
             borderRadius: '50%',
             color: checked ? 'primary.main' : 'text.secondary',
             bgcolor: isProxy ? item.color : checked ? '#d9e6ff' : 'background.default',
-            boxShadow: isProxy ? 'inset 0 0 0 8px rgba(255,255,255,0.78)' : undefined,
+            boxShadow: isProxy ? 'inset 0 0 0 7px rgba(255,255,255,0.78)' : undefined,
           }}
         >
           {!isProxy && <LanOutlinedIcon sx={{fontSize: 17}} />}
@@ -271,15 +222,18 @@ const ProxyItem: FC<ProxyItemProps> = ({item, mode, checked, pending, disabled, 
       <ListItemText
         primary={item.title}
         secondary={detail}
+        sx={{my: 0}}
         slotProps={{
-          primary: {sx: {fontWeight: checked ? 700 : 600, fontSize: '0.9rem'}},
-          secondary: {sx: {fontSize: '0.72rem'}, noWrap: true},
+          primary: {sx: {fontWeight: checked ? 600 : 500, fontSize: '0.82rem'}},
+          secondary: {sx: {fontSize: '0.68rem'}, noWrap: true},
         }}
       />
       {pending ? (
         <CircularProgress size={18} />
       ) : checked ? (
-        <CheckRoundedIcon color="primary" fontSize="small" />
+        <Typography variant="caption" color="primary.main" sx={{fontWeight: 700, ml: 1}}>
+          Active
+        </Typography>
       ) : null}
     </ListItemButton>
   );

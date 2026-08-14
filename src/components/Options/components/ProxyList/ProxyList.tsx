@@ -9,7 +9,6 @@ import RuleRoundedIcon from '@mui/icons-material/RuleRounded';
 import {
   Box,
   Button,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -89,120 +88,70 @@ const ProxyList: FC = () => {
   return (
     <>
       <Header title="Connections" />
-      <Box component="main" sx={{maxWidth: 1180, mx: 'auto', px: {xs: 2, sm: 3}, pb: 5}}>
-        <Paper variant="outlined" sx={{display: {md: 'grid'}, gridTemplateColumns: '230px 1fr'}}>
-          <Box
-            component="aside"
-            sx={{
-              p: 2,
-              borderRight: {md: '1px solid'},
-              borderBottom: {xs: '1px solid', md: 0},
-              borderColor: 'divider',
-              '& nav': {
-                display: {xs: 'grid', md: 'block'},
-                gridTemplateColumns: {xs: 'repeat(2, minmax(0, 1fr))'},
-                gap: {xs: 0.5, md: 0},
-              },
-              '& nav > .MuiDivider-root, & nav > .MuiTypography-root': {
-                display: {xs: 'none', md: 'block'},
-              },
-              '& nav .MuiListItemIcon-root': {minWidth: {xs: 36, md: 56}},
-              '& nav .MuiListItemText-secondary': {display: {xs: 'none', md: 'block'}},
-            }}
+      <Box component="main" sx={{maxWidth: 1040, mx: 'auto', p: 2}}>
+        <Paper variant="outlined" sx={{p: {xs: 1.5, sm: 2}, minWidth: 0}}>
+          <Stack
+            direction={{xs: 'column', md: 'row'}}
+            spacing={1}
+            sx={{justifyContent: 'space-between', alignItems: {xs: 'stretch', md: 'center'}}}
           >
-            <Typography
-              variant="overline"
-              color="text.secondary"
-              sx={{px: 1, display: {xs: 'none', md: 'block'}}}
-            >
-              Workspace
-            </Typography>
-            <Menu />
-          </Box>
-
-          <Box sx={{p: {xs: 2, sm: 3}, minWidth: 0}}>
             <Stack
               direction={{xs: 'column', sm: 'row'}}
-              spacing={2}
-              sx={{
-                justifyContent: 'space-between',
-                alignItems: {xs: 'stretch', sm: 'flex-start'},
-              }}
+              spacing={0.5}
+              sx={{alignItems: {xs: 'stretch', sm: 'center'}, flex: 1, minWidth: 0}}
             >
-              <Box>
-                <Typography component="h2" variant="h5">
-                  Proxy routes
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{mt: 0.5}}>
-                  Choose the active route, then enable and order connections for automatic routing.
-                </Typography>
+              <Typography variant="body2" sx={{fontWeight: 600, flex: '0 0 auto'}}>
+                Active:
+              </Typography>
+              <Box sx={{width: {xs: '100%', sm: 260}, minWidth: 0}}>
+                <ProxySelect />
               </Box>
+            </Stack>
+            <Stack direction="row" spacing={0.5} sx={{alignItems: 'center', flexWrap: 'wrap'}}>
+              <Menu />
               <Button
                 component={Link}
                 to="/proxy"
                 variant="contained"
                 startIcon={<AddRoundedIcon />}
               >
-                Add connection
+                Add
               </Button>
             </Stack>
+          </Stack>
 
-            <Box sx={{mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 2.5}}>
-              <Typography variant="overline" color="text.secondary">
-                Active route
+          <Divider sx={{my: 1.5}} />
+
+          {proxies === null ? (
+            <Stack spacing={0.5} aria-label="Loading connections">
+              {Array.from({length: 3}).map((_, index) => (
+                <Skeleton key={index} variant="rounded" height={54} />
+              ))}
+            </Stack>
+          ) : proxies.length === 0 ? (
+            <Box sx={{py: 4, textAlign: 'center'}}>
+              <Typography variant="body2" color="text.secondary">
+                No connections. Click Add to create one.
               </Typography>
-              <Box sx={{mt: 0.5}}>
-                <ProxySelect />
-              </Box>
             </Box>
-
-            <Divider sx={{my: 3}} />
-
-            {proxies === null ? (
-              <Stack spacing={1.25} aria-label="Loading connections">
-                {Array.from({length: 3}).map((_, index) => (
-                  <Skeleton key={index} variant="rounded" height={86} />
-                ))}
-              </Stack>
-            ) : proxies.length === 0 ? (
-              <Box sx={{py: 7, textAlign: 'center'}}>
-                <Box
-                  sx={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: '50%',
-                    bgcolor: 'primary.main',
-                    mx: 'auto',
-                    mb: 2,
-                  }}
+          ) : (
+            <Box>
+              {proxies.map((proxy, index) => (
+                <ProxyItem
+                  key={proxy.id}
+                  proxy={proxy}
+                  position={index + 1}
+                  isFirst={index === 0}
+                  isLast={index === proxies.length - 1}
+                  busy={busyId === proxy.id}
+                  onDelete={setDeleteTarget}
+                  onMove={handleMove}
+                  onEnabledChange={handleEnabledChange}
+                  onClone={handleClone}
                 />
-                <Typography variant="h6">No connections yet</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{mt: 0.75, mb: 2.5}}>
-                  Add a proxy server or a direct route to get started.
-                </Typography>
-                <Button component={Link} to="/proxy" variant="contained">
-                  Add your first connection
-                </Button>
-              </Box>
-            ) : (
-              <Stack spacing={1.25}>
-                {proxies.map((proxy, index) => (
-                  <ProxyItem
-                    key={proxy.id}
-                    proxy={proxy}
-                    position={index + 1}
-                    isFirst={index === 0}
-                    isLast={index === proxies.length - 1}
-                    busy={busyId === proxy.id}
-                    onDelete={setDeleteTarget}
-                    onMove={handleMove}
-                    onEnabledChange={handleEnabledChange}
-                    onClone={handleClone}
-                  />
-                ))}
-              </Stack>
-            )}
-          </Box>
+              ))}
+            </Box>
+          )}
         </Paper>
       </Box>
 
@@ -258,29 +207,31 @@ const ProxyItem: FC<ProxyItemProps> = ({
   const address = proxy.type === 'direct' ? 'No proxy server' : `${proxy.host}:${proxy.port}`;
 
   return (
-    <Paper
+    <Box
       component="article"
-      variant="outlined"
       sx={{
         display: 'grid',
         gridTemplateColumns: {xs: 'minmax(0, 1fr)', sm: 'minmax(0, 1fr) auto'},
         alignItems: 'center',
-        gap: 1.5,
-        p: 1.5,
+        gap: 1,
+        py: 0.75,
+        px: 0.5,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
         opacity: busy ? 0.6 : proxy.enabled ? 1 : 0.68,
-        transition: 'border-color 150ms ease, opacity 150ms ease',
-        '&:hover': {borderColor: 'primary.main'},
+        '&:last-child': {borderBottom: 0},
+        '&:hover': {bgcolor: 'action.hover'},
       }}
     >
-      <Stack direction="row" spacing={1.5} sx={{minWidth: 0, alignItems: 'center'}}>
+      <Stack direction="row" spacing={1} sx={{minWidth: 0, alignItems: 'center'}}>
         <Box sx={{position: 'relative', flex: '0 0 auto'}}>
           <Box
             sx={{
-              width: 38,
-              height: 38,
+              width: 28,
+              height: 28,
               borderRadius: '50%',
               bgcolor: proxy.color,
-              boxShadow: 'inset 0 0 0 11px rgba(255,255,255,0.78)',
+              boxShadow: 'inset 0 0 0 8px rgba(255,255,255,0.78)',
             }}
           />
           <Typography
@@ -297,25 +248,21 @@ const ProxyItem: FC<ProxyItemProps> = ({
           </Typography>
         </Box>
         <Box sx={{minWidth: 0}}>
-          <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
-            <Typography noWrap sx={{fontWeight: 700}}>
+          <Stack direction="row" spacing={0.75} sx={{alignItems: 'baseline'}}>
+            <Typography variant="body2" noWrap sx={{fontWeight: 600}}>
               {proxy.title}
             </Typography>
-            <Chip
-              label={proxy.type.toUpperCase()}
-              size="small"
-              variant="outlined"
-              sx={{height: 22, fontSize: '0.65rem'}}
-            />
+            <Typography variant="caption" color="text.secondary">
+              {proxy.type.toUpperCase()}
+            </Typography>
           </Stack>
           <Typography
             variant="body2"
             color="text.secondary"
             noWrap
             sx={{
-              mt: 0.25,
               fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-              fontSize: '0.76rem',
+              fontSize: '0.7rem',
             }}
           >
             {address}
@@ -407,7 +354,7 @@ const ProxyItem: FC<ProxyItemProps> = ({
           </IconButton>
         </Tooltip>
       </Stack>
-    </Paper>
+    </Box>
   );
 };
 

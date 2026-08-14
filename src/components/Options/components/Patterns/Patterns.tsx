@@ -46,9 +46,9 @@ const Patterns = () => {
 
   return (
     <>
-      <Header title="Patterns" />
+      <Header title="Rules" />
       {loadError ? (
-        <Box sx={{maxWidth: 1180, mx: 'auto', px: 3}}>
+        <Box sx={{maxWidth: 1040, mx: 'auto', p: 2}}>
           <Alert severity="error">
             Could not load routing patterns. Return to the list and try again.
           </Alert>

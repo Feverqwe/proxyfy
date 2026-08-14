@@ -13,9 +13,10 @@ const MyInput: FC<MyInputProps> = ({label, isError = false, errorMessage, hidden
   return (
     <TextField
       fullWidth
-      margin="normal"
+      margin="dense"
       label={label}
       variant="outlined"
+      size="small"
       error={isError}
       helperText={isError ? errorMessage : props.helperText}
       autoComplete="off"

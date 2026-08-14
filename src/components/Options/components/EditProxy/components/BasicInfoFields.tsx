@@ -70,10 +70,10 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({isNew}) => {
       </Field>
       {isNew && (
         <FormControl fullWidth margin="dense">
-          <Typography variant="overline" color="text.secondary" sx={{mt: 2, mb: 0.75}}>
-            Automatic routing shortcuts
+          <Typography variant="overline" color="text.secondary" sx={{mt: 1, mb: 0.5}}>
+            Routing
           </Typography>
-          <Box component={Paper} variant="outlined" sx={{p: 1.25, bgcolor: 'background.default'}}>
+          <Box component={Paper} variant="outlined" sx={{p: 0.5, bgcolor: 'background.default'}}>
             <FormGroup>
               <FormControlLabel
                 control={

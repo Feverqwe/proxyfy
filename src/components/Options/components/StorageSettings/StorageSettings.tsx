@@ -85,7 +85,7 @@ const StorageSettings: FC = () => {
   if (!isInitialized) {
     return (
       <Box>
-        <Header title="Preferences" />
+        <Header title="Settings" />
         <Box sx={{display: 'grid', placeItems: 'center', py: 8}}>
           <CircularProgress size={28} aria-label="Loading preferences" />
         </Box>
@@ -96,8 +96,8 @@ const StorageSettings: FC = () => {
   if (initializationError) {
     return (
       <Box>
-        <Header title="Preferences" />
-        <Box sx={{maxWidth: 760, mx: 'auto', px: 3}}>
+        <Header title="Settings" />
+        <Box sx={{maxWidth: 1040, mx: 'auto', p: 2}}>
           <Alert severity="error">Unable to load preferences. Reload the page to try again.</Alert>
         </Box>
       </Box>
@@ -106,8 +106,8 @@ const StorageSettings: FC = () => {
 
   return (
     <>
-      <Header title="Preferences" />
-      <Box component="main" sx={{maxWidth: 760, mx: 'auto', px: {xs: 2, sm: 3}, pb: 5}}>
+      <Header title="Settings" />
+      <Box component="main" sx={{maxWidth: 1040, mx: 'auto', p: 2}}>
         <Button
           component={Link}
           to="/"
@@ -122,16 +122,15 @@ const StorageSettings: FC = () => {
             {saveError}
           </Alert>
         )}
-        <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}}}>
-          <Grid container spacing={4}>
+        <Paper variant="outlined" sx={{p: 2}}>
+          <Grid container spacing={2.5}>
             <Grid size={{xs: 12}}>
               <FormControl component="fieldset">
                 <Typography component="h2" variant="h5">
-                  Configuration storage
+                  Storage
                 </Typography>
                 <FormHelperText sx={{mt: 0.75, mb: 2, ml: 0}}>
-                  Credentials always remain on this device. Choose where non-sensitive connection
-                  settings are stored.
+                  Credentials always stay on this device.
                 </FormHelperText>
                 <RadioGroup value={storageType} onChange={handleStorageTypeChange} sx={{gap: 1}}>
                   <FormControlLabel
@@ -140,18 +139,14 @@ const StorageSettings: FC = () => {
                     control={<Radio sx={{ml: 0.5}} />}
                     sx={{
                       m: 0,
-                      p: 1.5,
-                      border: '1px solid',
-                      borderColor: storageType === 'sync' ? 'primary.main' : 'divider',
-                      borderRadius: 2.5,
+                      py: 0.25,
                       alignItems: 'flex-start',
                     }}
                     label={
                       <Box>
                         <Typography sx={{fontWeight: 700}}>Sync across Chrome</Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Keep connection settings available in Chrome browsers signed into your
-                          account.
+                          Sync connection settings through Chrome.
                         </Typography>
                       </Box>
                     }
@@ -162,10 +157,7 @@ const StorageSettings: FC = () => {
                     control={<Radio sx={{ml: 0.5}} />}
                     sx={{
                       m: 0,
-                      p: 1.5,
-                      border: '1px solid',
-                      borderColor: storageType === 'local' ? 'primary.main' : 'divider',
-                      borderRadius: 2.5,
+                      py: 0.25,
                       alignItems: 'flex-start',
                     }}
                     label={
@@ -183,7 +175,7 @@ const StorageSettings: FC = () => {
             <Grid size={{xs: 12}}>
               <Box>
                 <Typography component="h2" variant="h5">
-                  Default toolbar icon
+                  Icon
                 </Typography>
                 <FormHelperText sx={{mt: 0.75, mb: 1, ml: 0}}>
                   Used when the active route does not have its own color.

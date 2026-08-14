@@ -21,7 +21,7 @@ import {Pattern} from './Pattern';
 
 const TableContainerS = styled(TableContainer)(({theme}) => ({
   border: `1px solid ${theme.palette.divider}`,
-  borderRadius: '12px',
+  borderRadius: '7px',
   '& .small-checkbox': {padding: '6px'},
   '& tbody tr:hover': {backgroundColor: theme.palette.action.hover},
   '& tbody td': {verticalAlign: 'middle'},
@@ -29,7 +29,7 @@ const TableContainerS = styled(TableContainer)(({theme}) => ({
   '& .pattern-cell': {paddingLeft: '10px', paddingRight: '10px'},
   '& .type-cell': {width: '120px'},
   '& .enabled-cell': {width: '190px'},
-  '& .MuiInputBase-root': {padding: '7px 8px', borderRadius: '7px'},
+  '& .MuiInputBase-root': {padding: '4px 6px', borderRadius: '5px'},
   '& .MuiInputBase-root:focus-within': {backgroundColor: theme.palette.background.paper},
   '& .MuiInputBase-root.Mui-error': {boxShadow: `inset 0 0 0 1px ${theme.palette.error.main}`},
 }));
@@ -63,7 +63,7 @@ const PatternList: FC<PatternListProps> = ({patterns, onChange}) => {
   );
 
   return (
-    <TableContainerS sx={{mt: 2}}>
+    <TableContainerS sx={{mt: 1.25}}>
       <Table size="small">
         <TableHead>
           <TableRow>

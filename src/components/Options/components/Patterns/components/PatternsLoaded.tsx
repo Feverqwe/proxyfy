@@ -90,14 +90,13 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
   }, []);
 
   return (
-    <Box component="main" sx={{maxWidth: 1180, mx: 'auto', px: {xs: 2, sm: 3}, pb: 5}}>
+    <Box component="main" sx={{maxWidth: 1040, mx: 'auto', p: 2}}>
       {notify && <Notification notify={notify} />}
-      <Alert severity="info" sx={{mb: 2.5}}>
-        These rules run only when the active route is set to <b>Automatic routing</b>. Rules are
-        evaluated from top to bottom.
+      <Alert severity="info" sx={{mb: 1.5, py: 0}}>
+        Used only in <b>Automatic routing</b>. Rules run from top to bottom.
       </Alert>
 
-      <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}, mb: 2.5}}>
+      <Paper variant="outlined" sx={{p: 2, mb: 1.5}}>
         <Stack
           direction={{xs: 'column', sm: 'row'}}
           spacing={2}
@@ -111,7 +110,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
               Use this connection when…
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{mt: 0.5}}>
-              A URL matching any enabled rule below may use “{proxy.title}”.
+              Matching URLs use “{proxy.title}”.
             </Typography>
           </Box>
           <Button
@@ -128,7 +127,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         </Button>
       </Paper>
 
-      <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}, mb: 2.5}}>
+      <Paper variant="outlined" sx={{p: 2, mb: 1.5}}>
         <Stack
           direction={{xs: 'column', sm: 'row'}}
           spacing={2}
@@ -142,7 +141,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
               Except when…
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{mt: 0.5}}>
-              Matching URLs skip this connection, even if a rule above includes them.
+              Matching URLs skip this connection.
             </Typography>
           </Box>
           <Button
@@ -159,16 +158,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
         </Button>
       </Paper>
 
-      <Paper
-        variant="outlined"
-        sx={{
-          p: 2,
-          position: 'sticky',
-          bottom: 12,
-          zIndex: 2,
-          boxShadow: '0 8px 30px rgba(21,38,58,0.08)',
-        }}
-      >
+      <Paper variant="outlined" sx={{p: 1}}>
         <ActionBox>
           <MyButtonM onClick={() => navigate('/')} color="inherit">
             Cancel
