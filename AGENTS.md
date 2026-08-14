@@ -28,7 +28,7 @@ The extension has four build entry points:
 - `src/**/__tests__/` — unit and integration tests; shared Chrome mocks live under
   `src/__tests__/mocks/`.
 - `src/assets/manifest.json` — source extension manifest.
-- `builder/` and `rspack.config.ts` — packaging and build configuration.
+- `builder/` and `rspack.config.mts` — packaging and build configuration.
 - `dist/` — generated build output; never edit or commit it.
 
 ## Working rules

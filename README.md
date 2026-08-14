@@ -72,9 +72,9 @@ This project uses **Rspack** as the build system, which provides faster build ti
 
 ### Configuration Files
 
-- **Rspack**: `rspack.config.ts`
+- **Rspack**: `rspack.config.mts`
 - **TypeScript**: `tsconfig.json`
-- **Vitest**: `vitest.config.ts`
+- **Vitest**: `vitest.config.mts`
 - **ESLint**: `eslint.config.mjs`
 - **Prettier**: `.prettierrc.mjs`
 
