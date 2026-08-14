@@ -1,7 +1,12 @@
 import {describe, expect, it, vi} from 'vitest';
 
 import {ConfigProxy, DirectProxyType, GenericProxyType} from '../../../../../tools/index';
-import {createProxyFormValues, createProxyFromForm, validateProxyForm} from '../proxyForm';
+import {
+  createProxyFormValues,
+  createProxyFromForm,
+  parseProxyAddress,
+  validateProxyForm,
+} from '../proxyForm';
 
 const proxy: ConfigProxy = {
   id: 'office',
@@ -38,6 +43,58 @@ describe('proxy form', () => {
       port: 'Port is required',
     });
     expect(validateProxyForm({...values, type: DirectProxyType.Direct})).toEqual({});
+  });
+
+  it('validates the complete port value and range', () => {
+    const values = createProxyFormValues(proxy);
+
+    expect(validateProxyForm({...values, port: '70000'})).toEqual({
+      port: 'Enter a port from 1 to 65535',
+    });
+    expect(validateProxyForm({...values, port: '8080abc'})).toEqual({
+      port: 'Enter a port from 1 to 65535',
+    });
+  });
+
+  it('rejects an address that could not be normalized', () => {
+    const values = createProxyFormValues(proxy);
+
+    expect(validateProxyForm({...values, host: 'ftp://proxy.example.com:21'})).toEqual({
+      host: 'Enter a valid proxy address',
+    });
+    expect(validateProxyForm({...values, host: 'proxy.example.com:abc'})).toEqual({
+      host: 'Enter a valid proxy address',
+    });
+    expect(validateProxyForm({...values, host: '[2001:db8::1]'})).toEqual({});
+  });
+
+  it.each([
+    ['proxy.example.com', {host: 'proxy.example.com'}],
+    ['proxy.example.com:8080', {host: 'proxy.example.com', port: '8080'}],
+    [
+      'https://alice:my%20password@proxy.example.com',
+      {
+        type: GenericProxyType.Https,
+        host: 'proxy.example.com',
+        port: '443',
+        username: 'alice',
+        password: 'my password',
+      },
+    ],
+    ['socks5://127.0.0.1:1081', {type: GenericProxyType.Socks5, host: '127.0.0.1', port: '1081'}],
+    [
+      'socks://proxy.example.com',
+      {type: GenericProxyType.Socks5, host: 'proxy.example.com', port: '1080'},
+    ],
+    ['[2001:db8::1]:8080', {host: '2001:db8::1', port: '8080'}],
+    ['2001:db8::1', {host: '2001:db8::1'}],
+  ])('parses a proxy address from %s', (value, expected) => {
+    expect(parseProxyAddress(value)).toEqual(expected);
+  });
+
+  it('leaves unsupported and malformed proxy URLs untouched', () => {
+    expect(parseProxyAddress('ftp://proxy.example.com:21')).toBeNull();
+    expect(parseProxyAddress('http://')).toBeNull();
   });
 
   it('creates a new proxy with selected presets and credentials', () => {

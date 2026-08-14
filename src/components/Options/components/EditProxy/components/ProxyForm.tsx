@@ -1,6 +1,7 @@
 import React, {FC, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {Alert, Box, Button, Grid, Paper, Stack, Typography} from '@mui/material';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
+import {Alert, Box, Button, Menu, MenuItem, Paper, Stack} from '@mui/material';
 import {FORM_ERROR, FormApi} from 'final-form';
 import {Form} from 'react-final-form';
 import {Link, useNavigate} from 'react-router';
@@ -22,6 +23,7 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
   const formRef = useRef<FormApi<ProxyFormValues> | null>(null);
   const submitActionRef = useRef<SubmitAction>('save');
   const [notify, setNotify] = useState<{text: string} | null>(null);
+  const [saveMenuAnchor, setSaveMenuAnchor] = useState<HTMLElement | null>(null);
   const initialValues = useMemo(() => createProxyFormValues(proxy), [proxy]);
 
   const handleFormSubmit = useCallback(
@@ -62,6 +64,14 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
     formRef.current?.submit();
   }, []);
 
+  const submitFromMenu = useCallback(
+    (action: Extract<SubmitAction, 'save-and-add' | 'save-and-edit-patterns'>) => {
+      setSaveMenuAnchor(null);
+      submit(action);
+    },
+    [submit],
+  );
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 's') return;
@@ -97,67 +107,58 @@ const ProxyForm: FC<ProxyFormProps> = ({proxy, onReset}) => {
                     {submitError}. Check your connection and try again.
                   </Alert>
                 )}
-                <Grid container spacing={1.5}>
-                  <Grid size={{xs: 12, md: 6}}>
-                    <Paper variant="outlined" sx={{p: 2, height: '100%'}}>
-                      <Typography component="h2" variant="h5">
-                        Appearance
-                      </Typography>
-                      <BasicInfoFields isNew={isNew} />
-                    </Paper>
-                  </Grid>
-                  <Grid size={{xs: 12, md: 6}}>
-                    <Paper variant="outlined" sx={{p: 2, height: '100%'}}>
-                      <Typography component="h2" variant="h5">
-                        Connection
-                      </Typography>
-                      <ProxySettingsFields type={values.type} />
-                    </Paper>
-                  </Grid>
-                  <Grid size={{xs: 12}}>
-                    <Paper variant="outlined" sx={{p: 1}}>
-                      <Stack
-                        direction={{xs: 'column', sm: 'row'}}
-                        spacing={1.5}
-                        sx={{justifyContent: 'space-between'}}
+                <Paper variant="outlined" sx={{overflow: 'hidden'}}>
+                  <Box sx={{p: {xs: 1.5, sm: 2}}}>
+                    <ProxySettingsFields type={values.type} />
+                    <BasicInfoFields isNew={isNew} />
+                  </Box>
+
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      borderTop: '1px solid',
+                      borderColor: 'divider',
+                      p: 1,
+                    }}
+                  >
+                    <Button component={Link} to="/" color="inherit">
+                      Cancel
+                    </Button>
+                    <ActionBox>
+                      <Button
+                        type="button"
+                        color="inherit"
+                        disabled={submitting}
+                        endIcon={<KeyboardArrowDownRoundedIcon />}
+                        onClick={(event) => setSaveMenuAnchor(event.currentTarget)}
+                        aria-controls={saveMenuAnchor ? 'save-options-menu' : undefined}
+                        aria-haspopup="menu"
+                        aria-expanded={saveMenuAnchor ? 'true' : undefined}
                       >
-                        <Button component={Link} to="/" color="inherit">
-                          Cancel
-                        </Button>
-                        <ActionBox>
-                          <MyButtonM
-                            type="button"
-                            disabled={submitting}
-                            onClick={() => submit('save-and-add')}
-                            variant="outlined"
-                          >
-                            Save & add
-                          </MyButtonM>
-                          <MyButtonM
-                            type="button"
-                            disabled={submitting}
-                            onClick={() => submit('save-and-edit-patterns')}
-                            variant="outlined"
-                          >
-                            Save & rules
-                          </MyButtonM>
-                          <MyButtonM
-                            type="button"
-                            disabled={submitting}
-                            onClick={() => submit('save')}
-                            variant="contained"
-                          >
-                            {submitting ? 'Saving…' : 'Save'}
-                          </MyButtonM>
-                        </ActionBox>
-                      </Stack>
-                    </Paper>
-                    {/* Keep form submission accessible to keyboard and assistive technology. */}
-                    <Box sx={{display: 'none'}}>
-                      <MyButtonM type="submit">Save</MyButtonM>
-                    </Box>
-                  </Grid>
-                </Grid>
+                        More
+                      </Button>
+                      <Menu
+                        id="save-options-menu"
+                        anchorEl={saveMenuAnchor}
+                        open={Boolean(saveMenuAnchor)}
+                        onClose={() => setSaveMenuAnchor(null)}
+                      >
+                        <MenuItem onClick={() => submitFromMenu('save-and-add')}>
+                          Save and add another
+                        </MenuItem>
+                        <MenuItem onClick={() => submitFromMenu('save-and-edit-patterns')}>
+                          Save and edit rules
+                        </MenuItem>
+                      </Menu>
+                      <MyButtonM type="submit" disabled={submitting} variant="contained">
+                        {submitting ? 'Saving…' : 'Save'}
+                      </MyButtonM>
+                    </ActionBox>
+                  </Stack>
+                </Paper>
               </form>
             );
           }}
