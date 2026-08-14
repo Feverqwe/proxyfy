@@ -20,7 +20,9 @@ function wildcardToRegexpStr(pattern: string) {
   }
 
   return patterns.map((pattern) => {
-    const re = escapeStringRegexp(pattern).replace(/\\([*?])/g, '.$1');
+    const re = escapeStringRegexp(pattern).replace(/\\([*?])/g, (_match, wildcard: string) => {
+      return wildcard === '*' ? '.*' : '.';
+    });
     return `^${re}$`;
   });
 }

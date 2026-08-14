@@ -8,6 +8,7 @@ import {StorageFactory} from '../../../../../storage/index';
 import {ConfigProxy, ConfigStruct, getConfig} from '../../../../../tools/index';
 import {ActionBox, MyButtonM, Notification} from '../../../../index';
 import {localhostPresets, matchAllPresets} from '../presets';
+import {arePatternsValid} from '../utils/validation';
 
 import {PatternList, PatternListHandler} from './PatternList';
 
@@ -36,6 +37,11 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
       e?.preventDefault();
       const whitePatterns = refWhiteRules.current?.getPatterns() || [];
       const blackPatterns = refBlackRules.current?.getPatterns() || [];
+
+      if (!arePatternsValid([...whitePatterns, ...blackPatterns])) {
+        setNotify({text: 'Fix invalid regular expressions before saving'});
+        return false;
+      }
 
       try {
         const config = await getConfig();

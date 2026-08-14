@@ -23,6 +23,8 @@ export class StorageFactory {
 
   private currentStorageService: StorageService | null = null;
 
+  private currentStorageType: StorageType | null = null;
+
   private constructor() {
     this.storageSettings = StorageSettings.getInstance();
   }
@@ -38,8 +40,10 @@ export class StorageFactory {
    * Get the current storage service based on settings
    */
   getStorageService(): StorageService {
-    if (!this.currentStorageService) {
+    const storageType = this.storageSettings.getStorageType();
+    if (!this.currentStorageService || this.currentStorageType !== storageType) {
       this.currentStorageService = this.createStorageService();
+      this.currentStorageType = storageType;
     }
     return this.currentStorageService;
   }
@@ -50,6 +54,7 @@ export class StorageFactory {
   async switchStorageType(storageType: StorageType): Promise<void> {
     await this.storageSettings.setStorageType(storageType);
     this.currentStorageService = this.createStorageService();
+    this.currentStorageType = storageType;
   }
 
   /**

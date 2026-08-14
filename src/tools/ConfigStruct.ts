@@ -8,6 +8,7 @@ export enum ProxyPatternType {
 const ProxyPatternTypeStruct = s.union([s.literal('wildcard'), s.literal('regexp')]);
 
 const ProxyPatternStruct = s.type({
+  id: s.optional(s.string()),
   enabled: s.boolean(),
   name: s.string(),
   type: ProxyPatternTypeStruct,
@@ -15,6 +16,7 @@ const ProxyPatternStruct = s.type({
 });
 
 export interface ProxyPattern {
+  id?: string;
   enabled: boolean;
   name: string;
   type: ProxyPatternType;

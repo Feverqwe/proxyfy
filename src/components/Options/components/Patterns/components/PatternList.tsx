@@ -19,7 +19,8 @@ import {
 } from '@mui/material';
 import {styled} from '@mui/system';
 
-import {ProxyPattern, ProxyPatternType} from '../../../../../tools/index';
+import {ProxyPattern, ProxyPatternType, getId} from '../../../../../tools/index';
+import {clonePattern, initializePatterns} from '../utils/patternListState';
 
 import {Pattern} from './Pattern';
 
@@ -63,7 +64,7 @@ export interface PatternListHandler {
 }
 
 const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, ref) => {
-  const [patterns, setPatterns] = useState(list);
+  const [patterns, setPatterns] = useState(() => initializePatterns(list));
   const refPatterns = useRef(patterns);
   refPatterns.current = patterns;
 
@@ -71,6 +72,7 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
     addRule(name = '', pattern = '', type = ProxyPatternType.Wildcard) {
       const newPatterns = refPatterns.current.slice(0);
       newPatterns.push({
+        id: getId(),
         enabled: true,
         name,
         type: type as ProxyPatternType,
@@ -100,7 +102,7 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
       const newPatterns = patterns.slice(0);
       const pos = newPatterns.indexOf(pattern);
       if (pos >= 0) {
-        const clone = JSON.parse(JSON.stringify(pattern));
+        const clone = clonePattern(pattern);
         newPatterns.splice(pos + 1, 0, clone);
         setPatterns(newPatterns);
       }
@@ -161,7 +163,7 @@ const PatternList = forwardRef<PatternListHandler, PatternListProps>(({list}, re
             const isLast = index === patterns.length - 1;
             return (
               <Pattern
-                key={index}
+                key={pattern.id}
                 pattern={pattern}
                 onMove={handlePatternMove}
                 onCopy={handlePatternCopy}

@@ -4,7 +4,7 @@ import {Box, Divider, List, ListItemButton, ListItemText, Paper} from '@mui/mate
 import {styled} from '@mui/system';
 
 import {AUTH_SUPPORTED} from '../../constants';
-import {ConfigProxy} from '../../tools/index';
+import {ConfigProxy, throwIfResponseError} from '../../tools/index';
 import type {MenuItem} from '../../types/index';
 import {useActualProxies, useActualState} from '../index';
 
@@ -46,11 +46,12 @@ const Popup = () => {
     }
 
     try {
-      await chrome.runtime.sendMessage({
+      const response = await chrome.runtime.sendMessage({
         action: 'set',
         mode,
         id,
       });
+      throwIfResponseError(response);
     } catch (err) {
       console.error('Set proxy error: %O', err);
     }

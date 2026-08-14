@@ -37,6 +37,11 @@ export async function initBackgroundService() {
       await storageFactory.initialize();
 
       if (areaName === 'local' && changes.storageType) {
+        try {
+          await applyConfig();
+        } catch (err) {
+          console.error('Apply config after storage switch error: %O', err);
+        }
         return;
       }
 

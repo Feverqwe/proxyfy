@@ -1,4 +1,4 @@
-import {splitMultiPattern} from '../../../../../tools/index';
+import {ProxyPattern, splitMultiPattern} from '../../../../../tools/index';
 
 export function isValidPattern(value: string, type: string) {
   if (type === 'wildcard') return true;
@@ -9,4 +9,8 @@ export function isValidPattern(value: string, type: string) {
     result = false;
   }
   return result;
+}
+
+export function arePatternsValid(patterns: ProxyPattern[]): boolean {
+  return patterns.every(({enabled, pattern, type}) => !enabled || isValidPattern(pattern, type));
 }

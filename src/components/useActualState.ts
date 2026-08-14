@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 
+import {throwIfResponseError} from '../tools/index';
 import type {ProxyState} from '../types/index';
 
 const useActualState = () => {
@@ -18,11 +19,18 @@ const useActualState = () => {
     }
 
     function fetchState() {
-      getState().then((state) => {
-        if (mounted) {
-          setState(state);
-        }
-      });
+      getState()
+        .then((state) => {
+          if (mounted) {
+            setState(state);
+          }
+        })
+        .catch((err) => {
+          console.error('Get proxy state error: %O', err);
+          if (mounted) {
+            setState(null);
+          }
+        });
     }
 
     return () => {
@@ -38,6 +46,7 @@ async function getState() {
   const result = await chrome.runtime.sendMessage({
     action: 'get',
   });
+  throwIfResponseError(result);
 
   if (result && typeof result === 'object' && 'mode' in result && typeof result.mode === 'string') {
     const state = result as ProxyState;

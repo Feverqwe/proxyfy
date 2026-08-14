@@ -1,7 +1,7 @@
 /**
  * Tests for Storage Service Interface and Implementations
  */
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {LocalStorageService} from '../LocalStorageService';
 import {StorageFactory} from '../StorageFactory';
@@ -113,6 +113,22 @@ describe('StorageFactory', () => {
   it('should create storage service based on settings', () => {
     const service = factory.getStorageService();
     expect(service).toBeDefined();
+  });
+
+  it('should recreate a cached service when another extension context changes storage type', async () => {
+    vi.mocked(chrome.storage.local.get)
+      .mockResolvedValueOnce({storageType: StorageType.SYNC})
+      .mockResolvedValueOnce({storageType: StorageType.LOCAL});
+
+    await factory.initialize();
+    const syncService = factory.getStorageService();
+
+    await factory.initialize();
+    const localService = factory.getStorageService();
+
+    expect(syncService).toBeInstanceOf(SyncStorageService);
+    expect(localService).toBeInstanceOf(LocalStorageService);
+    expect(localService).not.toBe(syncService);
   });
 
   it('should allow switching storage types', async () => {

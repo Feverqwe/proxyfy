@@ -5,6 +5,24 @@ import {getCurrentState} from '../proxy/proxyStateService';
 
 let authListener: AuthListener | null = null;
 
+export function parseRgbaColor(color: string): [number, number, number, number] | null {
+  const match = /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d*\.?\d+)\s*\)$/.exec(color);
+  if (!match) return null;
+
+  const [, red, green, blue, alpha] = match;
+  const [r, g, b, a] = [red, green, blue, alpha].map(Number);
+  if (
+    ![r, g, b, a].every(Number.isFinite) ||
+    ![r, g, b].every((value) => value >= 0 && value <= 255) ||
+    a < 0 ||
+    a > 1
+  ) {
+    return null;
+  }
+
+  return [r, g, b, Math.round(a * 255)];
+}
+
 export async function syncUiState(): Promise<void> {
   const state = await getCurrentState();
   const config = await getConfig();
@@ -32,17 +50,9 @@ export async function syncUiState(): Promise<void> {
             badgeText = proxy.badgeText;
           }
           if (proxy.badgeColor) {
-            const m = /rgba\((\d+),(\d+),(\d+),(\d+)\)/.exec(proxy.badgeColor);
-            if (m) {
-              const [, rS, gS, bS, aS] = m;
-              const [r, g, b, aF] = [rS, gS, bS, aS].map(parseFloat);
-              const a = Math.round(aF * 255);
-              badgeColor = [r, g, b, a].map((v) => {
-                if (!Number.isFinite(v) || v < 0 || v > 255) {
-                  v = 0;
-                }
-                return v;
-              });
+            const parsedBadgeColor = parseRgbaColor(proxy.badgeColor);
+            if (parsedBadgeColor) {
+              badgeColor = parsedBadgeColor;
             }
           }
           if (AUTH_SUPPORTED) {
