@@ -5,18 +5,23 @@ A Chrome extension for managing proxy configurations with support for multiple p
 ## Features
 
 - **Multiple Proxy Types**: Support for HTTP, HTTPS, SOCKS4, and SOCKS5 proxies
+- **Direct and QUIC Modes**: Configure direct connections and QUIC proxies
 - **Pattern-based URL Filtering**: Configure which URLs use which proxy using wildcard patterns
 - **PAC Script Generation**: Automatic PAC script generation for complex proxy configurations
 - **Storage Options**: Choose between Chrome's sync and local storage for configuration
 - **Material-UI Interface**: Modern, responsive user interface built with Material-UI
+- **Storybook**: Develop popup, options pages, and reusable controls in isolation
 
 ## Tech Stack
 
-- **Language**: TypeScript
-- **UI Framework**: React 18.2.0 with Material-UI 5.12.0
-- **Build Tool**: Rspack 1.7.10
-- **Testing**: Vitest 4.1.1
-- **Validation**: Superstruct 1.0.3
+- **Runtime**: Node.js 24
+- **Language**: TypeScript 6
+- **UI Framework**: React 19 with Material UI 9
+- **Routing**: React Router 8
+- **Build Tool**: Rspack 2
+- **Component Development**: Storybook 10 with Vite
+- **Testing**: Vitest 4 with `jsdom`
+- **Validation**: Superstruct 2
 - **Storage**: Chrome Extension Storage API
 
 ## Project Structure
@@ -27,27 +32,34 @@ src/
 │   ├── Options/         # Options page components
 │   ├── Popup/           # Popup components
 │   └── PageBase/        # Base page layout components
+├── services/            # Background, proxy, PAC, and UI services
 ├── storage/             # Storage service implementations
 ├── tools/               # Utility functions and helpers
+├── types/               # Shared TypeScript declarations
 ├── assets/              # Static assets (icons, HTML templates)
 ├── background.ts        # Background script
 ├── pacScript.ts         # PAC script generator
 └── __tests__/           # Integration tests
+
+.storybook/              # Storybook config and Chrome API mock
+builder/                 # Production archive scripts
 ```
 
 ## Development
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js 24 (pinned in `.nvmrc`)
 - npm
 
 ### Installation
 
 1. Clone the repository
-2. Install dependencies:
+2. Select the project Node.js version and install dependencies from the lockfile:
+
    ```bash
-   npm install
+   nvm use
+   npm ci
    ```
 
 ### Build Commands
@@ -57,13 +69,15 @@ src/
 - **Watch mode**: `npm run watch`
 - **Type checking**: `npm run typecheck`
 - **Linting**: `npm run lint`
-- **Testing**: `npm run test`
+- **Testing**: `npm test -- --run`
+- **Storybook**: `npm run storybook`
+- **Static Storybook build**: `npm run build-storybook`
 
 ### Testing
 
 The project uses Vitest for testing. All tests are located in `__tests__` directories throughout the codebase.
 
-- Run all tests: `npm run test`
+- Run all tests once: `npm test -- --run`
 - Run TypeScript compilation check: `npm run typecheck`
 
 ## Build System
@@ -77,13 +91,15 @@ This project uses **Rspack** as the build system, which provides faster build ti
 - **Vitest**: `vitest.config.mts`
 - **ESLint**: `eslint.config.mjs`
 - **Prettier**: `.prettierrc.mjs`
+- **Storybook**: `.storybook/main.ts` and `.storybook/preview.tsx`
+- **Node.js**: `.nvmrc`
 
 ## Migration History
 
 This project has been successfully migrated from:
 
-- **Jest → Vitest**: All tests migrated to Vitest 4.1.1
-- **Webpack → Rspack**: Build system upgraded to Rspack 1.7.10
+- **Jest → Vitest**: Tests run with Vitest in `jsdom`
+- **Webpack → Rspack**: Extension bundles are built with Rspack
 
 All migrations were completed with full test coverage and functionality preservation.
 
@@ -102,10 +118,11 @@ The extension manifest is located at `src/assets/manifest.json`.
 
 ## Contributing
 
-1. Ensure all tests pass: `npm run test`
+1. Ensure all tests pass: `npm test -- --run`
 2. Verify TypeScript compilation: `npm run typecheck`
 3. Run linting: `npm run lint`
 4. Test the build: `npm run build`
+5. If stories or Storybook configuration changed, run `npm run build-storybook`
 
 ## License
 

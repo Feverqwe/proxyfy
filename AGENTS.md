@@ -7,7 +7,7 @@ Keep tool-specific instruction files small and point them here so that project r
 
 Proxyfy is a Manifest V3 Chrome extension for switching between direct, fixed-server, system,
 auto-detect, and PAC-script proxy modes. It is written in strict TypeScript with React and MUI,
-bundled by Rspack, and tested with Vitest in `jsdom`.
+bundled by Rspack, tested with Vitest in `jsdom`, and developed visually with Storybook.
 
 The extension has four build entry points:
 
@@ -27,9 +27,11 @@ The extension has four build entry points:
 - `src/types/` — shared TypeScript declarations.
 - `src/**/__tests__/` — unit and integration tests; shared Chrome mocks live under
   `src/__tests__/mocks/`.
+- `src/**/*.stories.tsx` — component and full-page Storybook stories.
 - `src/assets/manifest.json` — source extension manifest.
+- `.storybook/` — Storybook configuration and its in-memory Chrome API mock.
 - `builder/` and `rspack.config.mts` — packaging and build configuration.
-- `dist/` — generated build output; never edit or commit it.
+- `dist/` and `storybook-static/` — generated build outputs; never edit or commit them.
 
 ## Working rules
 
@@ -51,12 +53,15 @@ The extension has four build entry points:
    and a 100-column target. Let Prettier decide formatting.
 10. Use explicit types at Chrome API, storage, message, and configuration boundaries. Avoid adding
     `any`; validate untrusted or persisted configuration with the existing Superstruct schemas.
+11. Keep Storybook-only data and Chrome API mocks isolated from production entry points. Reuse
+    `.storybook/chromeMock.ts` for stories that render extension UI.
 
 ## Commands
 
-Install dependencies from the lockfile:
+Use the Node.js version pinned in `.nvmrc` (Node 24), then install dependencies from the lockfile:
 
 ```bash
+nvm use
 npm ci
 ```
 
@@ -75,6 +80,14 @@ npm run lint
 npm run build
 ```
 
+For visual UI development, start Storybook manually. In automated runs, prefer its finite static
+build command:
+
+```bash
+npm run storybook
+npm run build-storybook
+```
+
 `npm run lint` already runs ESLint, Prettier checking, and TypeScript checking. During iteration,
 prefer the narrowest useful test command, for example:
 
@@ -91,6 +104,7 @@ rebuilds generated output and creates a zip in `dist/`.
 - Put focused tests beside the module in its `__tests__` directory; use `src/__tests__/` for behavior
   spanning multiple subsystems.
 - Reuse the Chrome mocks in `src/__tests__/mocks/` and reset mock/singleton state between tests.
+- Reuse `.storybook/chromeMock.ts` and realistic, non-sensitive fixture data in page stories.
 - Test success, error, and storage-switching paths when changing asynchronous Chrome API code.
 - Snapshot changes must be intentional and reviewed, not accepted merely to make a test pass.
 - `npm run typecheck` follows `tsconfig.json`, which excludes test directories; passing it does not
@@ -102,6 +116,7 @@ Before handing off a code change:
 
 - Run the most relevant tests plus `npm run lint`.
 - Run `npm run build` when entry points, assets, the manifest, dependencies, or build config changed.
+- Run `npm run build-storybook` when Storybook configuration, stories, mocks, or dependencies changed.
 - Report which checks ran and any checks that could not run.
 - Review the diff for generated files, credentials, debug output, unrelated formatting, and accidental
   permission changes.
