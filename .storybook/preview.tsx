@@ -4,6 +4,10 @@ import type {Preview} from '@storybook/react-vite';
 
 import PageBase from '../src/components/PageBase/PageBase';
 
+import {installChromeMock} from './chromeMock';
+
+installChromeMock();
+
 const preview: Preview = {
   decorators: [
     (Story) => (
