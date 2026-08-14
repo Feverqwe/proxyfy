@@ -54,4 +54,23 @@ describe('StorageSettings', () => {
     expect(loadingRegion?.getAttribute('aria-busy')).toBe('true');
     expect(loadingRegion?.querySelectorAll('.MuiSkeleton-root')).toHaveLength(7);
   });
+
+  it('describes sync storage without naming a specific browser', async () => {
+    runtimeMocks.getConfigStorageSettings.mockResolvedValue({
+      storageType: 'sync',
+      defaultIconColor: '#0a77e5',
+    });
+
+    await act(async () => {
+      root.render(
+        <MemoryRouter>
+          <StorageSettings />
+        </MemoryRouter>,
+      );
+    });
+
+    expect(container.textContent).toContain('Sync across devices');
+    expect(container.textContent).toContain('Use your browser sync for connection settings.');
+    expect(container.textContent).not.toContain('Chrome');
+  });
 });

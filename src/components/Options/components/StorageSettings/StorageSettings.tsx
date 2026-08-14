@@ -172,9 +172,9 @@ const StorageSettings: FC = () => {
                     }}
                     label={
                       <Box>
-                        <Typography sx={{fontWeight: 700}}>Sync across Chrome</Typography>
+                        <Typography sx={{fontWeight: 700}}>Sync across devices</Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Sync connection settings through Chrome.
+                          Use your browser sync for connection settings.
                         </Typography>
                       </Box>
                     }
