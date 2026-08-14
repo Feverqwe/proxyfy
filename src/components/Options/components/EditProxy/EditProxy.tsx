@@ -4,7 +4,7 @@ import {useLocation, useNavigate} from 'react-router';
 
 import {
   ConfigProxy,
-  DefaultProxyStruct,
+  createDefaultProxy,
   getConfig,
   getObjectId,
   getRandomInt,
@@ -19,9 +19,9 @@ const EditProxy = () => {
   const [proxy, setProxy] = useState<ConfigProxy | null>(null);
 
   const handleNewProxy = useCallback(() => {
-    const newProxy = DefaultProxyStruct.create({
+    const newProxy = createDefaultProxy({
       color: badgeColors[getRandomInt(0, badgeColors.length)],
-    }) as ConfigProxy;
+    });
     setProxy(newProxy);
   }, []);
 
@@ -44,7 +44,7 @@ const EditProxy = () => {
         } else if (proxy === null) {
           handleNewProxy();
         } else {
-          const currentProxy = DefaultProxyStruct.create(proxy) as ConfigProxy;
+          const currentProxy = createDefaultProxy(proxy);
           setProxy(currentProxy);
         }
       } catch (err) {

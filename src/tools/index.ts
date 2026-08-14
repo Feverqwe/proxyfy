@@ -2,7 +2,6 @@
 
 // Default exports
 export {default as authListener} from './authListener';
-export {default as ConfigStruct} from './ConfigStruct';
 export {default as downloadBlob} from './downloadBlob';
 export {default as getCircleIcon} from './getCircleIcon';
 export {default as getConfig} from './getConfig';
@@ -18,15 +17,17 @@ export {default as wildcardToRegexpStr} from './wildcardToRegexpStr';
 export * from './chromeApi';
 export * from './fileReaderPromise';
 
-// Named exports from ConfigStruct
+// Named exports from configuration modules
 export {
-  ProxyPatternType,
-  GenericProxyType,
-  DirectProxyType,
-  ProxyStruct,
-  ProxyPatternStruct,
-  DefaultConfigStruct,
-  DefaultProxyStruct,
-} from './ConfigStruct';
+  ConfigSchema,
+  ProxySchema,
+  ProxyPatternSchema,
+  StoredConfigSchema,
+  assertConfig,
+  createDefaultProxy,
+  parseConfig,
+  parseStoredConfig,
+} from './ConfigSchema';
+export {DirectProxyType, GenericProxyType, ProxyPatternType} from './ProxyTypes';
 
-export type {ProxyPattern, GenericProxy, DirectProxy, ConfigProxy, Config} from './ConfigStruct';
+export type {ProxyPattern, GenericProxy, DirectProxy, ConfigProxy, Config} from './ConfigSchema';

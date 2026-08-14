@@ -1,4 +1,4 @@
-import {DirectProxyType} from '../../tools/ConfigStruct';
+import {DirectProxyType} from '../../tools/ProxyTypes';
 import splitMultiPattern from '../../tools/splitMultiPattern';
 import wildcardToRegexpStr from '../../tools/wildcardToRegexpStr';
 

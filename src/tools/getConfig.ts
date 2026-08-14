@@ -1,6 +1,6 @@
 import {StorageFactory} from '../storage/index';
 
-import {Config, DefaultConfigStruct} from './index';
+import {Config, parseStoredConfig} from './index';
 
 async function getConfig(): Promise<Config> {
   const storageFactory = StorageFactory.getInstance();
@@ -9,11 +9,10 @@ async function getConfig(): Promise<Config> {
 
   try {
     const storage = await storageService.get();
-    // Use type assertion since DefaultConfigStruct.create should ensure type safety
-    return DefaultConfigStruct.create(storage) as Config;
+    return parseStoredConfig(storage);
   } catch (err) {
     console.error('Validate config error: %O', err);
-    return DefaultConfigStruct.create({}) as Config;
+    return parseStoredConfig({});
   }
 }
 

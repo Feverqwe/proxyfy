@@ -6,13 +6,13 @@
 
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
+import getId from '../../../../../tools/getId';
 import {
   ConfigProxy,
   DirectProxyType,
   GenericProxyType,
   ProxyPatternType,
-} from '../../../../../tools/ConfigStruct';
-import getId from '../../../../../tools/getId';
+} from '../../../../../tools/index';
 
 // Mock the dependencies
 vi.mock('../../../../../tools/getId', () => ({

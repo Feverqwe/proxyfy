@@ -1,4 +1,4 @@
-import {DirectProxyType, GenericProxyType, ProxyPattern} from '../../tools/index';
+import type {DirectProxyType, GenericProxyType, ProxyPattern} from '../../tools/index';
 
 export type PacScriptPattern = Pick<ProxyPattern, 'type' | 'pattern'>;
 

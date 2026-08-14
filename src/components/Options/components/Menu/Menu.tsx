@@ -8,7 +8,7 @@ import {List, ListItemButton, ListItemIcon, ListItemText} from '@mui/material';
 import {Link} from 'react-router';
 
 import {StorageFactory} from '../../../../storage/index';
-import {ConfigStruct, downloadBlob, readBlobAsText} from '../../../../tools/index';
+import {downloadBlob, parseConfig, readBlobAsText} from '../../../../tools/index';
 
 const Menu: FC = () => {
   const refFileInput = useRef<HTMLInputElement | null>(null);
@@ -24,8 +24,7 @@ const Menu: FC = () => {
 
       try {
         const data = await readBlobAsText(file);
-        const storage = JSON.parse(data as string);
-        const _ = ConfigStruct.assert(storage);
+        const storage = parseConfig(JSON.parse(data as string));
         const storageFactory = StorageFactory.getInstance();
         await storageFactory.initialize();
         const storageService = storageFactory.getStorageService();

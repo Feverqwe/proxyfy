@@ -6,7 +6,7 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {StorageFactory} from '../../storage/StorageFactory';
 import {StorageService} from '../../storage/StorageService';
 import {StorageSettings, StorageType} from '../../storage/StorageSettings';
-import {DefaultConfigStruct} from '../ConfigStruct';
+import {parseStoredConfig} from '../ConfigSchema';
 import getConfig from '../getConfig';
 
 describe('getConfig', () => {
@@ -48,7 +48,7 @@ describe('getConfig', () => {
     expect(mockGet).toHaveBeenCalled();
 
     // Verify config is created from empty storage
-    expect(config).toEqual(DefaultConfigStruct.create({}));
+    expect(config).toEqual(parseStoredConfig({}));
   });
 
   it('should handle storage with existing config data', async () => {
@@ -109,7 +109,7 @@ describe('getConfig', () => {
 
     expect(mockGet).toHaveBeenCalled();
     expect(consoleErrorSpy).toHaveBeenCalled();
-    expect(config).toEqual(DefaultConfigStruct.create({}));
+    expect(config).toEqual(parseStoredConfig({}));
 
     consoleErrorSpy.mockRestore();
   });
@@ -132,7 +132,7 @@ describe('getConfig', () => {
     const config = await getConfig();
 
     expect(mockGet).toHaveBeenCalled();
-    expect(config).toEqual(DefaultConfigStruct.create({}));
+    expect(config).toEqual(parseStoredConfig({}));
 
     // Test with local storage
     await storageSettings.setStorageType(StorageType.LOCAL);
@@ -151,6 +151,6 @@ describe('getConfig', () => {
     const config2 = await getConfig();
 
     expect(mockGet2).toHaveBeenCalled();
-    expect(config2).toEqual(DefaultConfigStruct.create({}));
+    expect(config2).toEqual(parseStoredConfig({}));
   });
 });

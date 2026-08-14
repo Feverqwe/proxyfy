@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import {Link} from 'react-router';
 
 import {StorageFactory} from '../../../../storage/index';
-import {ConfigProxy, ConfigStruct, getConfig, getId} from '../../../../tools/index';
+import {ConfigProxy, assertConfig, getConfig, getId} from '../../../../tools/index';
 import {ColorIcon, CopyIcon, Header, ProxySelect} from '../../../index';
 import Menu from '../Menu/Menu';
 
@@ -46,7 +46,7 @@ const ProxyList: FC = () => {
 
   const saveProxies = useCallback(
     async (newProxies: ConfigProxy[]) => {
-      const _ = ConfigStruct.assert({proxies: newProxies});
+      assertConfig({proxies: newProxies});
       const storageFactory = StorageFactory.getInstance();
       await storageFactory.initialize();
       const storageService = storageFactory.getStorageService();

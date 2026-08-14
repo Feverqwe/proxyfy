@@ -1,15 +1,14 @@
 import {RefObject, useCallback, useRef, useState} from 'react';
 
 import {useNavigate} from 'react-router';
-import {assert} from 'superstruct';
 
 import {StorageFactory} from '../../../../../storage/index';
 import {
   ConfigProxy,
-  ConfigStruct,
   DirectProxyType,
   GenericProxyType,
   ProxyPatternType,
+  assertConfig,
   getConfig,
   getId,
 } from '../../../../../tools/index';
@@ -146,7 +145,7 @@ export const useProxyForm = ({proxy, isNew, refForm}: UseProxyFormProps) => {
       const pos = config.proxies.indexOf(existsProxy);
       config.proxies.splice(pos, 1, changedProxy as ConfigProxy);
     }
-    assert(config, ConfigStruct);
+    assertConfig(config);
     const storageFactory = StorageFactory.getInstance();
     await storageFactory.initialize();
     const storageService = storageFactory.getStorageService();

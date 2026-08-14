@@ -1,4 +1,5 @@
-import {Config, DirectProxyType, ProxyPattern} from '../../tools/index';
+import {DirectProxyType} from '../../tools/index';
+import type {Config, ProxyPattern} from '../../tools/index';
 import {PacScript, PacScriptPattern} from '../pac/pacTypes';
 
 export async function getPacScript(proxies: Config['proxies']): Promise<string> {

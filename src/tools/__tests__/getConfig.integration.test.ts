@@ -147,7 +147,7 @@ describe('getConfig Integration', () => {
 
       // The getConfig function should handle invalid data by returning default config
       const result = await getConfig();
-      expect(result).toEqual({proxies: []}); // DefaultConfigStruct creates empty proxies array
+      expect(result).toEqual({proxies: []});
     });
   });
 

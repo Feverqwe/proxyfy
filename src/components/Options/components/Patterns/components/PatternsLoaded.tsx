@@ -2,10 +2,9 @@ import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 
 import {Alert, Box, Paper, Typography} from '@mui/material';
 import {useNavigate} from 'react-router';
-import {assert} from 'superstruct';
 
 import {StorageFactory} from '../../../../../storage/index';
-import {ConfigProxy, ConfigStruct, getConfig} from '../../../../../tools/index';
+import {ConfigProxy, assertConfig, getConfig} from '../../../../../tools/index';
 import {ActionBox, MyButtonM, Notification} from '../../../../index';
 import {localhostPresets, matchAllPresets} from '../presets';
 import {arePatternsValid} from '../utils/validation';
@@ -52,7 +51,7 @@ const PatternsLoaded: FC<PatternsLoadedProps> = ({proxy}) => {
 
         existsProxy.whitePatterns = whitePatterns;
         existsProxy.blackPatterns = blackPatterns;
-        assert(config, ConfigStruct);
+        assertConfig(config);
         const storageFactory = StorageFactory.getInstance();
         await storageFactory.initialize();
         const storageService = storageFactory.getStorageService();
