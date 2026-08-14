@@ -1,17 +1,6 @@
-import React, {FC, useCallback, useMemo} from 'react';
+import React, {FC, useCallback} from 'react';
 
-import InfoIcon from '@mui/icons-material/Info';
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import {Box, Typography} from '@mui/material';
 import {styled} from '@mui/system';
 
 import {ProxyPattern} from '../../../../../tools/index';
@@ -19,19 +8,49 @@ import {copyPattern, movePattern, removePattern, updatePattern} from '../utils/p
 
 import {Pattern} from './Pattern';
 
-const TableContainerS = styled(TableContainer)(({theme}) => ({
+const PatternListRoot = styled(Box)(({theme}) => ({
   border: `1px solid ${theme.palette.divider}`,
   borderRadius: '7px',
+  overflow: 'hidden',
+  '& .pattern-list-grid': {
+    display: 'grid',
+    gridTemplateColumns: '36px minmax(120px, 0.75fr) minmax(220px, 1.5fr) 116px 36px',
+    columnGap: '8px',
+    alignItems: 'center',
+  },
+  '& .pattern-list-header': {
+    padding: '6px 8px',
+    color: theme.palette.text.secondary,
+    backgroundColor: theme.palette.action.hover,
+    fontSize: '0.75rem',
+    fontWeight: 600,
+  },
+  '& .pattern-row': {
+    padding: '5px 8px',
+    borderTop: `1px solid ${theme.palette.divider}`,
+  },
+  '& .pattern-row:hover': {backgroundColor: theme.palette.action.hover},
   '& .small-checkbox': {padding: '6px'},
-  '& tbody tr:hover': {backgroundColor: theme.palette.action.hover},
-  '& tbody td': {verticalAlign: 'middle'},
-  '& .name-cell': {width: '220px'},
-  '& .pattern-cell': {paddingLeft: '10px', paddingRight: '10px'},
-  '& .type-cell': {width: '120px'},
-  '& .enabled-cell': {width: '190px'},
   '& .MuiInputBase-root': {padding: '4px 6px', borderRadius: '5px'},
   '& .MuiInputBase-root:focus-within': {backgroundColor: theme.palette.background.paper},
   '& .MuiInputBase-root.Mui-error': {boxShadow: `inset 0 0 0 1px ${theme.palette.error.main}`},
+  [theme.breakpoints.down('sm')]: {
+    '& .pattern-list-header': {display: 'none'},
+    '& .pattern-row': {
+      gridTemplateColumns: '36px minmax(0, 1fr) 36px',
+      gridTemplateAreas: '"toggle name actions" ". pattern pattern" ". type type"',
+      rowGap: '4px',
+      paddingBlock: '8px',
+      borderTop: 0,
+      borderBottom: `1px solid ${theme.palette.divider}`,
+    },
+    '& .pattern-row:last-child': {borderBottom: 0},
+    '& .toggle-cell': {gridArea: 'toggle'},
+    '& .name-cell': {gridArea: 'name'},
+    '& .pattern-cell': {gridArea: 'pattern'},
+    '& .type-cell': {gridArea: 'type', width: 116},
+    '& .actions-cell': {gridArea: 'actions'},
+  },
 }));
 
 interface PatternListProps {
@@ -47,69 +66,38 @@ const PatternList: FC<PatternListProps> = ({patterns, onChange}) => {
     [onChange, patterns],
   );
 
-  const helpTooltip = useMemo(
-    () => (
-      <div>
-        <div>Use a new line or comma to separate patterns.</div>
-        <div>Lines beginning with # are ignored.</div>
-        <br />
-        <div>
-          URLs are matched as <b>scheme://host:port</b>. Credentials, paths, and queries are
-          ignored.
-        </div>
-      </div>
-    ),
-    [],
-  );
-
   return (
-    <TableContainerS sx={{mt: 1.25}}>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell className="name-cell">Name</TableCell>
-            <TableCell className="pattern-cell">
-              Pattern
-              <Tooltip
-                placement="left-start"
-                title={helpTooltip}
-                style={{marginLeft: '8px', verticalAlign: 'middle'}}
-              >
-                <InfoIcon fontSize="small" />
-              </Tooltip>
-            </TableCell>
-            <TableCell className="type-cell">Type</TableCell>
-            <TableCell className="enabled-cell">Enabled & actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {patterns.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4}>
-                <Box sx={{py: 2.5, textAlign: 'center'}}>
-                  <Typography variant="body2" color="text.secondary">
-                    No rules in this section.
-                  </Typography>
-                </Box>
-              </TableCell>
-            </TableRow>
-          ) : (
-            patterns.map((pattern, index) => (
-              <Pattern
-                key={pattern.id}
-                pattern={pattern}
-                onChange={handlePatternChange}
-                onMove={(item, offset) => onChange(movePattern(patterns, item.id, offset))}
-                onCopy={(item) => onChange(copyPattern(patterns, item.id))}
-                onDelete={(item) => onChange(removePattern(patterns, item.id))}
-                isFirst={index === 0}
-                isLast={index === patterns.length - 1}
-              />
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </TableContainerS>
+    <PatternListRoot sx={{mt: 1.25}}>
+      {patterns.length > 0 && (
+        <Box className="pattern-list-grid pattern-list-header" aria-hidden="true">
+          <span />
+          <span>Name</span>
+          <span>URL pattern</span>
+          <span>Match</span>
+          <span />
+        </Box>
+      )}
+      {patterns.length === 0 ? (
+        <Box sx={{py: 2.5, textAlign: 'center'}}>
+          <Typography variant="body2" color="text.secondary">
+            No rules yet.
+          </Typography>
+        </Box>
+      ) : (
+        patterns.map((pattern, index) => (
+          <Pattern
+            key={pattern.id}
+            pattern={pattern}
+            onChange={handlePatternChange}
+            onMove={(item, offset) => onChange(movePattern(patterns, item.id, offset))}
+            onCopy={(item) => onChange(copyPattern(patterns, item.id))}
+            onDelete={(item) => onChange(removePattern(patterns, item.id))}
+            isFirst={index === 0}
+            isLast={index === patterns.length - 1}
+          />
+        ))
+      )}
+    </PatternListRoot>
   );
 };
 

@@ -109,6 +109,9 @@ const theme = createTheme({
         tooltip: {
           borderRadius: 8,
           padding: '8px 10px',
+          maxWidth: 320,
+          fontSize: '0.875rem',
+          lineHeight: 1.45,
         },
       },
     },

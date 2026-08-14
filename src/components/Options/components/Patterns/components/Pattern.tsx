@@ -1,17 +1,19 @@
-import React, {FC, useCallback} from 'react';
+import React, {FC, useCallback, useState} from 'react';
 
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
+import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import {
+  Box,
   Checkbox,
-  Grid,
   IconButton,
   InputBase,
+  ListItemIcon,
+  ListItemText,
+  Menu,
   MenuItem,
   Select,
-  TableCell,
-  TableRow,
   Tooltip,
 } from '@mui/material';
 
@@ -40,6 +42,8 @@ const Pattern: FC<PatternProps> = ({
   onCopy,
   onMove,
 }) => {
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+
   const handleTypeChange = useCallback<NonNullable<MySelectProps['onChange']>>(
     (event: Parameters<NonNullable<MySelectProps['onChange']>>[0]) => {
       onChange(pattern, {type: event.target.value as ProxyPatternType});
@@ -47,106 +51,106 @@ const Pattern: FC<PatternProps> = ({
     [onChange, pattern],
   );
 
+  const runAction = useCallback((action: () => void) => {
+    setMenuAnchor(null);
+    action();
+  }, []);
+
   return (
-    <TableRow>
-      <TableCell padding="none" className="name-cell">
-        <InputBase
-          multiline
-          size="small"
-          onChange={(event) => onChange(pattern, {name: event.target.value})}
-          value={pattern.name}
-          fullWidth
-          autoComplete="off"
-          placeholder="Rule name"
-          inputProps={{'aria-label': 'Rule name'}}
+    <Box className="pattern-list-grid pattern-row" component="article">
+      <Tooltip title={pattern.enabled ? 'Disable rule' : 'Enable rule'}>
+        <Checkbox
+          className="small-checkbox toggle-cell"
+          onChange={(event) => onChange(pattern, {enabled: event.target.checked})}
+          checked={pattern.enabled}
+          slotProps={{
+            input: {
+              'aria-label': `${pattern.enabled ? 'Disable' : 'Enable'} ${pattern.name || 'rule'}`,
+            },
+          }}
         />
-      </TableCell>
-      <TableCell padding="none" className="pattern-cell">
-        <InputBase
-          multiline
-          size="small"
-          onChange={(event) => onChange(pattern, {pattern: event.target.value})}
-          value={pattern.pattern}
-          fullWidth
-          autoComplete="off"
-          error={!isValidPattern(pattern.pattern, pattern.type)}
-          placeholder="*.example.com"
-          inputProps={{'aria-label': 'URL pattern'}}
-        />
-      </TableCell>
-      <TableCell padding="none" className="type-cell">
-        <Select<string>
-          onChange={handleTypeChange}
-          value={pattern.type}
-          fullWidth
-          input={<InputBase size="small" />}
-          inputProps={selectInputProps}
-          aria-label="Pattern type"
+      </Tooltip>
+      <InputBase
+        className="name-cell"
+        multiline
+        size="small"
+        onChange={(event) => onChange(pattern, {name: event.target.value})}
+        value={pattern.name}
+        fullWidth
+        autoComplete="off"
+        placeholder="Rule name"
+        inputProps={{'aria-label': 'Rule name'}}
+      />
+      <InputBase
+        className="pattern-cell"
+        multiline
+        size="small"
+        onChange={(event) => onChange(pattern, {pattern: event.target.value})}
+        value={pattern.pattern}
+        fullWidth
+        autoComplete="off"
+        error={!isValidPattern(pattern.pattern, pattern.type)}
+        placeholder="*.example.com"
+        inputProps={{'aria-label': 'URL pattern'}}
+      />
+      <Select<string>
+        className="type-cell"
+        onChange={handleTypeChange}
+        value={pattern.type}
+        fullWidth
+        input={<InputBase size="small" />}
+        inputProps={selectInputProps}
+        aria-label="Pattern type"
+      >
+        <MenuItem value="wildcard">Wildcard</MenuItem>
+        <MenuItem value="regexp">RegExp</MenuItem>
+      </Select>
+      <Box className="actions-cell">
+        <Tooltip title="Rule actions">
+          <IconButton
+            aria-label="Rule actions"
+            size="small"
+            onClick={(event) => setMenuAnchor(event.currentTarget)}
+            aria-controls={menuAnchor ? `rule-actions-${pattern.id}` : undefined}
+            aria-haspopup="menu"
+            aria-expanded={menuAnchor ? 'true' : undefined}
+          >
+            <MoreVertRoundedIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Menu
+          id={`rule-actions-${pattern.id}`}
+          anchorEl={menuAnchor}
+          open={Boolean(menuAnchor)}
+          onClose={() => setMenuAnchor(null)}
         >
-          <MenuItem value="wildcard">Wildcard</MenuItem>
-          <MenuItem value="regexp">RegExp</MenuItem>
-        </Select>
-      </TableCell>
-      <TableCell padding="none" className="enabled-cell">
-        <Grid container sx={{alignItems: 'center'}}>
-          <Grid>
-            <Checkbox
-              className="small-checkbox"
-              onChange={(event) => onChange(pattern, {enabled: event.target.checked})}
-              checked={pattern.enabled}
-              slotProps={{input: {'aria-label': `Enable ${pattern.name || 'rule'}`}}}
-            />
-          </Grid>
-          <Grid>
-            <Tooltip title="Move up">
-              <span>
-                <IconButton
-                  aria-label="Move rule up"
-                  onClick={() => onMove(pattern, -1)}
-                  disabled={isFirst}
-                  size="small"
-                >
-                  <ArrowUpwardIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Grid>
-          <Grid>
-            <Tooltip title="Move down">
-              <span>
-                <IconButton
-                  aria-label="Move rule down"
-                  onClick={() => onMove(pattern, 1)}
-                  disabled={isLast}
-                  size="small"
-                >
-                  <ArrowDownwardIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Grid>
-          <Grid>
-            <Tooltip title="Duplicate">
-              <IconButton aria-label="Duplicate rule" onClick={() => onCopy(pattern)} size="small">
-                <CopyIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-          <Grid>
-            <Tooltip title="Delete">
-              <IconButton
-                aria-label="Delete rule"
-                onClick={() => onDelete(pattern)}
-                size="small"
-                color="error"
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-        </Grid>
-      </TableCell>
-    </TableRow>
+          <MenuItem onClick={() => runAction(() => onMove(pattern, -1))} disabled={isFirst}>
+            <ListItemIcon>
+              <ArrowUpwardIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Move up</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => runAction(() => onMove(pattern, 1))} disabled={isLast}>
+            <ListItemIcon>
+              <ArrowDownwardIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Move down</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => runAction(() => onCopy(pattern))}>
+            <ListItemIcon>
+              <CopyIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Duplicate</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={() => runAction(() => onDelete(pattern))} sx={{color: 'error.main'}}>
+            <ListItemIcon sx={{color: 'error.main'}}>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Delete</ListItemText>
+          </MenuItem>
+        </Menu>
+      </Box>
+    </Box>
   );
 };
 
